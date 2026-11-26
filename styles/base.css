@@ -4,8 +4,38 @@
    (--vscode-*) or themes/millionscope.tokens.js (--ms-*).
    ========================================================================== */
 
+/* TTT: the bundled UI face (a Segoe UI cut, the same family VS Code uses). */
+@font-face {
+  font-family: "TTT";
+  src: url("/public/fonts/TTT.woff2") format("woff2"), url("/public/fonts/TTT.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "TTT";
+  src: url("/public/fonts/TTT_Italic.woff2") format("woff2"), url("/public/fonts/TTT_Italic.woff") format("woff");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "TTT";
+  src: url("/public/fonts/TTT_Bold.woff2") format("woff2"), url("/public/fonts/TTT_Bold.woff") format("woff");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "TTT";
+  src: url("/public/fonts/TTT_Bold_Italic.woff2") format("woff2"), url("/public/fonts/TTT_Bold_Italic.woff") format("woff");
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
 :root {
-  --ms-font-ui: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", system-ui, Ubuntu, sans-serif;
+  --ms-font-ui: "TTT", -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", system-ui, Ubuntu, sans-serif;
   --ms-font-mono: "Cascadia Code", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
   --ms-fs: 13px;
   --ms-fs-small: 12px;

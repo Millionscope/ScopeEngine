@@ -79,7 +79,7 @@ export function seqColors() {
 }
 
 /** UI font stacks (mirrors base.css). */
-export const FONT_UI = '-apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", system-ui, Ubuntu, sans-serif';
+export const FONT_UI = '"TTT", -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", system-ui, Ubuntu, sans-serif';
 export const FONT_MONO = '"Cascadia Code", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace';
 
 /**

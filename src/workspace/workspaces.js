@@ -76,7 +76,9 @@ export class WorkspaceManager {
       }
     }
     if (!restored) for (const p of PRESETS) this._addWorkspace({ id: p.key, name: p.name, icon: p.icon, preset: p.key, tree: p.build() });
-    const want = restored && saved.activeId && this.get(saved.activeId) ? saved.activeId : this.workspaces[0].id;
+    // first load (nothing saved) opens Verify; later loads restore the last active tab
+    const want = restored && saved.activeId && this.get(saved.activeId) ? saved.activeId
+      : (this.get('verify') ? 'verify' : this.workspaces[0].id);
     this.switchTo(want, { initial: true });
     return restored;
   }
