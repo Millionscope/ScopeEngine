@@ -1,0 +1,8 @@
+/* Solar system viewer: reuses the Scope HUD (scope.css); only the telemetry rows, facts and name tags are new. */
+.ms-so-row { display: flex; justify-content: space-between; gap: 8px; padding: 3px 0; border-top: 1px solid rgba(63, 216, 255, .1); font-size: var(--ms-fs-tiny); color: #9cc9dd; text-transform: uppercase; letter-spacing: .3px; }
+.ms-so-row b { font-weight: 600; color: #fff; text-transform: none; letter-spacing: 0; font-variant-numeric: tabular-nums; }
+.ms-so-facts { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; font-size: var(--ms-fs-tiny); color: #7aa6bb; }
+.ms-so-facts b { font-weight: 400; color: #d8f3ff; font-family: var(--ms-font-mono); text-align: right; }
+.ms-so-label { padding: 1px 6px; }
+.ms-so-label b { font-size: 10px; text-shadow: 0 0 6px var(--c); }
+.ms-solar .ms-sc-sys[aria-current="true"] { background: rgba(63, 216, 255, .16); box-shadow: inset 2px 0 0 var(--c); }
