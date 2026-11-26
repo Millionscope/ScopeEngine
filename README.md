@@ -28,6 +28,16 @@ Then open `http://localhost:8000/` (`npx serve` prints its own port).
   pinned versions through the import map in `index.html`, and only when an editor needs them.
   After the first load everything else runs offline.
 
+## Deploy to Cloudflare Pages
+
+There's no build step. The repo root is the site, as set in `wrangler.toml`.
+
+- **Git integration**: in the Cloudflare dashboard, go to *Workers & Pages → Create → Pages →
+  Connect to Git*, pick this repo, set the framework preset to *None*, leave the build command
+  empty and set the output directory to `/`.
+- **CLI**: `npx wrangler pages dev` serves the site locally on Pages' runtime, and
+  `npx wrangler pages deploy` uploads it.
+
 ## A two-minute tour
 
 1. **Answer** workspace (the default): the chat answer is prose whose numbers are *bound values*.
