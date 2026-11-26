@@ -3,25 +3,39 @@
    autocomplete popover and the reply peek card.
    ========================================================================== */
 
+/* Floats over the workspace (takes no layout space), centered like a chat app input. */
 .ms-composer-dock {
-  position: relative;
-  flex: 0 0 auto;
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--ms-h-status) + 12px);
+  transform: translateX(-50%);
+  width: min(720px, calc(100% - 32px));
   z-index: 5;
-  background: var(--vscode-panel-background);
-  border-top: 1px solid var(--vscode-panel-border);
 }
 
 .ms-composer {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 5px 10px 6px;
+  gap: 6px;
+  padding: 8px 8px 6px;
   min-height: var(--ms-h-composer-min);
+  border: 1px solid var(--vscode-widget-border);
+  border-radius: 16px;
+  background: var(--vscode-input-background);
+  box-shadow: 0 4px 20px var(--vscode-widget-shadow);
+  cursor: text;
+  overflow: hidden;
+  transition: border-color .15s, box-shadow .15s;
 }
-.ms-composer > .ms-progress { top: -1px; }
+.ms-composer:focus-within {
+  border-color: var(--vscode-focusBorder);
+  box-shadow: 0 4px 24px var(--vscode-widget-shadow), 0 0 0 1px var(--vscode-focusBorder);
+}
+.ms-composer > .ms-progress { top: 0; }
 
 .ms-composer-chips {
+  flex: 1 1 auto;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -61,47 +75,24 @@
 
 .ms-composer-row {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   gap: 6px;
   min-width: 0;
-}
-
-.ms-composer-input-wrap {
-  position: relative;
-  flex: 1 1 auto;
-  min-width: 0;
-  display: flex;
-  align-items: stretch;
-  border: 1px solid var(--vscode-input-border, transparent);
-  border-radius: 6px;
-  background: var(--vscode-input-background);
-}
-.ms-composer-input-wrap:focus-within {
-  border-color: var(--vscode-focusBorder);
-  outline: 1px solid var(--vscode-focusBorder);
-  outline-offset: -1px;
-}
-.ms-composer-prompt {
-  flex: 0 0 auto;
-  padding: 6px 0 0 8px;
-  color: var(--vscode-descriptionForeground);
-  font-size: 12px;
-  line-height: 18px;
+  cursor: default;
 }
 
 .ms-composer-field {
   position: relative;
-  flex: 1 1 auto;
   min-width: 0;
 }
 .ms-composer-hl,
 .ms-composer-input {
   margin: 0;
-  padding: 6px 8px;
+  padding: 4px 6px;
   border: 0;
   font-family: var(--ms-font-ui);
-  font-size: var(--ms-fs);
-  line-height: 18px;
+  font-size: 14px;
+  line-height: 20px;
   letter-spacing: normal;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -113,7 +104,7 @@
   z-index: 1;
   display: block;
   width: 100%;
-  min-height: 30px;
+  min-height: 28px;
   max-height: 40vh;
   resize: none;
   overflow-y: auto;
@@ -150,12 +141,10 @@
 
 .ms-route {
   flex: 0 0 auto;
-  align-self: flex-end;
   display: inline-flex;
   align-items: center;
   gap: 4px;
   height: 20px;
-  margin: 0 6px 5px 0;
   padding: 0 7px;
   border-radius: 10px;
   border: 1px solid var(--vscode-widget-border);
@@ -181,7 +170,7 @@
 .ms-route[data-kind="invalid"] { color: var(--vscode-errorForeground); }
 .ms-route[data-kind="empty"] { opacity: .65; }
 
-.ms-composer-actions { display: flex; align-items: center; gap: 4px; flex: 0 0 auto; padding-bottom: 3px; }
+.ms-composer-actions { display: flex; align-items: center; gap: 4px; flex: 0 0 auto; }
 .ms-mode-btn {
   display: inline-flex; align-items: center; gap: 4px;
   height: 24px; padding: 0 6px;
@@ -192,15 +181,15 @@
   font-size: var(--ms-fs-small);
 }
 .ms-mode-btn:hover { background: var(--vscode-toolbar-hoverBackground); }
-.ms-send-btn { width: 30px; padding: 0; }
+.ms-send-btn { width: 28px; height: 28px; padding: 0; border-radius: 8px; }
 .ms-send-btn .codicon { font-size: 16px; }
 .ms-send-btn.is-stop { background: var(--vscode-button-secondaryBackground); color: var(--vscode-button-secondaryForeground); border-color: var(--vscode-widget-border); }
 
 /* ---------- autocomplete popover (opens upward) ---------- */
 .ms-ac {
   position: absolute;
-  bottom: calc(100% + 4px);
-  left: 10px;
+  bottom: calc(100% + 6px);
+  left: 0;
   z-index: 30;
   width: min(560px, calc(100vw - 40px));
   max-height: 280px;
@@ -249,7 +238,7 @@
 /* ---------- peek card (reply when no Chat area is visible) ---------- */
 .ms-peek {
   position: absolute;
-  right: 12px;
+  right: 0;
   bottom: calc(100% + 8px);
   z-index: 25;
   width: min(520px, calc(100vw - 32px));

@@ -3,6 +3,7 @@
    ========================================================================== */
 
 .ms-app {
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -41,9 +42,9 @@
   flex: 0 0 auto;
 }
 .ms-logo-mark {
-  color: var(--vscode-activityBarBadge-background);
-  font-size: 14px;
-  line-height: 1;
+  width: 18px;
+  height: 18px;
+  display: block;
 }
 
 .ms-menubar { display: flex; align-items: stretch; flex: 0 0 auto; }

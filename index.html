@@ -1,10 +1,26 @@
 <!doctype html>
 <html lang="en" data-theme="dark">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="MillionScope Workbench: answers as a live, recomputable graph of scopes.">
-  <title>MillionScope Workbench</title>
+  <link rel="icon" type="image/png" href="/public/favicon/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/public/favicon/favicon.svg" />
+  <link rel="shortcut icon" href="/public/favicon/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/public/favicon/apple-touch-icon.png" />
+  <link rel="manifest" href="/public/favicon/site.webmanifest" />
+
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="MillionScope" />
+  <meta name="msapplication-TileColor" content="#ffffff" />
+  <meta name="msapplication-tap-highlight" content="no" />
+  <meta name="description" content="MillionScope - Millions of perspectives in one vision." />
+  <meta name="author" content="MillionScope" />
+  <title>MillionScope - Millions of perspectives in one vision.</title>
 
   <!--
     Boot guard: pick the theme kind before CSS loads so the first frame is not a white flash.
@@ -14,7 +30,7 @@
   <script>
     (function () {
       var mode = 'auto';
-      try { mode = localStorage.getItem('millionscope.theme') || 'auto'; } catch (e) {}
+      try { mode = localStorage.getItem('millionscope.theme') || 'auto'; } catch (e) { }
       var dark = mode === 'dark' || (mode !== 'light' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
       var root = document.documentElement;
       root.setAttribute('data-theme', dark ? 'dark' : 'light');
@@ -22,8 +38,13 @@
     })();
   </script>
   <style id="boot-style">
-    html[data-theme="dark"] { background: #1F1F1F; }
-    html[data-theme="light"] { background: #FFFFFF; }
+    html[data-theme="dark"] {
+      background: #1F1F1F;
+    }
+
+    html[data-theme="light"] {
+      background: #FFFFFF;
+    }
   </style>
 
   <!-- VS Code-native icons (pinned). KaTeX CSS is lazy-loaded by src/core/lazy.js. -->
@@ -56,6 +77,7 @@
   </script>
   <script type="module" src="src/main.js"></script>
 </head>
+
 <body>
   <div id="app" class="ms-app" aria-busy="true">
     <header id="topbar" class="ms-topbar"></header>
@@ -71,4 +93,5 @@
       for example with <code>npx serve .</code> or <code>python -m http.server</code>.</p>
   </noscript>
 </body>
+
 </html>

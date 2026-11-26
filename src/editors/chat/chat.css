@@ -1,8 +1,8 @@
 /* Chat Transcript editor */
 .ms-chat { position: relative; }
-.ms-chat-scroll { padding: 6px 0 24px; }
+.ms-chat-scroll { padding: 6px 0 140px; } /* clears the floating composer */
 .ms-chat-list { max-width: 880px; margin: 0 auto; padding: 0 14px; display: flex; flex-direction: column; gap: 2px; }
-.ms-chat-jump { position: absolute; right: 16px; bottom: 12px; z-index: 2; box-shadow: 0 2px 8px var(--vscode-widget-shadow); }
+.ms-chat-jump { position: absolute; right: 16px; bottom: 120px; z-index: 2; box-shadow: 0 2px 8px var(--vscode-widget-shadow); }
 
 .ms-msg { padding: 10px 0 8px; border-bottom: 1px solid var(--vscode-editorGroup-border); }
 .ms-msg.is-filtered { display: none; }

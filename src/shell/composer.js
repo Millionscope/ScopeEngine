@@ -1,5 +1,5 @@
 /**
- * The single chat composer for the whole app, docked above the status bar.
+ * The single chat composer for the whole app, a centered card floating above the status bar.
  *
  *  - context chips: selected scopes, active scenario, focused area's editor type (removable;
  *    scope chips can be dropped in from any editor)
@@ -116,12 +116,6 @@ export class Composer {
     this.attachBtn.dataset.tooltip = 'Attach evidence (mock extraction)';
     this.attachBtn.innerHTML = '<span class="codicon codicon-file-add" aria-hidden="true"></span>';
 
-    const wrap = document.createElement('div');
-    wrap.className = 'ms-composer-input-wrap';
-    const prompt = document.createElement('span');
-    prompt.className = 'ms-composer-prompt';
-    prompt.setAttribute('aria-hidden', 'true');
-    prompt.textContent = '▸';
     const field = document.createElement('div');
     field.className = 'ms-composer-field';
     this.hl = document.createElement('div');
@@ -144,7 +138,6 @@ export class Composer {
     this.route = document.createElement('span');
     this.route.className = 'ms-route';
     this.route.id = 'ms-composer-route';
-    wrap.append(prompt, field, this.route);
 
     const actions = document.createElement('div');
     actions.className = 'ms-composer-actions';
@@ -155,10 +148,15 @@ export class Composer {
     this.sendBtn = document.createElement('button');
     this.sendBtn.type = 'button';
     this.sendBtn.className = 'ms-btn ms-send-btn';
-    actions.append(this.modeBtn, this.sendBtn);
+    actions.append(this.route, this.modeBtn, this.sendBtn);
 
-    row.append(this.attachBtn, wrap, actions);
-    box.append(this.progress, this.chips, row);
+    // Claude-style card: input on top, one footer row of controls underneath
+    row.append(this.attachBtn, this.chips, actions);
+    box.append(this.progress, field, row);
+    // clicking the card's empty space focuses the input
+    box.addEventListener('pointerdown', (e) => {
+      if (e.target === box || e.target === row) { e.preventDefault(); this.input.focus(); }
+    });
     el.append(this.peek, this.acEl, box);
     this.renderMode();
     this.renderSend();
