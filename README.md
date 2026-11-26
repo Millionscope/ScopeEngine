@@ -6,42 +6,40 @@ VS Code Dark Modern and Light Modern themes. It has exactly one chat composer an
 types. The model, the engine and the AI are mocked in the browser, behind adapters named after
 the planned API.
 
-It uses plain ES2022 modules with JSDoc types. There is no framework, bundler or build step.
+It uses plain ES2022 modules with JSDoc types and no framework, built with Vite.
 
 ## Run it
 
-Serve the folder with any static server and open it in a recent Chromium, Firefox or Safari:
-
 ```bash
-npx serve .
+npm install
+npm run dev       # http://localhost:5173/
+npm run build     # production build in dist/
+npm run preview   # serve dist/
 ```
 
-```bash
-python3 -m http.server 8000
-```
-
-Then open `http://localhost:8000/` (`npx serve` prints its own port).
-
-- **Tests**: open `/tests/index.html`. It is a zero-dependency in-browser runner covering the
+- **Tests**: open `/tests/` on the dev server. It is a zero-dependency in-browser runner covering the
   area tree, units, bindings, deltas, the engine and the import-rule check.
-- **Network**: the app makes no backend calls. Third-party libraries come from jsDelivr at
-  pinned versions through the import map in `index.html`, and only when an editor needs them.
-  After the first load everything else runs offline.
+- **Libraries**: npm dependencies at exact versions (`package.json`), loaded only through
+  `src/core/lazy.js` when an editor needs them; Vite splits each into its own chunk.
+- **Static files**: everything in `public/` is served from the site root (`/fonts`, `/favicon`,
+  `/models`, `/sitemap.xml`, `/robots.txt`).
+- **Scope**: the anatomy viewer (Scope tab) streams the BodyParts3D atlas from `public/models`
+  (about 33 MB gzipped, loaded once per page). BodyParts3D © The Database Center for Life Science,
+  CC BY 4.0.
 
 ## Deploy to Cloudflare Pages
 
-There's no build step. The repo root is the site, as set in `wrangler.toml`.
+`wrangler.toml` points Pages at the Vite output, `dist/`.
 
 - **Git integration**: in the Cloudflare dashboard, go to *Workers & Pages → Create → Pages →
-  Connect to Git*, pick this repo, set the framework preset to *None*, leave the build command
-  empty and set the output directory to `/`.
-- **CLI**: `npx wrangler pages dev` serves the site locally on Pages' runtime, and
+  Connect to Git*, pick this repo, set the build command to `npm run build` and the output
+  directory to `dist`.
+- **CLI**: `npm run build`, then `npx wrangler pages dev` serves `dist/` on Pages' runtime and
   `npx wrangler pages deploy` uploads it.
-- **Sitemap**: `sitemap.xml` and `robots.txt` sit at the repo root, so they're served at
-  `/sitemap.xml` and `/robots.txt`. A pre-commit hook rewrites the sitemap's `lastmod` on every
-  commit. Turn it on once per clone with `git config core.hooksPath .githooks`, or run
-  `node scripts/generate-sitemap.mjs` by hand. To stamp the deploy date instead, set the Pages
-  build command to that same line.
+- **Sitemap**: `public/sitemap.xml` and `public/robots.txt` are served at `/sitemap.xml` and
+  `/robots.txt`. A pre-commit hook rewrites the sitemap's `lastmod` on every commit. Turn it on
+  once per clone with `git config core.hooksPath .githooks`, or run
+  `node scripts/generate-sitemap.mjs` by hand.
 
 ## A two-minute tour
 
@@ -262,7 +260,7 @@ Other timings:
 
 ## Libraries and licences
 
-Exact versions are pinned in the import map; none is loaded before an editor needs it.
+Exact versions are pinned in package.json; none is loaded before an editor needs it.
 
 | Library | Version | Used by |
 | --- | --- | --- |
@@ -341,7 +339,7 @@ are deterministic mocks.
 ## Folder layout
 
 ```
-index.html            import map, boot theme guard, root layout
+index.html            boot theme guard, root layout
 themes/               VS Code theme JSON (unmodified), fallbacks, semantic tokens
 styles/               base, shell, workspace, composer, menus, shared editor styles
 src/core/             L0

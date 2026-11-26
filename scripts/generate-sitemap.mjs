@@ -1,4 +1,4 @@
-// Writes ./sitemap.xml at the site root (wrangler.toml serves the repo root, so this is /sitemap.xml).
+// Writes public/sitemap.xml (Vite copies public/ to the site root, so this is /sitemap.xml).
 // Run: node scripts/generate-sitemap.mjs   (the .githooks/pre-commit hook runs it on every commit)
 // SITE_URL overrides the origin.
 import fs from "node:fs/promises"
@@ -20,6 +20,6 @@ const xml = [
   "",
 ].join("\n")
 
-const out = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "sitemap.xml")
+const out = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "public", "sitemap.xml")
 await fs.writeFile(out, xml, "utf8")
 console.log("Wrote", path.relative(process.cwd(), out) || out)

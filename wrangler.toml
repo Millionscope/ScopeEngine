@@ -1,4 +1,4 @@
 name = "scopeengine"
 compatibility_date = "2026-10-01"
-# Static site, no build step: the repo root is the site.
-pages_build_output_dir = "."
+# Vite build output (npm run build).
+pages_build_output_dir = "dist"

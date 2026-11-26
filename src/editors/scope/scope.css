@@ -1,0 +1,167 @@
+/* Scope anatomy viewer (lazy-loaded with the editor). The viewport is a dark hologram stage in
+   both themes; HUD text uses the workbench fonts and sizes. */
+
+.ms-scope { --sc-cyan: #3fd8ff; --sc-glass: rgba(6, 22, 40, .62); --sc-line: rgba(63, 216, 255, .28); background: #02060d; }
+
+.ms-sc-host {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  outline: none;
+  touch-action: none;
+  color: #d8f3ff;
+  container-type: size;
+}
+.ms-sc-host:focus-visible { box-shadow: inset 0 0 0 1px var(--vscode-focusBorder); }
+.ms-sc-canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; cursor: grab; }
+.ms-sc-canvas:active { cursor: grabbing; }
+
+/* ---- HUD panels */
+.ms-sc-col {
+  position: absolute;
+  top: 10px;
+  bottom: 30px;
+  width: 210px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+  z-index: 2;
+}
+.ms-sc-col.is-left { left: 10px; }
+.ms-sc-col.is-right { right: 10px; }
+.ms-sc-panel {
+  pointer-events: auto;
+  padding: 8px 10px;
+  border: 1px solid var(--sc-line);
+  border-radius: 6px;
+  background: var(--sc-glass);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 0 18px rgba(63, 216, 255, .08), inset 0 0 12px rgba(63, 216, 255, .05);
+}
+.ms-sc-detail { margin-top: auto; }
+.ms-sc-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  font-size: var(--ms-fs-tiny);
+  font-weight: 600;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  color: var(--sc-cyan);
+}
+.ms-sc-head > span:first-child { flex: 1; }
+.ms-sc-head .ms-icon-btn { color: #9cc9dd; }
+.ms-sc-tag { font-weight: 400; letter-spacing: .4px; color: #7aa6bb; border: 1px solid rgba(122, 166, 187, .4); border-radius: 3px; padding: 0 4px; }
+
+.ms-sc-vital { display: grid; grid-template-columns: 18px 1fr 70px; align-items: center; gap: 6px; padding: 4px 0; border-top: 1px solid rgba(63, 216, 255, .1); }
+.ms-sc-vital .codicon { color: var(--c); font-size: 15px; filter: drop-shadow(0 0 4px var(--c)); }
+.ms-sc-vital-text { display: flex; flex-direction: column; min-width: 0; font-size: var(--ms-fs-tiny); color: #9cc9dd; text-transform: uppercase; letter-spacing: .3px; }
+.ms-sc-vital-text b { font-size: 15px; letter-spacing: 0; color: #fff; font-variant-numeric: tabular-nums; text-transform: none; }
+.ms-sc-vital svg { width: 70px; height: 24px; overflow: visible; }
+.ms-sc-vital polyline { fill: none; stroke: var(--c); stroke-width: 1.4; vector-effect: non-scaling-stroke; filter: drop-shadow(0 0 3px var(--c)); }
+
+.ms-sc-systems { display: flex; flex-direction: column; gap: 1px; }
+.ms-sc-sys {
+  display: grid;
+  grid-template-columns: 10px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  height: 24px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #d8f3ff;
+  font-size: var(--ms-fs-small);
+  text-align: left;
+  cursor: pointer;
+}
+.ms-sc-sys:hover { background: rgba(63, 216, 255, .1); }
+.ms-sc-sys i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); box-shadow: 0 0 6px var(--c); }
+.ms-sc-sys small { font-size: var(--ms-fs-tiny); color: #7aa6bb; font-variant-numeric: tabular-nums; }
+.ms-sc-sys[aria-pressed="false"] { color: #6c8797; }
+.ms-sc-sys[aria-pressed="false"] i { background: transparent; box-shadow: inset 0 0 0 1px var(--c); }
+
+.ms-sc-detail h3 { margin: 0 0 4px; font-size: 15px; color: #fff; text-shadow: 0 0 10px var(--c); }
+.ms-sc-detail p { margin: 0 0 6px; font-size: var(--ms-fs-small); line-height: 1.45; color: #b9dbea; }
+.ms-sc-detail .ms-sc-hint { margin: 0; color: #7aa6bb; }
+.ms-sc-meta { display: flex; justify-content: space-between; gap: 8px; font-size: var(--ms-fs-tiny); color: #7aa6bb; font-family: var(--ms-font-mono); }
+
+/* ---- annotations: callouts + leader lines */
+.ms-sc-anno { position: absolute; inset: 0; pointer-events: none; z-index: 1; overflow: hidden; }
+.ms-sc-anno[hidden] { display: none; }
+.ms-sc-lines { position: absolute; inset: 0; width: 100%; height: 100%; }
+.ms-sc-lines polyline { fill: none; stroke: var(--c); stroke-width: 1; opacity: .75; filter: drop-shadow(0 0 2px var(--c)); }
+.ms-sc-lines polyline.is-behind { opacity: .3; stroke-dasharray: 3 3; }
+.ms-sc-lines polyline.is-active { stroke-width: 1.6; opacity: 1; }
+.ms-sc-lines circle { fill: var(--c); filter: drop-shadow(0 0 4px var(--c)); }
+.ms-sc-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 2px 8px;
+  border: 1px solid color-mix(in srgb, var(--c) 45%, transparent);
+  border-radius: 4px;
+  background: rgba(4, 16, 30, .72);
+  color: #fff;
+  pointer-events: auto;
+  cursor: pointer;
+  white-space: nowrap;
+  will-change: transform;
+  transition: opacity .2s, box-shadow .2s;
+}
+.ms-sc-label b { font-size: var(--ms-fs-small); font-weight: 600; letter-spacing: .5px; text-transform: uppercase; }
+.ms-sc-label small { font-size: 10px; color: var(--c); letter-spacing: .3px; }
+.ms-sc-label:hover, .ms-sc-label:focus-visible, .ms-sc-label.is-selected { box-shadow: 0 0 12px color-mix(in srgb, var(--c) 60%, transparent); border-color: var(--c); outline: none; }
+.ms-sc-label.is-behind { opacity: .45; }
+
+/* ---- status */
+.ms-sc-loading {
+  position: absolute;
+  left: 50%;
+  bottom: 34px;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 220px;
+  font-size: var(--ms-fs-tiny);
+  letter-spacing: .6px;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--sc-cyan);
+}
+.ms-sc-loading[hidden] { display: none; }
+.ms-sc-loading i { display: block; height: 2px; background: rgba(63, 216, 255, .15); }
+.ms-sc-loading b { display: block; height: 100%; background: var(--sc-cyan); box-shadow: 0 0 8px var(--sc-cyan); transition: width .3s; }
+.ms-sc-msg {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 4;
+  max-width: 340px;
+  padding: 8px 12px;
+  border: 1px solid var(--sc-line);
+  border-radius: 6px;
+  background: var(--sc-glass);
+  font-size: var(--ms-fs-small);
+  text-align: center;
+}
+.ms-sc-msg[hidden] { display: none; }
+.ms-sc-msg.is-clickable { cursor: pointer; }
+.ms-sc-credit { position: absolute; right: 10px; bottom: 8px; z-index: 2; font-size: 10px; color: #5f8396; text-decoration: none; }
+.ms-sc-credit:hover { color: var(--sc-cyan); }
+
+/* small areas: keep the model, drop the panels that would cover it */
+@container (max-width: 760px) { .ms-sc-col.is-left .ms-sc-panel:first-child { display: none; } }
+@container (max-width: 560px) { .ms-sc-col.is-right { display: none; } .ms-sc-col.is-left { width: auto; right: 10px; } }
+@container (max-height: 420px) { .ms-sc-col.is-left .ms-sc-panel:first-child, .ms-sc-col.is-right { display: none; } }

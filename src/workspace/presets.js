@@ -93,6 +93,13 @@ export const PRESETS = [
         S('col', 0.62, A('inspector'), A('chat'))),
     ),
   },
+  {
+    key: 'scope',
+    name: 'Scope',
+    icon: 'pulse',
+    description: 'Anatomy hologram (body and brain) with annotations; Chat beside it.',
+    build: () => new AreaTree(S('row', 0.76, A('scope'), A('chat'))),
+  },
 ];
 
 /** @param {string} key */

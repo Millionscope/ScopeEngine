@@ -7,7 +7,8 @@
 import { suite, assert } from './harness.js';
 
 const test = suite('deps (import rules)');
-const ROOT = new URL('../', import.meta.url);
+const here = import.meta.url; // not new URL('../', import.meta.url): Vite rewrites that pattern into an asset URL
+const ROOT = new URL('../', here);
 const ENTRY = 'src/main.js';
 
 /** Which layers each layer may import from. */
@@ -90,7 +91,9 @@ function crawl() {
       const imports = importsOf(src).map((i) => {
         if (!i.spec.startsWith('.') && !i.spec.startsWith('/')) return { ...i, rel: null };
         const url = new URL(i.spec, new URL(rel, ROOT));
-        return { ...i, rel: decodeURIComponent(url.pathname.slice(ROOT.pathname.length)) };
+        const path = decodeURIComponent(url.pathname.slice(ROOT.pathname.length));
+        // the Vite dev server serves bare library specifiers from node_modules/.vite/deps
+        return { ...i, rel: path.startsWith('node_modules/') ? null : path };
       });
       files.set(rel, { src, imports });
       for (const i of imports) if (i.rel && i.rel.endsWith('.js') && !files.has(i.rel)) queue.push(i.rel);

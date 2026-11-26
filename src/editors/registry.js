@@ -14,7 +14,7 @@
  * @property {string} label
  * @property {string} icon          codicon name
  * @property {string} group         editor-type menu column
- * @property {string[]} needs       ['d3'] | ['chartjs'] | ['three'] | ['mermaid'] | ['katex']
+ * @property {string[]} needs       ['d3'] | ['chartjs'] | ['three'] | [] | ['mermaid'] | ['katex']
  * @property {'editor'|'panel'} kind
  * @property {string|null} shortcut
  * @property {boolean} usesScenario
@@ -46,6 +46,7 @@ export const EDITORS = [
   { id: 'outliner', label: 'Outliner', icon: 'list-tree', group: 'Scope', needs: [], kind: 'panel', shortcut: 'shift+f2', usesScenario: false, loader: lazy('outliner', () => import('./outliner/index.js')) },
   { id: 'graph', label: 'Scope Graph', icon: 'type-hierarchy-sub', group: 'Scope', needs: ['d3'], kind: 'editor', shortcut: 'shift+f3', usesScenario: false, loader: lazy('graph', () => import('./graph/index.js')) },
   { id: 'space3d', label: '3D Scope Space', icon: 'globe', group: 'Scope', needs: ['three'], kind: 'editor', shortcut: 'shift+f5', usesScenario: false, loader: lazy('space3d', () => import('./space3d/index.js')) },
+  { id: 'scope', label: 'Scope', icon: 'pulse', group: 'Scope', needs: ['three', 'threefx'], kind: 'editor', shortcut: null, usesScenario: false, loader: lazy('scope', () => import('./scope/index.js')) },
   { id: 'sheet', label: 'Sheet', icon: 'table', group: 'Scope', needs: [], kind: 'editor', shortcut: 'shift+f6', usesScenario: true, loader: lazy('sheet', () => import('./sheet/index.js')) },
   { id: 'inspector', label: 'Properties', icon: 'symbol-property', group: 'Scope', needs: [], kind: 'panel', shortcut: 'shift+f7', usesScenario: true, loader: lazy('inspector', () => import('./inspector/index.js')) },
   // Analysis

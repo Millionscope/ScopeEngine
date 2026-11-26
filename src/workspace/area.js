@@ -319,7 +319,7 @@ export class Area {
     title.textContent = `Could not open ${entry ? entry.label : type}`;
     const pre = document.createElement('pre');
     const needs = (entry?.needs || []).map((n) => LIBS[n]?.version || n);
-    pre.textContent = `${err && err.message ? err.message : String(err)}${needs.length ? `\nRequires ${needs.join(', ')} from cdn.jsdelivr.net.` : ''}`;
+    pre.textContent = `${err && err.message ? err.message : String(err)}${needs.length ? `\nRequires ${needs.join(', ')}.` : ''}`;
     box.append(title, pre);
     const row = document.createElement('div');
     row.className = 'ms-row';

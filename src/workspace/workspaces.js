@@ -69,6 +69,9 @@ export class WorkspaceManager {
           const tree = AreaTree.deserialize(w.tree, { knownTypes: known });
           this._addWorkspace({ id: w.id || uid('ws'), name: w.name || 'Workspace', icon: w.icon || 'window', preset: w.preset || 'answer', tree, activeAreaId: w.activeAreaId || null });
         }
+        // presets shipped after this layout was saved get their tab once (closing it later sticks)
+        const seen = new Set(saved.presets || saved.workspaces.map((w) => w.preset));
+        for (const p of PRESETS) if (!seen.has(p.key) && !this.get(p.key)) this._addWorkspace({ id: p.key, name: p.name, icon: p.icon, preset: p.key, tree: p.build() });
         restored = true;
       } catch (err) {
         log.warn('workspace', `saved layout was invalid and was reset: ${(/** @type {Error} */ (err)).message}`);
@@ -493,6 +496,7 @@ export class WorkspaceManager {
     for (const w of this.workspaces) w.screen?.captureStates();
     return {
       activeId: this.activeId,
+      presets: PRESETS.map((p) => p.key),
       workspaces: this.workspaces.map((w) => ({
         id: w.id, name: w.name, icon: w.icon, preset: w.preset, activeAreaId: w.activeAreaId, tree: w.tree.serialize(),
       })),

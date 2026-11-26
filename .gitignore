@@ -1,3 +1,5 @@
 .wrangler/
 .DS_Store
 human-atlas/
+node_modules/
+dist/

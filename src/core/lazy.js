@@ -3,24 +3,22 @@
  * Libraries are only fetched through dynamic import() the first time an editor that declares
  * them in `needs` mounts; results are cached, failures are reported and retryable.
  *
- * Library specifiers resolve through the import map in index.html (exact pinned versions).
+ * Libraries are npm dependencies (exact pins in package.json); Vite splits each into its own chunk.
  * @module core/lazy
  */
 
 /**
  * @typedef {Object} LibSpec
- * @property {string} specifier            bare specifier mapped by the import map
+ * @property {() => Promise<any>} load     dynamic import of the library (and its stylesheet)
  * @property {string} version              documented pin
- * @property {string=} css                 stylesheet to load alongside
- * @property {Record<string,string>=} extras additional modules (name -> specifier)
- * @property {(mod: any, extras: Record<string, any>) => any=} init
+ * @property {(mod: any) => any=} init
  */
 
 /** @type {Record<string, LibSpec>} */
 export const LIBS = {
-  d3: { specifier: 'd3', version: 'd3@7.9.0' },
+  d3: { load: () => import('d3'), version: 'd3@7.9.0' },
   chartjs: {
-    specifier: 'chart.js',
+    load: () => import('chart.js'),
     version: 'chart.js@4.4.1',
     init: (m) => {
       m.Chart.register(...m.registerables);
@@ -28,25 +26,33 @@ export const LIBS = {
     },
   },
   three: {
-    specifier: 'three',
+    load: () => Promise.all([import('three'), import('three/examples/jsm/controls/OrbitControls.js')]),
     version: 'three@0.160.0',
-    extras: { OrbitControls: 'three/addons/controls/OrbitControls.js' },
-    init: (m, extras) => ({ THREE: m, OrbitControls: extras.OrbitControls.OrbitControls }),
+    init: ([THREE, oc]) => ({ THREE, OrbitControls: oc.OrbitControls }),
   },
-  mermaid: { specifier: 'mermaid', version: 'mermaid@10.9.1', init: (m) => m.default },
+  // three.js add-ons for the Scope anatomy viewer: bloom post-processing and geometry merging
+  threefx: {
+    load: () => Promise.all([
+      import('three/examples/jsm/postprocessing/EffectComposer.js'),
+      import('three/examples/jsm/postprocessing/RenderPass.js'),
+      import('three/examples/jsm/postprocessing/UnrealBloomPass.js'),
+      import('three/examples/jsm/postprocessing/OutputPass.js'),
+      import('three/examples/jsm/utils/BufferGeometryUtils.js'),
+    ]),
+    version: 'three@0.160.0 addons',
+    init: ([ec, rp, ub, op, bgu]) => ({ EffectComposer: ec.EffectComposer, RenderPass: rp.RenderPass, UnrealBloomPass: ub.UnrealBloomPass, OutputPass: op.OutputPass, mergeGeometries: bgu.mergeGeometries }),
+  },
+  mermaid: { load: () => import('mermaid'), version: 'mermaid@10.9.1', init: (m) => m.default },
   katex: {
-    specifier: 'katex',
+    load: () => Promise.all([import('katex'), import('katex/dist/katex.min.css')]).then(([m]) => m),
     version: 'katex@0.16.9',
-    css: 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css',
     init: (m) => m.default,
   },
-  highcharts: { specifier: 'highcharts', version: 'highcharts@11.4.8', init: (m) => m.default },
+  highcharts: { load: () => import('highcharts'), version: 'highcharts@11.4.8', init: (m) => m.default },
 };
 
 /** @type {Map<string, Promise<any>>} */
 const libCache = new Map();
-/** @type {Map<string, Promise<any>>} */
-const moduleCache = new Map();
 /** @type {Map<string, Promise<void>>} */
 const cssCache = new Map();
 /** names of libraries that finished loading */
@@ -64,17 +70,6 @@ let hooks = {
 /** @param {Partial<typeof hooks>} h */
 export function configureLazy(h) {
   hooks = { ...hooks, ...h };
-}
-
-/** Dynamic import with caching. @param {string} specifier */
-export function loadModule(specifier) {
-  let p = moduleCache.get(specifier);
-  if (!p) {
-    p = import(/* @vite-ignore */ specifier);
-    moduleCache.set(specifier, p);
-    p.catch(() => moduleCache.delete(specifier));
-  }
-  return p;
 }
 
 /**
@@ -115,16 +110,8 @@ export function loadLib(name) {
   requested.add(name);
   const t0 = performance.now();
   p = (async () => {
-    const [mod, extras] = await Promise.all([
-      loadModule(spec.specifier),
-      (async () => {
-        const out = {};
-        for (const [k, s] of Object.entries(spec.extras || {})) out[k] = await loadModule(s);
-        return out;
-      })(),
-      spec.css ? loadCss(spec.css) : Promise.resolve(),
-    ]);
-    const api = spec.init ? spec.init(mod, extras) : mod;
+    const mod = await spec.load();
+    const api = spec.init ? spec.init(mod) : mod;
     loaded.add(name);
     hooks.onLoaded(name, Math.round(performance.now() - t0));
     return api;

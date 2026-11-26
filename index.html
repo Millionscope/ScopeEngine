@@ -5,13 +5,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="MillionScope Workbench: answers as a live, recomputable graph of scopes.">
-  <link rel="icon" type="image/png" href="/public/favicon/favicon-96x96.png" sizes="96x96" />
-  <link rel="icon" type="image/svg+xml" href="/public/favicon/favicon.svg" />
-  <link rel="shortcut icon" href="/public/favicon/favicon.ico" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/public/favicon/apple-touch-icon.png" />
-  <link rel="manifest" href="/public/favicon/site.webmanifest" />
-  <link rel="preload" href="/public/fonts/TTT.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="preload" href="/public/fonts/TTT_Bold.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="icon" type="image/png" href="/favicon/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
+  <link rel="shortcut icon" href="/favicon/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
+  <link rel="manifest" href="/favicon/site.webmanifest" />
+  <link rel="preload" href="/fonts/TTT.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/TTT_Bold.woff2" as="font" type="font/woff2" crossorigin />
 
   <meta name="theme-color" content="#ffffff" />
   <meta name="mobile-web-app-capable" content="yes" />
@@ -52,32 +52,14 @@
   <!-- VS Code-native icons (pinned). KaTeX CSS is lazy-loaded by src/core/lazy.js. -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@vscode/codicons@0.0.45/dist/codicon.css">
 
-  <link rel="stylesheet" href="styles/base.css">
-  <link rel="stylesheet" href="styles/shell.css">
-  <link rel="stylesheet" href="styles/workspace.css">
-  <link rel="stylesheet" href="styles/composer.css">
-  <link rel="stylesheet" href="styles/menus.css">
-  <link rel="stylesheet" href="styles/editors.css">
+  <link rel="stylesheet" href="/styles/base.css">
+  <link rel="stylesheet" href="/styles/shell.css">
+  <link rel="stylesheet" href="/styles/workspace.css">
+  <link rel="stylesheet" href="/styles/composer.css">
+  <link rel="stylesheet" href="/styles/menus.css">
+  <link rel="stylesheet" href="/styles/editors.css">
 
-  <!--
-    Third-party libraries, exact pinned versions. Nothing here is fetched until a module
-    imports it; heavy libraries are only imported through src/core/lazy.js when an editor
-    that declares them in `needs` mounts.
-  -->
-  <script type="importmap">
-  {
-    "imports": {
-      "d3": "https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm",
-      "chart.js": "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/+esm",
-      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
-      "mermaid": "https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.esm.min.mjs",
-      "katex": "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.mjs",
-      "highcharts": "https://cdn.jsdelivr.net/npm/highcharts@11.4.8/es-modules/masters/highcharts.src.js"
-    }
-  }
-  </script>
-  <script type="module" src="src/main.js"></script>
+  <script type="module" src="/src/main.js"></script>
 </head>
 
 <body>
@@ -91,8 +73,7 @@
   <div id="sr-live" class="ms-sr-only" aria-live="polite" aria-atomic="false"></div>
   <div id="sr-assertive" class="ms-sr-only" aria-live="assertive" aria-atomic="true"></div>
   <noscript>
-    <p style="padding:16px">MillionScope Workbench needs JavaScript (ES2022 modules) and must be served over HTTP,
-      for example with <code>npx serve .</code> or <code>python -m http.server</code>.</p>
+    <p style="padding:16px">MillionScope Workbench needs JavaScript (ES2022 modules). Run it with <code>npm run dev</code>.</p>
   </noscript>
 </body>
 

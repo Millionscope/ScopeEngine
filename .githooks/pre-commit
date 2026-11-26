@@ -1,4 +1,4 @@
 #!/bin/sh
 # Refresh sitemap.xml lastmod on every commit. Enable once per clone: git config core.hooksPath .githooks
 command -v node >/dev/null || exit 0
-node scripts/generate-sitemap.mjs >/dev/null && git add sitemap.xml
+node scripts/generate-sitemap.mjs >/dev/null && git add public/sitemap.xml
