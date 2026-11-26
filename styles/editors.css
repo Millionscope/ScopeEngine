@@ -112,15 +112,14 @@
 .ms-section-head {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 0;
   height: 22px;
-  padding: 0 6px 0 2px;
+  padding: 0 8px 0 0;
   background: var(--vscode-sideBarSectionHeader-background);
   color: var(--vscode-sideBarSectionHeader-foreground);
   font-size: var(--ms-fs-tiny);
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: .4px;
   cursor: pointer;
   user-select: none;
   position: sticky;
@@ -130,7 +129,7 @@
   width: 100%;
   text-align: left;
 }
-.ms-section-head .codicon { font-size: 14px; transition: transform .1s; }
+.ms-section-head .codicon { font-size: 16px; margin: 0 2px; transition: transform .1s; }
 .ms-section.is-collapsed .ms-section-head .codicon-chevron-down { transform: rotate(-90deg); }
 .ms-section.is-collapsed .ms-section-body { display: none; }
 .ms-section-head .ms-badge { margin-left: auto; text-transform: none; letter-spacing: 0; }
@@ -180,7 +179,9 @@
   background: var(--vscode-list-activeSelectionBackground);
   color: var(--vscode-list-activeSelectionForeground);
 }
-.ms-list-row.is-focused { outline: 1px solid var(--vscode-list-focusOutline, var(--vscode-focusBorder)); outline-offset: -1px; }
+/* VS Code: solid focus outline only while the list has focus, dotted otherwise */
+.ms-list-row.is-focused { outline: 1px dotted var(--vscode-list-inactiveFocusOutline, var(--vscode-list-focusOutline, var(--vscode-focusBorder))); outline-offset: -1px; }
+.ms-vlist:focus-within .ms-list-row.is-focused { outline-style: solid; outline-color: var(--vscode-list-focusOutline, var(--vscode-focusBorder)); }
 .ms-list-row.is-hovered-elsewhere { background: var(--ms-cone); }
 .ms-list-row.is-cone { box-shadow: inset 3px 0 0 var(--ms-cone-strong); }
 
@@ -193,8 +194,8 @@
 .ms-tabs {
   display: flex;
   align-items: stretch;
-  gap: 2px;
-  height: 28px;
+  gap: 0;
+  height: 35px;
   padding: 0 8px;
   border-bottom: 1px solid var(--vscode-panel-border);
   flex: 0 0 auto;
@@ -203,30 +204,32 @@
   position: relative;
   border: 0;
   background: transparent;
-  padding: 0 8px;
+  padding: 2px 10px;
+  line-height: 27px;
   color: var(--vscode-panelTitle-inactiveForeground);
   font-size: var(--ms-fs-tiny);
   text-transform: uppercase;
-  letter-spacing: .4px;
   white-space: nowrap;
 }
 .ms-tab:hover { color: var(--vscode-panelTitle-activeForeground); }
 .ms-tab[aria-selected="true"] { color: var(--vscode-panelTitle-activeForeground); }
 .ms-tab[aria-selected="true"]::after {
-  content: ""; position: absolute; left: 6px; right: 6px; bottom: 0; height: 1px;
+  content: ""; position: absolute; left: 10px; right: 10px; bottom: 2px; height: 1px;
   background: var(--vscode-panelTitle-activeBorder);
 }
 
 /* segmented control */
-.ms-seg { display: inline-flex; border: 1px solid var(--vscode-widget-border); border-radius: var(--ms-radius); overflow: hidden; height: 22px; flex: 0 0 auto; }
+/* VS Code radio (segmented style): bordered track, 2px inset, pill segments */
+.ms-seg { display: inline-flex; align-items: center; gap: 2px; padding: 2px; border: 1px solid var(--vscode-widget-border); border-radius: var(--ms-radius-md); flex: 0 0 auto; }
 .ms-seg > button {
-  border: 0; background: transparent; color: var(--vscode-foreground);
-  padding: 0 8px; font-size: var(--ms-fs-small);
-  border-right: 1px solid var(--vscode-widget-border);
+  height: 24px;
+  border: 1px solid transparent; border-radius: var(--ms-radius); background: transparent; color: var(--vscode-foreground);
+  padding: 0 6px; font-size: 11px; font-weight: 400;
 }
-.ms-seg > button:last-child { border-right: 0; }
 .ms-seg > button:hover { background: var(--vscode-toolbar-hoverBackground); }
-.ms-seg > button[aria-pressed="true"] { background: var(--vscode-inputOption-activeBackground); color: var(--vscode-inputOption-activeForeground, var(--vscode-foreground)); }
+.ms-seg > button[aria-pressed="true"] { background: color-mix(in srgb, var(--vscode-foreground) 10%, transparent); font-weight: 600; }
+.ms-area-tools .ms-seg { padding: 1px; }
+.ms-area-tools .ms-seg > button { height: 22px; }
 
 /* ---------- chips ---------- */
 .ms-chip {
@@ -384,12 +387,12 @@ mark.ms-hit, .ms-hit {
   text-align: right;
   font-variant-numeric: tabular-nums;
   border: 1px solid var(--vscode-input-border, transparent);
-  border-radius: var(--ms-radius-sm);
+  border-radius: var(--ms-radius);
   background: var(--vscode-input-background);
   color: var(--vscode-input-foreground);
 }
 .ms-num-input:focus { outline: 1px solid var(--vscode-focusBorder); outline-offset: -1px; }
-.ms-num-input.is-invalid { border-color: var(--vscode-errorForeground); }
+.ms-num-input.is-invalid { border-color: var(--vscode-inputValidation-errorBorder, var(--vscode-errorForeground)); }
 .ms-unit { color: var(--vscode-descriptionForeground); font-size: var(--ms-fs-tiny); white-space: nowrap; }
 
 /* simulation voice: in-simulation speech is never styled like the assistant */

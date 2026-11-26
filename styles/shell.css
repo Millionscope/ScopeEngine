@@ -37,7 +37,6 @@
   gap: 6px;
   padding: 0 10px 0 12px;
   font-weight: 600;
-  letter-spacing: .2px;
   white-space: nowrap;
   flex: 0 0 auto;
 }
@@ -47,17 +46,22 @@
   display: block;
 }
 
-.ms-menubar { display: flex; align-items: stretch; flex: 0 0 auto; }
+.ms-menubar { display: flex; align-items: center; flex: 0 0 auto; }
 .ms-menubar-item {
+  height: 22px;
   border: 0;
   background: transparent;
   color: inherit;
   padding: 0 8px;
-  border-radius: 0;
+  border-radius: 5px;
   font-size: var(--ms-fs);
+  line-height: 22px;
 }
 .ms-menubar-item:hover,
-.ms-menubar-item[aria-expanded="true"] { background: var(--vscode-toolbar-hoverBackground); }
+.ms-menubar-item[aria-expanded="true"] {
+  background: var(--vscode-menubar-selectionBackground, var(--vscode-toolbar-hoverBackground));
+  color: var(--vscode-menubar-selectionForeground, inherit);
+}
 
 /* workspace tabs */
 .ms-ws-tabs {
@@ -77,8 +81,8 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  height: var(--ms-h-tab);
-  padding: 0 12px;
+  height: 100%;
+  padding: 0 10px;
   border: 0;
   border-right: 1px solid var(--vscode-tab-border);
   background: var(--vscode-tab-inactiveBackground);
@@ -94,10 +98,10 @@
 }
 .ms-ws-tab[aria-selected="true"]::before {
   content: "";
-  position: absolute; left: 0; right: 0; top: 0; height: 2px;
+  position: absolute; left: 0; right: 0; top: 0; height: 1px;
   background: var(--vscode-tab-activeBorderTop);
 }
-.ms-ws-tab .codicon { font-size: 14px; opacity: .85; }
+.ms-ws-tab .codicon { font-size: 16px; }
 .ms-ws-tab.is-drop-before { box-shadow: inset 2px 0 0 var(--vscode-focusBorder); }
 .ms-ws-tab.is-drop-after { box-shadow: inset -2px 0 0 var(--vscode-focusBorder); }
 .ms-ws-tab-input {
@@ -117,22 +121,24 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  width: min(38vw, 420px);
+  width: 38vw;
+  max-width: 600px;
   min-width: 40px;
   height: 22px;
+  margin: 0 6px;
   padding: 0 8px;
-  border: 1px solid var(--vscode-widget-border);
+  border: 1px solid var(--vscode-commandCenter-border, var(--vscode-widget-border));
   border-radius: 6px;
   background: var(--vscode-input-background);
   color: var(--vscode-descriptionForeground);
   font-size: var(--ms-fs-small);
   overflow: hidden;
 }
-.ms-command-center:hover { background: var(--vscode-toolbar-hoverBackground); }
+.ms-command-center:hover { background: var(--vscode-toolbar-hoverBackground); border-color: var(--vscode-commandCenter-activeBorder, var(--vscode-widget-border)); }
 .ms-command-center .codicon { font-size: 14px; }
 .ms-command-center .ms-kbd { margin-left: auto; }
 
-.ms-topbar-right { display: flex; align-items: center; gap: 2px; padding: 0 6px; flex: 0 0 auto; }
+.ms-topbar-right { display: flex; align-items: center; gap: 4px; padding: 0 6px; flex: 0 0 auto; }
 
 /* ---------- status bar ---------- */
 .ms-statusbar {
@@ -144,19 +150,25 @@
   min-width: 0;
   background: var(--vscode-statusBar-background);
   color: var(--vscode-statusBar-foreground);
-  border-top: 1px solid var(--vscode-statusBar-border);
   font-size: var(--ms-fs-small);
   user-select: none;
   position: relative;
   z-index: 3;
+}
+/* VS Code draws the top border as an overlay so items keep the full 22px */
+.ms-statusbar::after {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px;
+  background: var(--vscode-statusBar-border, transparent);
+  pointer-events: none; z-index: 1;
 }
 .ms-sb-group { display: flex; align-items: stretch; min-width: 0; overflow: hidden; }
 .ms-sb-group.is-right { justify-content: flex-end; flex-shrink: 1; }
 .ms-sb-item {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 0 6px;
+  gap: 3px;
+  padding: 0 5px;
+  margin: 0 3px;
   border: 0;
   background: transparent;
   color: inherit;
@@ -169,8 +181,12 @@ button.ms-sb-item:hover {
   background: var(--vscode-statusBarItem-hoverBackground);
   color: var(--vscode-statusBarItem-hoverForeground);
 }
+button.ms-sb-item:active { background: var(--vscode-statusBarItem-activeBackground, var(--vscode-statusBarItem-hoverBackground)); }
+.ms-sb-group:not(.is-right) > .ms-sb-item:first-child,
+.ms-sb-group.is-right > .ms-sb-item:last-child,
+.ms-sb-item.is-highlight, .ms-sb-item.is-error, .ms-sb-item.is-prominent { padding: 0 8px; margin: 0; }
 button.ms-sb-item:focus-visible { outline: 1px solid var(--vscode-statusBarItem-focusBorder); outline-offset: -1px; }
-.ms-sb-item .codicon { font-size: 14px; }
+.ms-sb-item .codicon { font-size: 16px; }
 .ms-sb-item.is-highlight {
   background: var(--vscode-statusBarItem-remoteBackground);
   color: var(--vscode-statusBarItem-remoteForeground);
@@ -182,8 +198,8 @@ button.ms-sb-item:focus-visible { outline: 1px solid var(--vscode-statusBarItem-
 .ms-sb-item.is-warn { color: var(--ms-warn); }
 .ms-sb-item.is-prominent { background: var(--vscode-statusBarItem-prominentBackground); }
 .ms-sb-item.is-collapsible-1 { }
-.ms-sb-sep { width: 1px; margin: 4px 2px; background: var(--vscode-statusBar-border); flex: 0 0 auto; }
-.ms-sb-item .ms-badge { height: 14px; min-width: 14px; font-size: 10px; }
+.ms-sb-sep { display: none; } /* VS Code status bar has no separators */
+.ms-sb-item .ms-badge { height: 16px; min-width: 16px; padding: 3px 5px; font-size: 10px; border-radius: 10px; }
 
 /* compact status bar at narrow widths */
 @media (max-width: 1180px) {

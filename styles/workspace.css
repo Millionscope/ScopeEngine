@@ -41,7 +41,7 @@
   z-index: 4;
   background: var(--vscode-editorGroup-border);
   touch-action: none;
-  transition: background-color .1s ease .15s;
+  transition: background-color .1s ease-out .3s;
 }
 .ms-split.is-row > .ms-splitter { cursor: col-resize; }
 .ms-split.is-col > .ms-splitter { cursor: row-resize; }
@@ -55,14 +55,14 @@
   content: "";
   position: absolute;
   background: transparent;
-  transition: background-color .1s ease .15s;
+  transition: background-color .1s ease-out .3s;
   pointer-events: none;
 }
-.ms-split.is-row > .ms-splitter::after { top: 0; bottom: 0; left: -1px; right: -1px; }
-.ms-split.is-col > .ms-splitter::after { left: 0; right: 0; top: -1px; bottom: -1px; }
+.ms-split.is-row > .ms-splitter::after { top: 0; bottom: 0; left: -2px; right: -1px; }
+.ms-split.is-col > .ms-splitter::after { left: 0; right: 0; top: -2px; bottom: -1px; }
 .ms-splitter:hover::after,
 .ms-splitter.is-dragging::after,
-.ms-splitter:focus-visible::after { background: var(--vscode-focusBorder); }
+.ms-splitter:focus-visible::after { background: var(--vscode-sash-hoverBorder, var(--vscode-focusBorder)); }
 .ms-splitter.is-dragging::after { transition: none; }
 .ms-splitter:focus-visible { outline: none; }
 body.is-resizing-row, body.is-resizing-row * { cursor: col-resize !important; user-select: none !important; }
@@ -107,7 +107,7 @@ body.is-gesturing, body.is-gesturing * { cursor: crosshair !important; user-sele
   display: flex;
   align-items: center;
   gap: 2px;
-  padding: 0 4px 0 4px;
+  padding: 0 8px 0 4px;
   min-width: 0;
   background: var(--vscode-editorGroupHeader-tabsBackground);
   border-bottom: 1px solid var(--vscode-editorGroupHeader-tabsBorder);
@@ -120,7 +120,7 @@ body.is-gesturing, body.is-gesturing * { cursor: crosshair !important; user-sele
 }
 .ms-area-header::before {
   content: "";
-  position: absolute; left: 0; right: 0; top: 0; height: 2px;
+  position: absolute; left: 0; right: 0; top: 0; height: 1px;
   background: var(--vscode-tab-unfocusedActiveBorderTop);
   pointer-events: none;
 }
@@ -128,14 +128,12 @@ body.is-gesturing, body.is-gesturing * { cursor: crosshair !important; user-sele
 .ms-area.is-header-bottom .ms-area-header::before { top: auto; bottom: 0; }
 
 .ms-area-type-btn { padding: 0 2px 0 4px; height: 22px; }
-.ms-area-type-btn .codicon { font-size: 15px; }
+.ms-area-type-btn .codicon { font-size: 16px; }
 .ms-area-title {
-  font-size: var(--ms-fs-small);
+  font-size: var(--ms-fs);
   color: var(--vscode-foreground);
   padding: 0 4px 0 2px;
   white-space: nowrap;
-  font-weight: 600;
-  letter-spacing: .1px;
 }
 .ms-area-menus { display: flex; align-items: center; min-width: 0; }
 .ms-area-menu-item {
@@ -144,17 +142,16 @@ body.is-gesturing, body.is-gesturing * { cursor: crosshair !important; user-sele
   color: var(--vscode-foreground);
   height: 22px;
   padding: 0 6px;
-  border-radius: var(--ms-radius);
+  border-radius: var(--ms-radius-md);
   font-size: var(--ms-fs-small);
   white-space: nowrap;
 }
 .ms-area-menu-item:hover,
 .ms-area-menu-item[aria-expanded="true"] { background: var(--vscode-toolbar-hoverBackground); }
 .ms-area-tools { display: flex; align-items: center; gap: 2px; min-width: 0; overflow: hidden; }
-.ms-area-tools .ms-input, .ms-area-tools .ms-select { height: 20px; font-size: var(--ms-fs-small); }
-.ms-area-tools .ms-seg { height: 20px; }
+.ms-area-tools .ms-input, .ms-area-tools .ms-select { height: 24px; font-size: var(--ms-fs-small); }
 .ms-area-controls { display: flex; align-items: center; gap: 1px; flex: 0 0 auto; padding-left: 4px; }
-.ms-area-controls .ms-select { height: 20px; font-size: var(--ms-fs-small); max-width: 140px; }
+.ms-area-controls .ms-select { height: 24px; font-size: var(--ms-fs-small); max-width: 140px; }
 .ms-area-header .ms-spacer { min-width: 4px; }
 
 /* collapsed header */
@@ -217,7 +214,6 @@ body.is-gesturing, body.is-gesturing * { cursor: crosshair !important; user-sele
   font-size: var(--ms-fs-tiny);
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: .4px;
   position: sticky; top: 0; z-index: 1;
 }
 .ms-region-body { padding: 6px 8px; }

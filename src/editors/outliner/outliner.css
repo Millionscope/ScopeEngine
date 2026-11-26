@@ -1,7 +1,7 @@
 /* Scope Outliner */
 .ms-outliner .ms-vlist { padding: 2px 0; }
 .ms-outliner .ms-list-row { gap: 3px; font-size: var(--ms-fs); }
-.ms-ol-twisty { width: 16px; flex: 0 0 16px; font-size: 14px; display: inline-grid; place-items: center; cursor: pointer; color: var(--vscode-icon-foreground); }
+.ms-ol-twisty { width: 16px; flex: 0 0 16px; font-size: 16px; padding-right: 6px; box-sizing: content-box; transform: translateX(3px); display: inline-grid; place-items: center; cursor: pointer; color: var(--vscode-icon-foreground); }
 .ms-ol-icon { font-size: 14px; color: var(--vscode-icon-foreground); opacity: .85; flex: 0 0 auto; }
 .ms-ol-name { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .ms-ol-name.is-scope { font-weight: 600; }

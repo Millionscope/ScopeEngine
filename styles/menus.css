@@ -10,51 +10,53 @@
 .ms-menu {
   position: fixed;
   z-index: 120;
-  min-width: 180px;
+  min-width: 160px;
   max-width: 420px;
   max-height: calc(100vh - 16px);
   overflow-y: auto;
-  padding: 4px;
+  padding: 4px 0;
   border: 1px solid var(--vscode-menu-border, var(--vscode-widget-border));
-  border-radius: 6px;
+  border-radius: var(--ms-radius-lg);
   background: var(--vscode-menu-background);
   color: var(--vscode-menu-foreground);
-  box-shadow: 0 4px 16px var(--vscode-widget-shadow);
+  box-shadow: var(--ms-shadow-lg);
   font-size: var(--ms-fs);
   user-select: none;
+  animation: ms-fade-in .083s linear;
 }
+@keyframes ms-fade-in { from { opacity: 0; } to { opacity: 1; } }
 .ms-menu-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0;
   height: 24px;
-  padding: 0 8px 0 6px;
-  border-radius: 4px;
+  margin: 0 4px;
+  padding: 0;
+  border-radius: var(--ms-radius-md);
   cursor: pointer;
   white-space: nowrap;
   outline: none;
 }
-.ms-menu-item .ms-menu-check { width: 16px; display: inline-grid; place-items: center; flex: 0 0 16px; }
-.ms-menu-item .ms-menu-check .codicon { font-size: 14px; }
-.ms-menu-item .ms-menu-label { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; }
-.ms-menu-item .ms-menu-key { color: var(--vscode-descriptionForeground); font-size: var(--ms-fs-small); padding-left: 16px; }
-.ms-menu-item .ms-menu-sub { font-size: 12px; }
+/* VS Code: 2em check column, label padded 0 2em, keybinding 0 2em at .7 opacity */
+.ms-menu-item .ms-menu-check { width: 2em; display: inline-grid; place-items: center; flex: 0 0 2em; }
+.ms-menu-item .ms-menu-check .codicon { font-size: 16px; }
+.ms-menu-item .ms-menu-label { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; padding-right: 2em; }
+.ms-menu-item .ms-menu-key { color: inherit; opacity: .7; padding: 0 2em 0 0; }
+.ms-menu-item .ms-menu-sub { font-size: 16px; margin-right: 6px; }
 .ms-menu-item:focus,
 .ms-menu-item.is-focused {
   background: var(--vscode-menu-selectionBackground);
   color: var(--vscode-menu-selectionForeground);
 }
 .ms-menu-item:focus .ms-menu-key,
-.ms-menu-item.is-focused .ms-menu-key { color: inherit; opacity: .85; }
+.ms-menu-item.is-focused .ms-menu-key { color: inherit; opacity: .7; }
 .ms-menu-item[aria-disabled="true"] { opacity: .45; cursor: default; }
 .ms-menu-item[aria-disabled="true"]:focus { background: transparent; color: inherit; }
-.ms-menu-sep { height: 1px; margin: 4px 6px; background: var(--vscode-menu-separatorBackground, var(--vscode-widget-border)); }
+.ms-menu-sep { height: 1px; margin: 5px 0; background: var(--vscode-menu-separatorBackground, var(--vscode-widget-border)); }
 .ms-menu-header {
-  padding: 4px 8px 2px;
-  font-size: var(--ms-fs-tiny);
+  padding: .7em 1em .1em;
+  font-weight: bold;
   color: var(--vscode-descriptionForeground);
-  text-transform: uppercase;
-  letter-spacing: .4px;
 }
 
 /* ---------- editor-type menu (grid of groups) ---------- */
@@ -63,10 +65,10 @@
   z-index: 120;
   padding: 6px;
   border: 1px solid var(--vscode-menu-border, var(--vscode-widget-border));
-  border-radius: 6px;
+  border-radius: var(--ms-radius-lg);
   background: var(--vscode-menu-background);
   color: var(--vscode-menu-foreground);
-  box-shadow: 0 6px 20px var(--vscode-widget-shadow);
+  box-shadow: var(--ms-shadow-lg);
   user-select: none;
   max-width: calc(100vw - 16px);
 }
@@ -83,7 +85,6 @@
   font-weight: 700;
   color: var(--vscode-descriptionForeground);
   text-transform: uppercase;
-  letter-spacing: .4px;
   border-bottom: 1px solid var(--vscode-menu-separatorBackground, var(--vscode-widget-border));
   margin-bottom: 2px;
   white-space: nowrap;
@@ -94,12 +95,12 @@
   gap: 6px;
   height: 24px;
   padding: 0 6px;
-  border-radius: 4px;
+  border-radius: var(--ms-radius-md);
   cursor: pointer;
   white-space: nowrap;
   outline: none;
 }
-.ms-etm-item .codicon { font-size: 15px; flex: 0 0 auto; }
+.ms-etm-item .codicon { font-size: 16px; flex: 0 0 auto; }
 .ms-etm-item .ms-etm-label { flex: 1 1 auto; }
 .ms-etm-item .ms-etm-key { font-size: var(--ms-fs-tiny); color: var(--vscode-descriptionForeground); padding-left: 10px; }
 .ms-etm-item.is-current { font-weight: 600; }
@@ -120,23 +121,23 @@
 .ms-palette {
   position: fixed;
   z-index: 111;
-  top: 44px;
+  top: var(--ms-h-topbar);
   left: 50%;
   transform: translateX(-50%);
-  width: min(640px, calc(100vw - 32px));
+  width: min(62vw, 600px);
   max-height: min(520px, calc(100vh - 80px));
   display: flex;
   flex-direction: column;
   border: 1px solid var(--vscode-widget-border);
-  border-radius: 6px;
+  border-radius: 12px;
   background: var(--vscode-quickInput-background);
   color: var(--vscode-quickInput-foreground);
-  box-shadow: 0 8px 28px var(--vscode-widget-shadow);
+  box-shadow: 0 0 8px 2px var(--vscode-widget-shadow);
   overflow: hidden;
 }
-.ms-palette-input-row { padding: 6px; }
-.ms-palette-input { width: 100%; height: 26px; }
-.ms-palette-list { overflow-y: auto; padding: 0 0 6px; }
+.ms-palette-input-row { padding: 6px 6px 4px 6px; }
+.ms-palette-input { width: 100%; height: 26px; border-radius: 6px; }
+.ms-palette-list { overflow-y: auto; padding: 0 6px 7px; }
 .ms-palette-group {
   display: flex;
   justify-content: flex-end;
@@ -149,16 +150,17 @@
 .ms-palette-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  height: 24px;
-  padding: 0 10px;
+  gap: 6px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 3px;
   cursor: pointer;
   white-space: nowrap;
 }
-.ms-palette-item .codicon { font-size: 15px; flex: 0 0 auto; }
+.ms-palette-item .codicon { font-size: 16px; flex: 0 0 auto; }
 .ms-palette-item .ms-pal-label { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .ms-palette-item .ms-pal-detail { color: var(--vscode-descriptionForeground); font-size: var(--ms-fs-small); overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1 1 auto; }
-.ms-palette-item .ms-kbd { margin-left: auto; }
+.ms-palette-item .ms-kbd { margin-left: auto; margin-right: 8px; }
 .ms-palette-item mark { background: none; color: var(--vscode-list-highlightForeground, var(--vscode-textLink-foreground)); font-weight: 700; }
 .ms-palette-item[aria-selected="true"] {
   background: var(--vscode-quickInputList-focusBackground, var(--vscode-list-activeSelectionBackground));
@@ -171,14 +173,15 @@
 .ms-tooltip {
   position: fixed;
   z-index: 140;
-  max-width: 320px;
+  max-width: 500px;
   padding: 4px 8px;
-  border: 1px solid var(--vscode-widget-border);
-  border-radius: 4px;
-  background: var(--vscode-editorWidget-background);
-  color: var(--vscode-editorWidget-foreground, var(--vscode-foreground));
-  box-shadow: 0 2px 8px var(--vscode-widget-shadow);
-  font-size: var(--ms-fs-small);
+  border: 1px solid var(--vscode-editorHoverWidget-border, var(--vscode-widget-border));
+  border-radius: 5px;
+  background: var(--vscode-editorHoverWidget-background, var(--vscode-editorWidget-background));
+  color: var(--vscode-editorHoverWidget-foreground, var(--vscode-editorWidget-foreground, var(--vscode-foreground)));
+  box-shadow: var(--ms-shadow-lg);
+  font-size: var(--ms-fs);
+  line-height: 19px;
   pointer-events: none;
   white-space: pre-line;
 }
@@ -218,8 +221,8 @@
 /* ---------- toasts ---------- */
 .ms-toasts {
   position: fixed;
-  right: 12px;
-  bottom: calc(var(--ms-h-status) + 96px);
+  right: 3px;
+  bottom: calc(var(--ms-h-status) + 96px); /* clears the floating composer */
   z-index: 150;
   display: flex;
   flex-direction: column;
@@ -231,24 +234,26 @@
   pointer-events: auto;
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  width: min(420px, calc(100vw - 24px));
-  padding: 8px 8px 8px 10px;
+  gap: 4px;
+  width: min(450px, calc(100vw - 14px));
+  margin: 4px;
+  padding: 10px 5px;
   border: 1px solid var(--vscode-notifications-border);
-  border-radius: 6px;
+  border-radius: 4px;
   background: var(--vscode-notifications-background);
   color: var(--vscode-notifications-foreground);
-  box-shadow: 0 4px 16px var(--vscode-widget-shadow);
+  box-shadow: var(--ms-shadow-lg);
   animation: ms-toast-in .18s var(--ms-ease);
 }
-.ms-toast .codicon { font-size: 16px; margin-top: 1px; }
+.ms-toast > .codicon { font-size: 18px; line-height: 22px; height: 22px; margin: 0 4px; }
 .ms-toast[data-level="error"] > .codicon { color: var(--vscode-errorForeground); }
 .ms-toast[data-level="warn"] > .codicon { color: var(--ms-warn); }
 .ms-toast[data-level="success"] > .codicon { color: var(--ms-ok); }
 .ms-toast[data-level="info"] > .codicon { color: var(--vscode-editorInfo-foreground, var(--vscode-textLink-foreground)); }
-.ms-toast-body { flex: 1 1 auto; min-width: 0; line-height: 1.45; }
+.ms-toast-body { flex: 1 1 auto; min-width: 0; line-height: 22px; }
 .ms-toast-detail { color: var(--vscode-descriptionForeground); font-size: var(--ms-fs-small); margin-top: 2px; white-space: pre-wrap; }
-.ms-toast-actions { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+.ms-toast-actions { display: flex; gap: 0; margin: 4px -5px 0; flex-wrap: wrap; }
+.ms-toast-actions > .ms-btn { margin: 4px 5px; }
 @keyframes ms-toast-in { from { transform: translateY(6px); opacity: 0; } to { transform: none; opacity: 1; } }
 
 /* ---------- modal-ish overlays (shortcuts, debug) ---------- */
@@ -271,7 +276,7 @@
 .ms-modal-head { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--vscode-widget-border); font-weight: 600; }
 .ms-modal-body { overflow-y: auto; padding: 8px 14px 14px; }
 .ms-shortcuts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 24px; }
-.ms-shortcuts h3 { font-size: var(--ms-fs-small); color: var(--vscode-descriptionForeground); text-transform: uppercase; letter-spacing: .4px; margin: 12px 0 4px; grid-column: 1 / -1; }
+.ms-shortcuts h3 { font-size: var(--ms-fs-small); color: var(--vscode-descriptionForeground); text-transform: uppercase; margin: 12px 0 4px; grid-column: 1 / -1; }
 .ms-shortcut-row { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 3px 0; border-bottom: 1px solid var(--vscode-widget-border); }
 
 .ms-debug {
