@@ -1,0 +1,38 @@
+{
+  "name": "MillionScope - Millions of perspectives in one vision",
+  "short_name": "MillionScope",
+  "description": "MillionScope - Millions of perspectives in one vision.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/public/favicon/pwa-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/public/favicon/pwa-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/public/favicon/pwa-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/public/favicon/pwa-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"]
+}

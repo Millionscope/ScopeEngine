@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MillionScope - Offline</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .container {
+            text-align: center;
+            padding: 2rem;
+            max-width: 500px;
+        }
+
+        .icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        p {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .retry-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .retry-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="logo">MillionScope</div>
+        <div class="icon">📡</div>
+        <h1>You're Offline</h1>
+        <p>
+            It looks like you're not connected to the internet.
+            Please check your connection and try again.
+        </p>
+        <button class="retry-btn" onclick="window.location.reload()">
+            Try Again
+        </button>
+    </div>
+
+    <script>
+        // Auto-retry when online
+        window.addEventListener('online', function () {
+            window.location.reload();
+        });
+
+        // Check if we're back online every 5 seconds
+        setInterval(function () {
+            if (navigator.onLine) {
+                window.location.reload();
+            }
+        }, 5000);
+    </script>
+</body>
+
+</html>
