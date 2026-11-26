@@ -42,6 +42,9 @@ export const LIBS = {
     version: 'three@0.160.0 addons',
     init: ([ec, rp, ub, op, bgu]) => ({ EffectComposer: ec.EffectComposer, RenderPass: rp.RenderPass, UnrealBloomPass: ub.UnrealBloomPass, OutputPass: op.OutputPass, mergeGeometries: bgu.mergeGeometries }),
   },
+  // three-globe (Globe.GL's layer engine). 2.40.0 is the last release without a `three/webgpu` import,
+  // which three 0.160 lacks; globe.gl itself needs three >= 0.179.
+  threeglobe: { load: () => import('three-globe'), version: 'three-globe@2.40.0', init: (m) => m.default },
   mermaid: { load: () => import('mermaid'), version: 'mermaid@10.9.1', init: (m) => m.default },
   katex: {
     load: () => Promise.all([import('katex'), import('katex/dist/katex.min.css')]).then(([m]) => m),

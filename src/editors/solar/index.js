@@ -6,6 +6,7 @@
  *    Earth's night lights and clouds, orbit ellipses and an asteroid belt;
  *  - camera tour (loop): orbit the system → fly to Earth → closer to Earth → pull back to the whole
  *    system. Dragging pauses it; it resumes after a few idle seconds. Picking a planet follows it;
+ *    picking Earth (label, list, key 3 or a click on its disc) also opens the Earth globe beside it;
  *  - two clocks so both read on screen: spin (1 Earth day = 8 s) and orbits (1 Earth year = 2 min);
  *    each keeps the true ratios between bodies;
  *  - the WebGL renderer comes from the shared GL pool and is released while the area is hidden.
@@ -190,6 +191,8 @@ export default class SolarEditor extends BaseEditor {
     this.anim = ctx.scheduler.animate(this, (info) => this.tick(info));
     this.disposables.add(this.anim);
     this.listen(this.host, 'keydown', (e) => this.onKey(/** @type {KeyboardEvent} */ (e)));
+    this.listen(this.host, 'pointerdown', (e) => { this._down = [/** @type {PointerEvent} */ (e).clientX, /** @type {PointerEvent} */ (e).clientY]; });
+    this.listen(this.host, 'pointerup', (e) => this.pickEarth(/** @type {PointerEvent} */ (e)));
     this.listen(this.msg, 'click', () => {
       if (this.paused) { this.paused = false; this.msg.hidden = true; this.invalidate(); }
     });
@@ -381,6 +384,23 @@ export default class SolarEditor extends BaseEditor {
     this.renderPlanets();
     this.renderDetail();
     this.invalidate();
+    // picking Earth opens the Earth globe beside this area (or focuses it)
+    if (body && body === this.earth) this.ctx?.commands.executeWith('area.openGlobe', { areaId: this.ctx.areaId });
+  }
+
+  /** A click (not a drag) on or near Earth's disc on the canvas picks Earth. @param {PointerEvent} e */
+  pickEarth(e) {
+    const down = this._down;
+    this._down = null;
+    if (!down || e.target !== this.canvasEl || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 5) return;
+    const r = this.canvasEl.getBoundingClientRect();
+    const p = this._v.copy(this.earth.pos).project(this.camera);
+    if (p.z > 1) return;
+    const dist = this.camera.position.distanceTo(this.earth.pos);
+    const px = (this.earth.p.radius / (dist * Math.tan((this.camera.fov * Math.PI) / 360))) * (r.height / 2);
+    const dx = r.left + (p.x * 0.5 + 0.5) * r.width - e.clientX;
+    const dy = r.top + (-p.y * 0.5 + 0.5) * r.height - e.clientY;
+    if (Math.hypot(dx, dy) <= Math.max(px, 12)) this.setFocus(this.earth);
   }
 
   startTour() {

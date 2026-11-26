@@ -1,0 +1,11 @@
+/* Globe: reuses the Scope HUD (scope.css) and Solar's rows (solar.css); only the city tags are new. */
+.ms-gl-label { padding: 1px 6px; border-color: transparent; background: rgba(4, 16, 30, .45); }
+.ms-gl-label b { font-size: 10px; text-shadow: 0 0 6px var(--c); }
+.ms-gl-label small { display: none; }
+/* active city: the glowing callout with its coordinates */
+.ms-gl-label.is-selected { z-index: 1; padding: 4px 12px; border-radius: 999px; border: 1px solid #7fe6ff; background: linear-gradient(90deg, rgba(10, 70, 120, .85), rgba(6, 30, 60, .85)); box-shadow: 0 0 14px rgba(63, 216, 255, .55), inset 0 0 10px rgba(63, 216, 255, .25); }
+.ms-gl-label.is-selected b { font-size: var(--ms-fs-small); color: #fff; text-shadow: 0 0 8px #3fd8ff; }
+.ms-gl-label.is-selected small { display: block; color: #bff4ff; font-family: var(--ms-font-mono); font-variant-numeric: tabular-nums; text-shadow: 0 0 6px #3fd8ff; }
+.ms-globe .ms-sc-detail h3 { text-shadow: 0 0 10px var(--c); }
+.ms-gl-cities .ms-sc-systems { max-height: 46vh; overflow-y: auto; }
+.ms-globe .ms-sc-sys[aria-current="true"] { background: rgba(63, 216, 255, .16); box-shadow: inset 2px 0 0 var(--c); }

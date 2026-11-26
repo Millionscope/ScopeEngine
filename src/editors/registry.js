@@ -48,6 +48,7 @@ export const EDITORS = [
   { id: 'space3d', label: '3D Scope Space', icon: 'globe', group: 'Scope', needs: ['three'], kind: 'editor', shortcut: 'shift+f5', usesScenario: false, loader: lazy('space3d', () => import('./space3d/index.js')) },
   { id: 'scope', label: 'Scope', icon: 'pulse', group: 'Scope', needs: ['three', 'threefx'], kind: 'editor', shortcut: null, usesScenario: false, loader: lazy('scope', () => import('./scope/index.js')) },
   { id: 'solar', label: 'Solar System', icon: 'globe', group: 'Scope', needs: ['three', 'threefx'], kind: 'editor', shortcut: null, usesScenario: false, loader: lazy('solar', () => import('./solar/index.js')) },
+  { id: 'globe', label: 'Earth Globe', icon: 'globe', group: 'Scope', needs: ['three', 'threefx', 'threeglobe'], kind: 'editor', shortcut: null, usesScenario: false, loader: lazy('globe', () => import('./globe/index.js')) },
   { id: 'sheet', label: 'Sheet', icon: 'table', group: 'Scope', needs: [], kind: 'editor', shortcut: 'shift+f6', usesScenario: true, loader: lazy('sheet', () => import('./sheet/index.js')) },
   { id: 'inspector', label: 'Properties', icon: 'symbol-property', group: 'Scope', needs: [], kind: 'panel', shortcut: 'shift+f7', usesScenario: true, loader: lazy('inspector', () => import('./inspector/index.js')) },
   // Analysis

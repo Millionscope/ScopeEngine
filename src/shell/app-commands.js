@@ -39,6 +39,14 @@ export function registerAppCommands({ env, ws, keymap, palette, composer, menus,
     { id: 'area.toggleSidebar', title: 'Toggle Sidebar', category: 'Area', icon: 'layout-sidebar-right', when: hasArea, checked: (ctx) => !!target(ctx)?.leaf.regions.sidebar, run: (ctx) => { const a = target(ctx); if (a) ws.toggleRegion(a.id, 'sidebar'); } },
     { id: 'area.splitVertical', title: 'Split Area Vertically', category: 'Area', icon: 'split-horizontal', when: hasArea, run: (ctx) => { const a = target(ctx); if (a) ws.splitArea(a.id, 'row'); } },
     { id: 'area.splitHorizontal', title: 'Split Area Horizontally', category: 'Area', icon: 'split-vertical', when: hasArea, run: (ctx) => { const a = target(ctx); if (a) ws.splitArea(a.id, 'col'); } },
+    // Solar → Earth: open the globe beside the area, or focus the one already open in this workspace
+    { id: 'area.openGlobe', title: 'Open Earth Globe', category: 'Area', icon: 'globe', when: hasArea, run: (ctx) => {
+      const a = target(ctx);
+      if (!a) return;
+      const open = ws.treeOf(a.id)?.leaves().find((l) => l.editorType === 'globe');
+      if (open) ws.setActiveArea(open.id);
+      else ws.splitArea(a.id, 'row', 0.5, { type: 'globe' });
+    } },
     { id: 'area.duplicate', title: 'Duplicate Area', category: 'Area', icon: 'copy', when: hasArea, run: (ctx) => { const a = target(ctx); if (a) ws.duplicateArea(a.id); } },
     { id: 'area.close', title: 'Close Area', category: 'Area', icon: 'close', when: (ctx) => (ws.activeTree()?.size || 0) > 1 && hasArea(ctx), run: (ctx) => { const a = target(ctx); if (a) ws.closeArea(a.id); } },
     { id: 'area.typeMenu', title: 'Change Editor Type…', category: 'Area', icon: 'window', when: hasArea, run: (ctx) => target(ctx)?.header.openTypeMenu() },

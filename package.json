@@ -13,7 +13,8 @@
     "highcharts": "11.4.8",
     "katex": "0.16.9",
     "mermaid": "10.9.1",
-    "three": "0.160.0"
+    "three": "0.160.0",
+    "three-globe": "2.40.0"
   },
   "devDependencies": {
     "vite": "^7.3.8"
