@@ -39,7 +39,7 @@
 /* on a selection background the word carries the status; the row color keeps contrast */
 .ms-pf-item[aria-selected="true"] .ms-pf-item-status { color: inherit; }
 .ms-pf-item-warn { color: var(--ms-warn); }
-.ms-pf-item-warn::before { content: "⚠ "; }
+.ms-pf-item-warn::before { content: "\ea6c"; font: normal normal normal 12px/1 codicon; margin-right: 3px; vertical-align: -2px; }
 
 .ms-pf-tool {
   display: inline-flex; align-items: center; gap: 4px;

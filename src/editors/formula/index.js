@@ -18,6 +18,7 @@ import { describe } from '../../model/distributions.js';
 import { PROVENANCE } from '../../theme/tokens.js';
 import { renderMath } from './tex.js';
 import { equationTex, exprDom, fmtFor, referenceItems, unitsCheck, unitsTex } from './view.js';
+import { setStatus } from '../shared/status.js';
 
 const DEFAULT_FOCUS = 'sc_bakery.monthly_cash';
 const MAX_DEPTH = 8;
@@ -267,8 +268,7 @@ export default class FormulaEditor extends BaseEditor {
     const chk = unitsCheck(g, id);
     const badge = document.createElement('span');
     badge.className = 'ms-status';
-    badge.dataset.status = chk.ok ? 'pass' : 'fail';
-    badge.textContent = chk.ok ? '✓ units' : '✕ units';
+    setStatus(badge, chk.ok ? 'pass' : 'fail', 'units');
     badge.title = chk.text;
     const why = document.createElement('span');
     why.className = 'ms-small ms-muted ms-fx-unitnote';

@@ -154,7 +154,7 @@ export class StatusBar {
     if (c) {
       const bad = c.failed > 0;
       certIcon.className = `codicon codicon-${bad ? 'error' : c.notProven > 0 ? 'warning' : 'verified'}`;
-      this.setLabel(this.cert, bad ? `${c.failed} failed` : c.notProven > 0 ? `✓ 0 failed · ${c.notProven} not proven` : '✓ 0 failed');
+      this.setLabel(this.cert, bad ? `${c.failed} failed` : c.notProven > 0 ? `0 failed · ${c.notProven} not proven` : '0 failed');
       this.cert.classList.toggle('is-error', bad);
       this.cert.classList.toggle('is-highlight', false);
     } else {

@@ -273,8 +273,11 @@ export class Composer {
    */
   chip(icon, text, kind, onRemove, isScope) {
     const c = document.createElement('span');
-    c.className = `ms-ctx-chip${isScope ? ' is-scope' : ' is-muted'}`;
-    c.innerHTML = `<span class="codicon codicon-${icon}" aria-hidden="true"></span><span class="ms-chip-kind">${esc(kind)}:</span>`;
+    c.className = `ms-ctx-chip${isScope ? ' is-scope' : ' is-badge'}`;
+    c.dataset.kind = kind;
+    // scope chips say "scope:" inline; scenario/area badges carry the kind in a tooltip and screen-reader text
+    c.innerHTML = `<span class="codicon codicon-${icon}" aria-hidden="true"></span><span class="${isScope ? 'ms-chip-kind' : 'ms-sr-only'}">${esc(kind)}:</span>`;
+    if (!isScope) c.dataset.tooltip = `${kind[0].toUpperCase()}${kind.slice(1)}: ${text}`;
     const l = document.createElement('span');
     l.className = 'ms-chip-label';
     l.textContent = text;
@@ -323,8 +326,10 @@ export class Composer {
     const router = this.services.router;
     /** @type {{kind: string, label: string, detail?: string}} */
     let r;
-    if (!text.trim()) r = { kind: 'empty', label: 'type to see routing' };
-    else if (router) r = router.classify(text, this.context());
+    // nothing typed: no routing chip at all (hidden also drops it from aria-describedby)
+    this.route.hidden = !text.trim();
+    if (this.route.hidden) { this.route.replaceChildren(); this.lastRoute = { kind: 'empty', label: '' }; return; }
+    if (router) r = router.classify(text, this.context());
     else if (text.trim().startsWith('/')) r = { kind: 'command', label: 'command' };
     else r = { kind: 'question', label: 'model · ~40k tokens' };
     const icons = { numeric: 'zap', structural: 'sparkle', question: 'sparkle', command: 'terminal-cmd', invalid: 'error', empty: 'info' };

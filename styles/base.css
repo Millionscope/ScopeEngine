@@ -10,7 +10,7 @@
   src: url("/public/fonts/TTT.woff2") format("woff2"), url("/public/fonts/TTT.woff") format("woff");
   font-weight: 400;
   font-style: normal;
-  font-display: swap;
+  font-display: block;
 }
 @font-face {
   font-family: "TTT";
@@ -24,7 +24,7 @@
   src: url("/public/fonts/TTT_Bold.woff2") format("woff2"), url("/public/fonts/TTT_Bold.woff") format("woff");
   font-weight: 700;
   font-style: normal;
-  font-display: swap;
+  font-display: block;
 }
 @font-face {
   font-family: "TTT";

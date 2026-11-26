@@ -101,11 +101,10 @@ export function renderCertChip(cert, opts) {
   const failed = cert.failed.length;
   const icon = failed ? 'error' : cert.notProven.length ? 'verified' : 'verified-filled';
   const c = cert.counts;
-  btn.innerHTML = `<span class="codicon codicon-${failed ? 'error' : 'verified'}" aria-hidden="true"></span>`;
-  void icon;
+  btn.innerHTML = `<span class="codicon codicon-${icon}" aria-hidden="true"></span>`;
   const text = document.createElement('span');
   text.className = 'ms-tabular';
-  text.textContent = `${failed ? '✕' : '✓'} ${c.computed.toLocaleString('en-US')} computed · ${cert.sources.matched}/${cert.sources.total} sources · ${c.estimated} estimated · ${c.proven} proven · ${failed} failed`;
+  text.textContent = `${c.computed.toLocaleString('en-US')} computed · ${cert.sources.matched}/${cert.sources.total} sources · ${c.estimated} estimated · ${c.proven} proven · ${failed} failed`;
   btn.appendChild(text);
   const chev = document.createElement('span');
   chev.className = 'codicon codicon-chevron-down';

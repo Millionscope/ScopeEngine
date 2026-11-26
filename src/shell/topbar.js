@@ -90,7 +90,7 @@ export class TopBar {
 
     const logo = document.createElement('div');
     logo.className = 'ms-logo';
-    logo.innerHTML = '<img class="ms-logo-mark" src="/public/logo.svg" alt="" aria-hidden="true"><span>MillionScope</span>';
+    logo.innerHTML = '<img class="ms-logo-mark" src="/public/logo.svg" alt="" aria-hidden="true"><span>Millionscope</span>';
 
     const menubar = document.createElement('nav');
     menubar.className = 'ms-menubar';

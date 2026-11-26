@@ -37,6 +37,11 @@ There's no build step. The repo root is the site, as set in `wrangler.toml`.
   empty and set the output directory to `/`.
 - **CLI**: `npx wrangler pages dev` serves the site locally on Pages' runtime, and
   `npx wrangler pages deploy` uploads it.
+- **Sitemap**: `sitemap.xml` and `robots.txt` sit at the repo root, so they're served at
+  `/sitemap.xml` and `/robots.txt`. A pre-commit hook rewrites the sitemap's `lastmod` on every
+  commit. Turn it on once per clone with `git config core.hooksPath .githooks`, or run
+  `node scripts/generate-sitemap.mjs` by hand. To stamp the deploy date instead, set the Pages
+  build command to that same line.
 
 ## A two-minute tour
 

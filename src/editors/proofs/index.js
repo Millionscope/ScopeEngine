@@ -18,14 +18,15 @@ import { loadCss } from '../../core/lazy.js';
 import { renderTex } from '../../theme/adapters/katex.js';
 import { interval } from '../../model/format.js';
 import { defaultFmt } from '../../model/binding.js';
+import { setStatus } from '../shared/status.js';
 
 const TOOL = {
   lean: { label: 'Lean 4', long: 'Lean 4 + Mathlib', icon: 'law', lang: 'lean' },
   smt: { label: 'SMT', long: 'SMT (Z3 / cvc5, mocked)', icon: 'symbol-boolean', lang: 'smt' },
 };
 const STATUS = {
-  proven: { glyph: '✓', text: 'proven' },
-  not_proven: { glyph: '⚠', text: 'not proven' },
+  proven: { icon: 'verified-filled', text: 'proven' },
+  not_proven: { icon: 'warning', text: 'not proven' },
 };
 const OP = { '<': '<', '>': '>', '<=': '≤', '>=': '≥' };
 
@@ -250,9 +251,8 @@ export default class ProofsEditor extends BaseEditor {
       const covered = this.covers(c);
       if (covered.some((id) => this.selected.has(id))) li.classList.add('is-hit');
       const mark = document.createElement('span');
-      mark.className = 'ms-pf-mark';
       mark.dataset.status = st.status;
-      mark.textContent = info.glyph;
+      mark.className = `ms-pf-mark codicon codicon-${info.icon}`;
       mark.setAttribute('aria-hidden', 'true');
       const body = document.createElement('span');
       body.className = 'ms-pf-item-body';
@@ -338,8 +338,7 @@ export default class ProofsEditor extends BaseEditor {
     const updateHead = () => {
       const st = this.status(c.id);
       const info = STATUS[st.status] || STATUS.not_proven;
-      pill.dataset.status = st.status;
-      pill.textContent = `${info.glyph} ${info.text}`;
+      setStatus(pill, st.status, info.text);
       pill.setAttribute('aria-label', `Status: ${info.text}`);
       det.dataset.status = st.status;
       det.replaceChildren();
@@ -424,8 +423,7 @@ export default class ProofsEditor extends BaseEditor {
         const a = engine.value(hyp.a);
         const b = typeof hyp.b === 'number' ? hyp.b : engine.value(hyp.b);
         const ok = compare(a, hyp.op, b);
-        state.dataset.status = ok ? 'pass' : 'fail';
-        state.textContent = ok ? '✓ holds' : '✕ violated';
+        setStatus(state, ok ? 'pass' : 'fail', ok ? 'holds' : 'violated');
         row.classList.toggle('is-violated', !ok);
       };
       update();
@@ -481,8 +479,8 @@ export default class ProofsEditor extends BaseEditor {
         const v = engine.value(id);
         const r = n.range;
         const inside = !Array.isArray(r) || (v >= r[0] - 1e-9 && v <= r[1] + 1e-9);
-        state.dataset.status = !Array.isArray(r) ? 'na' : inside ? 'pass' : 'fail';
-        state.textContent = !Array.isArray(r) ? 'unbounded' : inside ? '✓ in range' : '✕ outside';
+        if (!Array.isArray(r)) setStatus(state, 'na', 'unbounded');
+        else setStatus(state, inside ? 'pass' : 'fail', inside ? 'in range' : 'outside');
         tr.classList.toggle('is-violated', !inside);
       };
       update();
@@ -506,8 +504,7 @@ export default class ProofsEditor extends BaseEditor {
       sec.body.appendChild(t);
       const update = () => {
         const ok = compare(engine.value(c.target), c.op, c.bound);
-        state.dataset.status = ok ? 'pass' : 'fail';
-        state.textContent = ok ? '✓ holds here' : '✕ fails here';
+        setStatus(state, ok ? 'pass' : 'fail', ok ? 'holds here' : 'fails here');
       };
       update();
       this.live.push(update);

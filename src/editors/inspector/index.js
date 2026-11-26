@@ -17,6 +17,7 @@ import { describe } from '../../model/distributions.js';
 import { toScopeLang } from '../../model/expr.js';
 import { unitValue } from '../../model/format.js';
 import { PROVENANCE } from '../../theme/tokens.js';
+import { setStatus } from '../shared/status.js';
 
 const SECTIONS = ['identity', 'prototype', 'family', 'metrics', 'formulas', 'relations', 'constraints', 'provenance', 'overrides'];
 
@@ -301,8 +302,9 @@ export default class InspectorEditor extends BaseEditor {
         row.className = 'ms-insp-con';
         const st = document.createElement('span');
         st.className = 'ms-status';
-        st.dataset.status = c.ok ? 'pass' : c.severity === 'hard' ? 'fail' : 'warn';
-        st.textContent = c.ok ? '✓ holds' : c.severity === 'hard' ? '✕ violated' : '⚠ soft warning';
+        if (c.ok) setStatus(st, 'pass', 'holds');
+        else if (c.severity === 'hard') setStatus(st, 'fail', 'violated');
+        else setStatus(st, 'warn', 'soft warning');
         const code = document.createElement('code');
         code.className = 'ms-inline';
         code.textContent = c.label;

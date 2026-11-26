@@ -69,7 +69,17 @@
 }
 .ms-ctx-chip .ms-chip-x:hover { background: var(--vscode-toolbar-hoverBackground); color: var(--vscode-foreground); }
 .ms-ctx-chip.is-scope { border-color: var(--vscode-inputOption-activeBorder); }
-.ms-ctx-chip.is-muted { opacity: .7; }
+.ms-ctx-chip.is-badge {
+  gap: 5px;
+  height: 22px;
+  padding: 0 9px 0 7px;
+  border-color: transparent;
+  border-radius: 11px;
+  background: var(--vscode-badge-background);
+  color: var(--vscode-badge-foreground);
+  font-weight: 600;
+}
+.ms-ctx-chip.is-badge .codicon { font-size: 13px; opacity: 1; }
 .ms-chips-hint { color: var(--vscode-descriptionForeground); font-size: var(--ms-fs-tiny); margin-left: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ms-composer.is-drop-target { outline: 1px dashed var(--vscode-focusBorder); outline-offset: -3px; }
 
@@ -168,7 +178,7 @@
   border-color: transparent;
 }
 .ms-route[data-kind="invalid"] { color: var(--vscode-errorForeground); }
-.ms-route[data-kind="empty"] { opacity: .65; }
+.ms-route[hidden] { display: none; }
 
 .ms-composer-actions { display: flex; align-items: center; gap: 4px; flex: 0 0 auto; }
 .ms-mode-btn {

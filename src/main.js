@@ -84,7 +84,13 @@ async function boot() {
 
   // ---------------------------------------------------------------- theme
   const theme = new ThemeService(events);
-  await theme.init();
+  // TTT before any UI mounts, so DOM and canvas text never measure/render in a fallback face.
+  // Capped at 3 s so a slow or missing font never blocks boot.
+  const fonts = Promise.race([
+    Promise.all(['400 14px TTT', '700 14px TTT'].map((f) => document.fonts.load(f))),
+    new Promise((r) => setTimeout(r, 3000)),
+  ]).catch(() => {});
+  await Promise.all([theme.init(), fonts]);
 
   // ---------------------------------------------------------------- model
   const engine = new JsEngine({
