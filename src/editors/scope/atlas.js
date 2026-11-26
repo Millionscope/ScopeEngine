@@ -74,6 +74,8 @@ const state = { atlas: null, index: new Map(), meshes: [], progress: 0, error: n
 /** @type {Set<() => void>} */
 const listeners = new Set();
 let started = false;
+/** @type {Set<number>} chunk indices already merged into state.meshes */
+const loadedChunks = new Set();
 const notify = () => listeners.forEach((fn) => fn());
 
 /**
@@ -116,13 +118,14 @@ async function loadChunk(ci) {
     gs.forEach((g) => g.dispose());
     state.meshes.push({ system, geometry });
   }
-  state.progress = Math.round(((state.loaded = (state.loaded || 0) + 1) / atlas.chunks.length) * 100);
+  loadedChunks.add(ci);
+  state.progress = Math.round((loadedChunks.size / atlas.chunks.length) * 100);
   notify();
 }
 
 async function start() {
   started = true;
-  Object.assign(state, { error: null, progress: 0, loaded: 0, done: false });
+  state.error = null;
   try {
     if (!state.atlas) {
       const res = await fetch('/models/atlas.json');
@@ -132,11 +135,10 @@ async function start() {
       notify();
     }
     // ponytail: geometry is kept for the page lifetime (~60 MB) so reopening the editor is instant.
-    state.meshes = [];
-    let cursor = 0;
-    const n = state.atlas.chunks.length;
+    // a retry fetches only the chunks that are still missing; editors append meshes by position
+    const todo = state.atlas.chunks.map((_, i) => i).filter((i) => !loadedChunks.has(i));
     await Promise.all(Array.from({ length: 3 }, async () => {
-      while (cursor < n) await loadChunk(cursor++);
+      while (todo.length) await loadChunk(/** @type {number} */ (todo.shift()));
     }));
     state.done = true;
   } catch (err) {
