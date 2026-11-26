@@ -1,0 +1,22 @@
+/* Properties (inspector) */
+.ms-inspector { font-size: var(--ms-fs-small); }
+.ms-insp-title { display: flex; align-items: center; gap: 6px; padding: 8px 10px 6px; flex-wrap: wrap; border-bottom: 1px solid var(--vscode-sideBarSectionHeader-border, var(--vscode-editorGroup-border)); }
+.ms-insp-title > .codicon { font-size: 16px; }
+.ms-insp-name { font-size: var(--ms-fs); font-weight: 600; }
+.ms-insp-chain, .ms-insp-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.ms-insp-metrics td { padding: 2px 6px; }
+.ms-insp-metrics td.num { text-align: right; }
+.ms-insp-metrics tr.is-selected td { background: var(--vscode-list-inactiveSelectionBackground); }
+.ms-insp-mname { cursor: pointer; white-space: nowrap; }
+.ms-insp-mname:hover { color: var(--vscode-textLink-foreground); }
+.ms-insp-src { max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ms-insp-formula, .ms-insp-rel, .ms-insp-con, .ms-insp-log { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 3px 0; }
+.ms-insp-formula code { white-space: pre-wrap; flex: 1 1 200px; }
+.ms-insp-log { display: grid; grid-template-columns: 40px 90px minmax(0, 1fr); }
+
+@container area (max-width: 420px) {
+  .ms-insp-metrics th:nth-child(5), .ms-insp-metrics td:nth-child(5) { display: none; }
+}
+@container area (max-width: 340px) {
+  .ms-insp-metrics th:nth-child(4), .ms-insp-metrics td:nth-child(4) { display: none; }
+}

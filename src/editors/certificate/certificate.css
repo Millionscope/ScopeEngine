@@ -1,0 +1,137 @@
+/* Certificate editor */
+.ms-cert-scroll { padding: 10px 12px 18px; font-size: var(--ms-fs-small); }
+
+.ms-cert-summary {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px;
+  padding: 8px 10px;
+  border: 1px solid var(--vscode-widget-border);
+  border-left: 3px solid var(--ms-ok);
+  border-radius: 6px;
+  background: var(--vscode-editorWidget-background);
+}
+.ms-cert-summary[data-state="partial"] { border-left-color: var(--ms-warn); }
+.ms-cert-summary[data-state="fail"] { border-left-color: var(--ms-fail); }
+.ms-cert-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 2px 10px; border-radius: 11px;
+  background: var(--vscode-activityBarBadge-background);
+  color: var(--vscode-activityBarBadge-foreground);
+  font-weight: 600; white-space: nowrap;
+}
+.ms-cert-summary[data-state="fail"] .ms-cert-badge { background: var(--vscode-statusBarItem-errorBackground); color: var(--vscode-statusBarItem-errorForeground); }
+.ms-cert-badge .codicon { font-size: 14px; }
+.ms-cert-meta { display: flex; flex-wrap: wrap; gap: 2px 14px; margin: 0; min-width: 0; }
+.ms-cert-meta-item { display: inline-flex; align-items: baseline; gap: 5px; min-width: 0; }
+.ms-cert-meta dt { color: var(--vscode-descriptionForeground); }
+.ms-cert-meta dd { margin: 0; overflow-wrap: anywhere; }
+
+.ms-cert-note {
+  display: flex; gap: 8px; align-items: flex-start;
+  margin: 10px 0 4px;
+  padding: 8px 10px;
+  border-left: 3px solid var(--vscode-focusBorder);
+  background: var(--vscode-textBlockQuote-background);
+  border-radius: 0 4px 4px 0;
+  font-size: var(--ms-fs);
+  line-height: 1.45;
+  font-weight: 600;
+}
+.ms-cert-note .codicon { color: var(--vscode-focusBorder); margin-top: 2px; }
+
+.ms-cert-section { margin-top: 12px; }
+.ms-cert-h {
+  display: flex; align-items: center; gap: 6px;
+  margin: 0 0 6px;
+  font-size: var(--ms-fs-tiny);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  color: var(--vscode-descriptionForeground);
+}
+.ms-cert-h .codicon { font-size: 13px; }
+
+.ms-cert-counts { display: grid; grid-template-columns: max-content max-content max-content minmax(0, 1fr); gap: 3px 10px; align-items: baseline; }
+.ms-cert-count-row { display: contents; }
+.ms-cert-count-label { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.ms-cert-count-n { text-align: right; font-weight: 600; }
+.ms-cert-count-unit { color: var(--vscode-descriptionForeground); }
+.ms-cert-count-detail { color: var(--vscode-descriptionForeground); min-width: 0; overflow-wrap: anywhere; }
+.ms-cert-icon-warn { color: var(--ms-warn); font-size: 12px; width: 1.15em; text-align: center; }
+.ms-cert-drivers { display: inline; }
+.ms-cert-link {
+  border: 0; background: none; padding: 0;
+  color: var(--vscode-textLink-foreground);
+  font: inherit; text-align: left; cursor: pointer;
+}
+.ms-cert-link:hover { color: var(--vscode-textLink-activeForeground); text-decoration: underline; }
+
+/* ladder stepper */
+.ms-cert-ladder { list-style: none; margin: 0; padding: 0; position: relative; }
+.ms-cert-step { position: relative; padding-left: 0; }
+.ms-cert-step::before {
+  content: ""; position: absolute; left: 13px; top: 26px; bottom: -2px; width: 1px;
+  background: var(--vscode-editorGroup-border);
+}
+.ms-cert-step:last-child::before { display: none; }
+.ms-cert-step-head {
+  display: grid; grid-template-columns: 28px minmax(0, 1fr) auto auto; gap: 8px; align-items: start;
+  width: 100%; padding: 4px 4px 6px 0;
+  border: 0; background: none; color: inherit; text-align: left; font: inherit;
+  border-radius: 4px;
+}
+.ms-cert-step-head:hover { background: var(--vscode-list-hoverBackground); }
+.ms-cert-marker {
+  position: relative; z-index: 1;
+  width: 26px; height: 26px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--vscode-editor-background);
+  border: 1px solid var(--vscode-widget-border);
+}
+.ms-cert-marker .codicon { font-size: 14px; }
+.ms-cert-level {
+  position: absolute; right: -4px; bottom: -4px;
+  min-width: 13px; height: 13px; padding: 0 2px;
+  border-radius: 7px;
+  background: var(--vscode-badge-background); color: var(--vscode-badge-foreground);
+  font-size: 9px; font-weight: 700; line-height: 13px; text-align: center;
+}
+.ms-cert-step[data-status="pass"] .ms-cert-marker .codicon { color: var(--ms-ok); }
+.ms-cert-step[data-status="proven"] .ms-cert-marker .codicon { color: var(--ms-prov-proven); }
+.ms-cert-step[data-status="fail"] .ms-cert-marker { border-color: var(--ms-fail); }
+.ms-cert-step[data-status="fail"] .ms-cert-marker .codicon { color: var(--ms-fail); }
+.ms-cert-step[data-status="not_proven"] .ms-cert-marker .codicon { color: var(--ms-warn); }
+.ms-cert-step[data-status="statistical"] .ms-cert-marker .codicon { color: var(--ms-prov-estimated); }
+.ms-cert-step[data-status="judgment"] .ms-cert-marker .codicon,
+.ms-cert-step[data-status="na"] .ms-cert-marker .codicon { color: var(--vscode-descriptionForeground); }
+.ms-cert-step-body { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.ms-cert-step-name { font-weight: 600; font-size: var(--ms-fs); }
+.ms-cert-step-tool { color: var(--vscode-descriptionForeground); font-size: var(--ms-fs-tiny); }
+.ms-cert-step-detail { color: var(--vscode-foreground); }
+.ms-cert-step-head .ms-status { margin-top: 3px; }
+.ms-cert-chev { margin-top: 4px; font-size: 14px; color: var(--vscode-descriptionForeground); }
+.ms-cert-step-panel { margin: 0 0 8px 36px; padding: 4px 0 4px 8px; border-left: 2px solid var(--vscode-editorGroup-border); }
+.ms-cert-items, .ms-cert-list { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
+.ms-cert-items li, .ms-cert-list li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; }
+.ms-cert-items .ms-status, .ms-cert-list .ms-status { flex: 0 0 auto; min-width: 72px; justify-content: center; }
+/* pills keep their own surface so status text stays legible on hovered rows */
+.ms-cert .ms-status { background: var(--vscode-editor-background); }
+.ms-cert-item-label { min-width: 0; flex: 1 1 200px; overflow-wrap: anywhere; }
+.ms-cert-item-detail { flex-basis: 100%; padding-left: 78px; }
+.ms-cert-items li.ms-cert-more { align-items: center; gap: 8px; margin-top: 2px; }
+.ms-cert-claim { flex: 1 1 200px; min-width: 0; }
+.ms-cert-claim .ms-chip { margin: 0 4px; }
+
+.ms-cert-replay { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+.ms-cert-replay-out { display: inline-flex; align-items: flex-start; gap: 6px; font-variant-numeric: tabular-nums; }
+.ms-cert-replay-out.is-good .codicon { color: var(--ms-ok); }
+.ms-cert-replay-out.is-bad { color: var(--ms-fail); }
+
+/* narrow areas (Answer workspace) */
+@container area (max-width: 420px) {
+  .ms-cert-counts { grid-template-columns: max-content max-content minmax(0, 1fr); }
+  .ms-cert-count-unit { display: none; }
+  .ms-cert-step-head { grid-template-columns: 28px minmax(0, 1fr) auto; }
+  .ms-cert-step-head .ms-status { grid-column: 2; justify-self: start; margin-top: 2px; }
+  .ms-cert-step-tool { display: none; }
+  .ms-cert-item-detail { padding-left: 0; }
+}

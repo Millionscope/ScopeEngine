@@ -1,0 +1,320 @@
+/* ==========================================================================
+   workspace.css: workspaces, split tree, areas, headers, splitters,
+   corner action zones, tool (T) and sidebar (N) regions.
+   Splits and panes are deliberately NOT positioned so a maximized area
+   (position:absolute) resolves against the workspace box.
+   ========================================================================== */
+
+.ms-workspace {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+}
+.ms-workspace[hidden] { display: none; }
+
+.ms-split {
+  display: flex;
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+.ms-split.is-row { flex-direction: row; }
+.ms-split.is-col { flex-direction: column; }
+
+.ms-pane {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-basis: 0;
+  flex-shrink: 1;
+  overflow: hidden;
+}
+
+/* ---------- splitters ---------- */
+.ms-splitter {
+  flex: 0 0 1px;
+  position: relative;
+  z-index: 4;
+  background: var(--vscode-editorGroup-border);
+  touch-action: none;
+  transition: background-color .1s ease .15s;
+}
+.ms-split.is-row > .ms-splitter { cursor: col-resize; }
+.ms-split.is-col > .ms-splitter { cursor: row-resize; }
+.ms-splitter::before {
+  content: "";
+  position: absolute;
+}
+.ms-split.is-row > .ms-splitter::before { top: 0; bottom: 0; left: -2px; right: -1px; }
+.ms-split.is-col > .ms-splitter::before { left: 0; right: 0; top: -2px; bottom: -1px; }
+.ms-splitter::after {
+  content: "";
+  position: absolute;
+  background: transparent;
+  transition: background-color .1s ease .15s;
+  pointer-events: none;
+}
+.ms-split.is-row > .ms-splitter::after { top: 0; bottom: 0; left: -1px; right: -1px; }
+.ms-split.is-col > .ms-splitter::after { left: 0; right: 0; top: -1px; bottom: -1px; }
+.ms-splitter:hover::after,
+.ms-splitter.is-dragging::after,
+.ms-splitter:focus-visible::after { background: var(--vscode-focusBorder); }
+.ms-splitter.is-dragging::after { transition: none; }
+.ms-splitter:focus-visible { outline: none; }
+body.is-resizing-row, body.is-resizing-row * { cursor: col-resize !important; user-select: none !important; }
+body.is-resizing-col, body.is-resizing-col * { cursor: row-resize !important; user-select: none !important; }
+body.is-gesturing, body.is-gesturing * { cursor: crosshair !important; user-select: none !important; }
+
+/* ---------- areas ---------- */
+.ms-area {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--vscode-editor-background);
+  color: var(--vscode-editor-foreground);
+}
+.ms-area.is-header-bottom { flex-direction: column-reverse; }
+.ms-area { container-type: inline-size; container-name: area; }
+
+.ms-workspace.has-maximized .ms-area:not(.is-maximized) { visibility: hidden; }
+.ms-area.is-maximized { position: absolute; inset: 0; z-index: 6; }
+
+.ms-area.is-flash::after {
+  content: "";
+  position: absolute; inset: 0;
+  border: 2px solid var(--vscode-focusBorder);
+  pointer-events: none;
+  animation: ms-area-flash .9s ease-out forwards;
+  z-index: 8;
+}
+@keyframes ms-area-flash { from { opacity: 1; } to { opacity: 0; } }
+
+/* ---------- area header ---------- */
+.ms-area-header {
+  position: relative;
+  flex: 0 0 var(--ms-h-header);
+  height: var(--ms-h-header);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 4px 0 4px;
+  min-width: 0;
+  background: var(--vscode-editorGroupHeader-tabsBackground);
+  border-bottom: 1px solid var(--vscode-editorGroupHeader-tabsBorder);
+  color: var(--vscode-foreground);
+  user-select: none;
+}
+.ms-area.is-header-bottom .ms-area-header {
+  border-bottom: 0;
+  border-top: 1px solid var(--vscode-editorGroupHeader-tabsBorder);
+}
+.ms-area-header::before {
+  content: "";
+  position: absolute; left: 0; right: 0; top: 0; height: 2px;
+  background: var(--vscode-tab-unfocusedActiveBorderTop);
+  pointer-events: none;
+}
+.ms-area.is-active .ms-area-header::before { background: var(--vscode-tab-activeBorderTop); }
+.ms-area.is-header-bottom .ms-area-header::before { top: auto; bottom: 0; }
+
+.ms-area-type-btn { padding: 0 2px 0 4px; height: 22px; }
+.ms-area-type-btn .codicon { font-size: 15px; }
+.ms-area-title {
+  font-size: var(--ms-fs-small);
+  color: var(--vscode-foreground);
+  padding: 0 4px 0 2px;
+  white-space: nowrap;
+  font-weight: 600;
+  letter-spacing: .1px;
+}
+.ms-area-menus { display: flex; align-items: center; min-width: 0; }
+.ms-area-menu-item {
+  border: 0;
+  background: transparent;
+  color: var(--vscode-foreground);
+  height: 22px;
+  padding: 0 6px;
+  border-radius: var(--ms-radius);
+  font-size: var(--ms-fs-small);
+  white-space: nowrap;
+}
+.ms-area-menu-item:hover,
+.ms-area-menu-item[aria-expanded="true"] { background: var(--vscode-toolbar-hoverBackground); }
+.ms-area-tools { display: flex; align-items: center; gap: 2px; min-width: 0; overflow: hidden; }
+.ms-area-tools .ms-input, .ms-area-tools .ms-select { height: 20px; font-size: var(--ms-fs-small); }
+.ms-area-tools .ms-seg { height: 20px; }
+.ms-area-controls { display: flex; align-items: center; gap: 1px; flex: 0 0 auto; padding-left: 4px; }
+.ms-area-controls .ms-select { height: 20px; font-size: var(--ms-fs-small); max-width: 140px; }
+.ms-area-header .ms-spacer { min-width: 4px; }
+
+/* collapsed header */
+.ms-area.is-header-collapsed .ms-area-header {
+  flex-basis: 8px; height: 8px; padding: 0; overflow: hidden;
+}
+.ms-area.is-header-collapsed .ms-area-header > * { display: none; }
+.ms-area.is-header-collapsed .ms-area-header > .ms-header-expand {
+  display: flex;
+  position: absolute; left: 50%; top: 0; transform: translateX(-50%);
+  height: 8px; min-width: 32px; padding: 0;
+  border-radius: 0 0 4px 4px;
+  background: var(--vscode-toolbar-hoverBackground);
+}
+.ms-header-expand { display: none; }
+.ms-header-expand .codicon { font-size: 10px; }
+
+/* ---------- area body & regions ---------- */
+.ms-area-body {
+  position: relative;
+  flex: 1 1 auto;
+  display: flex;
+  min-height: 0;
+  min-width: 0;
+}
+.ms-editor-host {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.ms-area-body.is-editor-like .ms-editor-host {
+  background: var(--vscode-editor-background);
+  color: var(--vscode-editor-foreground);
+}
+.ms-area-body.is-panel-like .ms-editor-host {
+  background: var(--vscode-sideBar-background);
+  color: var(--vscode-sideBar-foreground);
+}
+.ms-region {
+  flex: 0 0 auto;
+  min-height: 0;
+  overflow: auto;
+  background: var(--vscode-sideBar-background);
+  color: var(--vscode-sideBar-foreground);
+  font-size: var(--ms-fs-small);
+}
+.ms-region-tools { width: 184px; border-right: 1px solid var(--vscode-editorGroup-border); }
+.ms-region-sidebar { width: 248px; border-left: 1px solid var(--vscode-editorGroup-border); }
+.ms-region[hidden] { display: none; }
+.ms-region-title {
+  display: flex; align-items: center; gap: 6px;
+  height: 22px; padding: 0 8px;
+  background: var(--vscode-sideBarSectionHeader-background);
+  color: var(--vscode-sideBarSectionHeader-foreground);
+  border-bottom: 1px solid var(--vscode-sideBarSectionHeader-border);
+  font-size: var(--ms-fs-tiny);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  position: sticky; top: 0; z-index: 1;
+}
+.ms-region-body { padding: 6px 8px; }
+.ms-region-empty { padding: 10px 8px; color: var(--vscode-descriptionForeground); }
+
+@media (max-width: 1100px) {
+  .ms-region-tools { width: 160px; }
+  .ms-region-sidebar { width: 210px; }
+}
+
+/* ---------- loading / error states ---------- */
+.ms-editor-loading {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 18px 14px;
+}
+.ms-skel {
+  height: 10px;
+  border-radius: 3px;
+  background: var(--vscode-editorWidget-background);
+  opacity: .9;
+}
+.ms-skel:nth-child(2n) { width: 70%; }
+.ms-skel:nth-child(3n) { width: 45%; }
+.ms-editor-loading-label { color: var(--vscode-descriptionForeground); font-size: var(--ms-fs-small); margin-top: 4px; }
+.ms-editor-error {
+  margin: 16px;
+  padding: 12px;
+  border: 1px solid var(--vscode-widget-border);
+  border-left: 3px solid var(--ms-fail);
+  border-radius: var(--ms-radius);
+  background: var(--vscode-editorWidget-background);
+  display: flex; flex-direction: column; gap: 8px; align-items: flex-start;
+}
+.ms-editor-error pre { white-space: pre-wrap; margin: 0; color: var(--vscode-descriptionForeground); }
+
+/* ---------- corner action zones (Blender-style) ---------- */
+.ms-corner {
+  position: absolute;
+  top: 0;
+  width: 14px;
+  height: 14px;
+  z-index: 7;
+  cursor: crosshair;
+  background: transparent;
+  touch-action: none;
+}
+.ms-corner.is-tl { left: 0; clip-path: polygon(0 0, 100% 0, 0 100%); }
+.ms-corner.is-tr { right: 0; clip-path: polygon(0 0, 100% 0, 100% 100%); }
+.ms-corner:hover { background: var(--vscode-toolbar-hoverBackground); }
+.ms-area.is-header-bottom .ms-corner { top: auto; bottom: 0; }
+.ms-area.is-header-bottom .ms-corner.is-tl { clip-path: polygon(0 0, 100% 100%, 0 100%); }
+.ms-area.is-header-bottom .ms-corner.is-tr { clip-path: polygon(100% 0, 100% 100%, 0 100%); }
+
+.ms-gesture-line {
+  position: absolute;
+  z-index: 9;
+  pointer-events: none;
+  background: var(--vscode-focusBorder);
+}
+.ms-gesture-line.is-vertical { top: 0; bottom: 0; width: 2px; margin-left: -1px; }
+.ms-gesture-line.is-horizontal { left: 0; right: 0; height: 2px; margin-top: -1px; }
+.ms-join-overlay {
+  position: absolute; inset: 0;
+  z-index: 9;
+  pointer-events: none;
+  background: var(--ms-scrim);
+  display: grid;
+  place-items: center;
+  color: var(--vscode-foreground);
+}
+.ms-join-overlay .codicon { font-size: 48px; opacity: .9; }
+.ms-join-overlay.is-invalid { background: transparent; outline: 2px dashed var(--ms-fail); outline-offset: -2px; }
+.ms-gesture-hint {
+  position: fixed;
+  z-index: 50;
+  pointer-events: none;
+  padding: 3px 8px;
+  border-radius: var(--ms-radius);
+  border: 1px solid var(--vscode-widget-border);
+  background: var(--vscode-editorWidget-background);
+  color: var(--vscode-foreground);
+  font-size: var(--ms-fs-small);
+  box-shadow: 0 2px 8px var(--vscode-widget-shadow);
+}
+
+/* ---------- narrow areas (container queries) ---------- */
+.ms-area-tools > .ms-row { flex-wrap: nowrap; min-width: 0; }
+.ms-area-tools input[type="search"] { min-width: 70px; flex: 1 1 auto; }
+@container area (max-width: 520px) {
+  .ms-area-title { display: none; }
+  .ms-area-controls .ms-select { max-width: 96px; }
+}
+@container area (max-width: 380px) {
+  .ms-area-tools .ms-toggle, .ms-area-tools .ms-btn { display: none; }
+  .ms-area-controls .ms-select { display: none; }
+}
+@container area (max-width: 260px) {
+  .ms-area-tools { display: none; }
+}

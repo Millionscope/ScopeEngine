@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="MillionScope Workbench: answers as a live, recomputable graph of scopes.">
+  <title>MillionScope Workbench</title>
+
+  <!--
+    Boot guard: pick the theme kind before CSS loads so the first frame is not a white flash.
+    The real colors come from themes/*.json via src/theme/theme-service.js; these two
+    background values only cover the few milliseconds before the theme variables are injected.
+  -->
+  <script>
+    (function () {
+      var mode = 'auto';
+      try { mode = localStorage.getItem('millionscope.theme') || 'auto'; } catch (e) {}
+      var dark = mode === 'dark' || (mode !== 'light' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      var root = document.documentElement;
+      root.setAttribute('data-theme', dark ? 'dark' : 'light');
+      root.style.colorScheme = dark ? 'dark' : 'light';
+    })();
+  </script>
+  <style id="boot-style">
+    html[data-theme="dark"] { background: #1F1F1F; }
+    html[data-theme="light"] { background: #FFFFFF; }
+  </style>
+
+  <!-- VS Code-native icons (pinned). KaTeX CSS is lazy-loaded by src/core/lazy.js. -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@vscode/codicons@0.0.36/dist/codicon.css">
+
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/shell.css">
+  <link rel="stylesheet" href="styles/workspace.css">
+  <link rel="stylesheet" href="styles/composer.css">
+  <link rel="stylesheet" href="styles/menus.css">
+  <link rel="stylesheet" href="styles/editors.css">
+
+  <!--
+    Third-party libraries, exact pinned versions. Nothing here is fetched until a module
+    imports it; heavy libraries are only imported through src/core/lazy.js when an editor
+    that declares them in `needs` mounts.
+  -->
+  <script type="importmap">
+  {
+    "imports": {
+      "d3": "https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm",
+      "chart.js": "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/+esm",
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
+      "mermaid": "https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.esm.min.mjs",
+      "katex": "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.mjs",
+      "highcharts": "https://cdn.jsdelivr.net/npm/highcharts@11.4.8/es-modules/masters/highcharts.src.js"
+    }
+  }
+  </script>
+  <script type="module" src="src/main.js"></script>
+</head>
+<body>
+  <div id="app" class="ms-app" aria-busy="true">
+    <header id="topbar" class="ms-topbar"></header>
+    <main id="screen" class="ms-screen" aria-label="Workbench areas"></main>
+    <section id="composer" class="ms-composer-dock" aria-label="Chat composer"></section>
+    <footer id="statusbar" class="ms-statusbar"></footer>
+  </div>
+  <div id="overlay-root" class="ms-overlay-root"></div>
+  <div id="sr-live" class="ms-sr-only" aria-live="polite" aria-atomic="false"></div>
+  <div id="sr-assertive" class="ms-sr-only" aria-live="assertive" aria-atomic="true"></div>
+  <noscript>
+    <p style="padding:16px">MillionScope Workbench needs JavaScript (ES2022 modules) and must be served over HTTP,
+      for example with <code>npx serve .</code> or <code>python -m http.server</code>.</p>
+  </noscript>
+</body>
+</html>

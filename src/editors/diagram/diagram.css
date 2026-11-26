@@ -1,0 +1,31 @@
+/* Diagram (editors/diagram). Mermaid draws with themeVariables from the shared adapter; this
+   file only adds layout, focus and selection affordances (theme variables only). */
+.ms-dg-head {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 6px 12px 4px;
+  min-width: 0;
+}
+.ms-dg-title { font-weight: 600; }
+.ms-dg-sub { color: var(--vscode-descriptionForeground); font-size: var(--ms-fs-small); }
+.ms-dg-body { padding: 6px 12px 14px; }
+.ms-dg-svg { display: flex; justify-content: center; min-width: 0; }
+.ms-dg-svg[hidden], .ms-dg-src[hidden], .ms-dg-msg[hidden] { display: none; }
+.ms-dg-svg svg { max-width: 100%; height: auto; }
+.ms-dg-tools { gap: 6px; }
+.ms-dg-tools .ms-select { max-width: 160px; }
+
+/* selectable nodes (decorated after rendering) */
+.ms-dg-svg .ms-dg-link { cursor: pointer; outline: none; }
+.ms-dg-svg g.ms-dg-link > :is(rect, polygon, path, circle, ellipse) { transition: stroke-width .12s ease; }
+.ms-dg-svg g.ms-dg-link:hover > :is(rect, polygon, path, circle, ellipse),
+.ms-dg-svg g.ms-dg-link.is-hover > :is(rect, polygon, path, circle, ellipse) { stroke-width: 2.5px !important; }
+.ms-dg-svg g.ms-dg-link.is-sel > :is(rect, polygon, path, circle, ellipse) { stroke: var(--vscode-focusBorder) !important; stroke-width: 3px !important; }
+.ms-dg-svg g.ms-dg-link:focus-visible > :is(rect, polygon, path, circle, ellipse) { stroke: var(--vscode-focusBorder) !important; stroke-width: 2px !important; stroke-dasharray: 4 2; }
+.ms-dg-svg text.ms-dg-link { text-decoration: underline; text-decoration-color: var(--vscode-textLink-foreground); }
+.ms-dg-svg text.ms-dg-link:hover, .ms-dg-svg text.ms-dg-link.is-hover { fill: var(--vscode-textLink-activeForeground) !important; }
+.ms-dg-svg text.ms-dg-link.is-sel { fill: var(--vscode-textLink-foreground) !important; font-weight: 600; }
+.ms-dg-svg text.ms-dg-link:focus-visible { outline: 1px dashed var(--vscode-focusBorder); }
+.ms-dg-src .ms-code { margin: 0; }

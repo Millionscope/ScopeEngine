@@ -1,0 +1,157 @@
+/* Scope Graph (editors/graph). Colors only from theme variables. */
+.ms-graph { background: var(--vscode-editor-background); }
+.ms-graph-stage {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+}
+.ms-graph-stage:active { cursor: grabbing; }
+.ms-graph-svg, .ms-graph-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.ms-graph-svg { font-family: var(--ms-font-ui); overflow: hidden; }
+.ms-graph-canvas:focus-visible { outline: 1px solid var(--vscode-focusBorder); outline-offset: -1px; }
+
+/* frames */
+.ms-graph-svg .frame-bg { fill: var(--vscode-editor-background); stroke: var(--vscode-widget-border); stroke-width: 1; }
+.ms-graph-svg .frame[data-depth="1"] .frame-bg { fill: var(--vscode-sideBar-background); }
+.ms-graph-svg .frame.is-sel > .frame-bg { stroke: var(--vscode-focusBorder); stroke-width: 1.6; }
+.ms-graph-svg .frame-title {
+  font-size: 11px;
+  fill: var(--vscode-descriptionForeground);
+  paint-order: stroke;
+  stroke: var(--vscode-editor-background);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+.ms-graph-svg .frame[data-depth="1"] .frame-title { stroke: var(--vscode-sideBar-background); }
+.ms-graph-svg .frame-title .nm { font-weight: 600; fill: var(--vscode-foreground); }
+.ms-graph-svg .frame-title.is-root .nm { font-size: 12px; }
+.ms-graph-svg .frame-head { cursor: pointer; outline: none; }
+.ms-graph-svg .frame-head-hit { fill: transparent; }
+.ms-graph-svg .frame-head:hover .frame-head-hit { fill: var(--vscode-toolbar-hoverBackground, var(--vscode-list-hoverBackground)); }
+.ms-graph-svg .frame-head:focus-visible .frame-head-hit { stroke: var(--vscode-focusBorder); stroke-width: 1.5; }
+.ms-graph-svg .frame-toggle { font-size: 10px; fill: var(--vscode-descriptionForeground); }
+.ms-graph-svg .frame-head:hover .frame-toggle { fill: var(--vscode-foreground); }
+
+/* edges */
+.ms-graph-svg .edge { fill: none; stroke: var(--vscode-descriptionForeground); stroke-opacity: .42; pointer-events: none; }
+.ms-graph-svg .arrow { fill: var(--vscode-descriptionForeground); fill-opacity: .6; }
+.ms-graph-svg .arrow.is-cone { fill: var(--ms-cone-strong); fill-opacity: 1; }
+.ms-graph-svg .arrow.is-up { fill: var(--ms-upstream); fill-opacity: 1; }
+.ms-graph-svg.has-hover .edge { stroke-opacity: .12; }
+.ms-graph-svg .edge.e-cone { stroke: var(--ms-cone-strong); stroke-opacity: 1; stroke-width: 2.2px; }
+.ms-graph-svg .edge.e-up { stroke: var(--ms-upstream); stroke-opacity: 1; stroke-width: 3px; }
+
+/* items (bound values: neutralize the inline .ms-bv box styles for SVG) */
+.ms-graph-svg g.ms-bv { display: inline; padding: 0; margin: 0; background: none; transition: none; }
+.ms-graph-svg .item { cursor: pointer; outline: none; }
+.ms-graph-svg .item .bg { fill: var(--vscode-input-background); stroke: var(--ms-prov-computed); stroke-width: 1.5; }
+.ms-graph-svg .item .ring { fill: none; stroke: transparent; stroke-width: 2; }
+.ms-graph-svg .item .glyph { font-size: 11px; font-weight: 700; fill: var(--ms-prov-computed); }
+.ms-graph-svg .item .name { font-size: 12px; fill: var(--vscode-foreground); }
+.ms-graph-svg .item .value { font-size: 11px; fill: var(--vscode-descriptionForeground); font-variant-numeric: tabular-nums; }
+.ms-graph-svg .item[data-prov="input"] .bg { stroke: var(--ms-prov-input); }
+.ms-graph-svg .item[data-prov="input"] .glyph { fill: var(--ms-prov-input); }
+.ms-graph-svg .item[data-prov="observed"] .bg { stroke: var(--ms-prov-observed); }
+.ms-graph-svg .item[data-prov="observed"] .glyph { fill: var(--ms-prov-observed); }
+.ms-graph-svg .item[data-prov="estimated"] .bg { stroke: var(--ms-prov-estimated); }
+.ms-graph-svg .item[data-prov="estimated"] .glyph { fill: var(--ms-prov-estimated); }
+.ms-graph-svg .item[data-prov="proven"] .bg { stroke: var(--ms-prov-proven); }
+.ms-graph-svg .item[data-prov="proven"] .glyph { fill: var(--ms-prov-proven); }
+.ms-graph-svg .item[data-prov="contested"] .bg { stroke: var(--ms-contested-color); stroke-dasharray: 5 2; }
+.ms-graph-svg .item[data-prov="contested"] .glyph { fill: var(--ms-contested-color); }
+.ms-graph-svg .item[data-prov="failed"] .bg { stroke: var(--ms-fail); }
+.ms-graph-svg .item[data-prov="failed"] .glyph { fill: var(--ms-fail); }
+.ms-graph-svg .proxy .bg { fill: var(--vscode-editorWidget-background); stroke: var(--vscode-descriptionForeground); stroke-opacity: .7; stroke-width: 1.1; stroke-dasharray: 4 3; }
+.ms-graph-svg .proxy .toggle { font-size: 10px; fill: var(--vscode-descriptionForeground); }
+.ms-graph-svg .proxy .pname { font-size: 12px; fill: var(--vscode-foreground); }
+.ms-graph-svg .proxy .pname .nm { font-weight: 600; }
+.ms-graph-svg .proxy .pname .pr { font-size: 11px; fill: var(--vscode-descriptionForeground); }
+.ms-graph-svg .proxy .sum { font-size: 10.5px; fill: var(--vscode-descriptionForeground); }
+
+.ms-graph-svg .item:hover .bg { stroke-width: 2.2; }
+.ms-graph-svg .item.is-hover .bg { fill: var(--vscode-list-hoverBackground); stroke-width: 2.4; }
+.ms-graph-svg .item.in-cone .bg { fill: var(--ms-cone); }
+.ms-graph-svg .item.in-up .bg { fill: var(--ms-upstream); }
+.ms-graph-svg.has-hover .item:not(.is-hover):not(.in-cone):not(.in-up) { opacity: .42; }
+.ms-graph-svg .item.is-sel .ring { stroke: var(--vscode-focusBorder); }
+.ms-graph-svg .item.is-primary .ring { stroke-width: 2.6; }
+.ms-graph-svg .item:focus-visible .ring { stroke: var(--vscode-focusBorder); stroke-dasharray: 3 2; }
+.ms-graph-svg .item.is-sel:focus-visible .ring { stroke-dasharray: none; }
+.ms-graph-svg .pulse { fill: none; stroke: var(--ms-cone-strong); stroke-width: 2; pointer-events: none; }
+
+/* level of detail: far out, items become chips and frame titles keep screen size */
+.ms-graph-svg.lod-low .item text { display: none; }
+.ms-graph-svg.lod-low .frame-head-hit { display: none; }
+.ms-graph-svg.lod-low .frame-title { stroke-width: 4px; }
+
+/* banner (canvas mode), hint, table */
+.ms-graph-banner {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  font-size: var(--ms-fs-small);
+  background: var(--vscode-editorWidget-background);
+  border-bottom: 1px solid var(--vscode-widget-border);
+  color: var(--vscode-foreground);
+}
+.ms-graph-banner > span:nth-child(2) { flex: 1 1 auto; min-width: 0; }
+.ms-graph-banner .codicon-info { color: var(--vscode-editorInfo-foreground, var(--vscode-focusBorder)); }
+.ms-graph-hint {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100% - 16px);
+  padding: 4px 6px 4px 10px;
+  font-size: var(--ms-fs-small);
+  color: var(--vscode-descriptionForeground);
+  background: var(--vscode-editorWidget-background);
+  border: 1px solid var(--vscode-widget-border);
+  border-radius: var(--ms-radius, 4px);
+  box-shadow: 0 2px 8px var(--vscode-widget-shadow, rgba(0, 0, 0, .3));
+}
+.ms-graph-hint[hidden], .ms-graph-banner[hidden], .ms-graph-table[hidden], .ms-graph-stage[hidden] { display: none; }
+.ms-graph-table { padding: 4px 8px 10px; }
+.ms-graph-table td .ms-prov { margin-right: 2px; }
+.ms-graph-table-note { padding: 6px 2px; }
+.ms-graph-link {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--vscode-textLink-foreground);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.ms-graph-link:hover { color: var(--vscode-textLink-activeForeground); text-decoration: underline; }
+.ms-graph-link:focus-visible { outline: 1px solid var(--vscode-focusBorder); outline-offset: 1px; }
+
+/* header tools */
+.ms-graph-tools { gap: 6px; }
+.ms-graph-search { width: 130px; height: 22px; font-size: var(--ms-fs-small); }
+
+/* sidebar (N) */
+.ms-graph-side { display: flex; flex-direction: column; gap: 4px; padding: 4px 8px 10px; font-size: var(--ms-fs-small); }
+.ms-graph-side-h {
+  margin-top: 6px;
+  font-size: var(--ms-fs-tiny, 11px);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--vscode-descriptionForeground);
+}
+.ms-graph-minimap { width: 100%; }
+.ms-graph-minimap canvas { display: block; width: 100%; border: 1px solid var(--vscode-widget-border); border-radius: 3px; cursor: crosshair; }
+.ms-graph-side .ms-prov-legend { display: flex; flex-wrap: wrap; gap: 4px 10px; }
+.ms-graph-side-stats > div { line-height: 1.6; color: var(--vscode-foreground); }
+.ms-graph-side-sel { display: flex; flex-direction: column; gap: 4px; }
+.ms-graph-side-actions { flex-wrap: wrap; gap: 4px; }

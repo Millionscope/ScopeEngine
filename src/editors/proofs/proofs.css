@@ -1,0 +1,113 @@
+/* Proofs editor */
+.ms-pf-body { display: flex; flex: 1 1 auto; min-height: 0; }
+.ms-pf-list {
+  list-style: none; margin: 0; padding: 4px 0;
+  flex: 0 0 34%; min-width: 190px; max-width: 320px;
+  overflow-y: auto;
+  border-right: 1px solid var(--vscode-editorGroup-border);
+  background: var(--vscode-sideBar-background);
+  color: var(--vscode-sideBar-foreground);
+  outline: none;
+}
+.ms-pf-item {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 6px 8px;
+  border-left: 2px solid transparent;
+  cursor: pointer;
+  outline: none;
+}
+.ms-pf-item:hover { background: var(--vscode-list-hoverBackground); }
+.ms-pf-item[aria-selected="true"] { background: var(--vscode-list-inactiveSelectionBackground); border-left-color: var(--vscode-focusBorder); }
+.ms-pf-list:focus-within .ms-pf-item[aria-selected="true"] { background: var(--vscode-list-activeSelectionBackground); color: var(--vscode-list-activeSelectionForeground); }
+.ms-pf-item:focus-visible { outline: 1px solid var(--vscode-list-focusOutline, var(--vscode-focusBorder)); outline-offset: -1px; }
+.ms-pf-item.is-hit { box-shadow: inset 3px 0 0 var(--ms-cone-strong); }
+.ms-pf-mark {
+  flex: 0 0 18px; height: 18px; margin-top: 1px;
+  display: inline-grid; place-items: center;
+  border-radius: 50%;
+  font-size: 11px; font-weight: 700;
+  border: 1px solid currentColor;
+}
+.ms-pf-mark[data-status="proven"] { color: var(--ms-prov-proven); }
+.ms-pf-mark[data-status="not_proven"] { color: var(--ms-warn); border-radius: 3px; }
+.ms-pf-item-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ms-pf-item-title { font-size: var(--ms-fs-small); font-weight: 600; overflow-wrap: anywhere; }
+.ms-pf-item-sub { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; font-size: var(--ms-fs-tiny); color: var(--vscode-descriptionForeground); }
+.ms-pf-item[aria-selected="true"] .ms-pf-item-sub { color: inherit; opacity: .85; }
+.ms-pf-item-status[data-status="proven"] { color: var(--ms-prov-proven); }
+.ms-pf-item-status[data-status="not_proven"] { color: var(--ms-warn); }
+/* on a selection background the word carries the status; the row color keeps contrast */
+.ms-pf-item[aria-selected="true"] .ms-pf-item-status { color: inherit; }
+.ms-pf-item-warn { color: var(--ms-warn); }
+.ms-pf-item-warn::before { content: "⚠ "; }
+
+.ms-pf-tool {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 0 5px; height: 16px; border-radius: 3px;
+  font-family: var(--ms-font-mono); font-size: 10px; font-weight: 600;
+  border: 1px solid var(--vscode-widget-border);
+  color: var(--vscode-foreground);
+  white-space: nowrap;
+}
+.ms-pf-tool.is-large { height: 18px; font-size: var(--ms-fs-tiny); font-family: var(--ms-font-ui); font-weight: 500; }
+.ms-pf-tool .codicon { font-size: 12px; }
+
+.ms-pf-detail { flex: 1 1 auto; min-width: 0; padding: 10px 14px 18px; font-size: var(--ms-fs-small); }
+.ms-pf-head { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; }
+.ms-pf-title { margin: 0 auto 0 0; font-size: 14px; font-weight: 600; color: var(--vscode-foreground); }
+.ms-pf-pill { height: 20px; font-size: var(--ms-fs-small); }
+.ms-pf-statement { padding: 8px 2px 2px; overflow-x: auto; overflow-y: hidden; color: var(--vscode-editor-foreground); }
+.ms-pf-statement .katex-display { margin: 4px 0; text-align: left; }
+.ms-pf-statement .katex-display > .katex { text-align: left; }
+.ms-pf-statement .katex { font-size: 1.12em; }
+.ms-pf-statement .katex .katex-mathml { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(1px, 1px, 1px, 1px); border: 0; }
+.ms-pf-plain { font-family: var(--ms-font-mono); font-size: var(--ms-fs-tiny); margin-bottom: 4px; overflow-wrap: anywhere; }
+
+.ms-pf-section { margin-top: 10px; border-top: 1px solid var(--vscode-editorGroup-border); padding-top: 6px; }
+.ms-pf-section-title {
+  display: flex; align-items: center; gap: 6px; margin: 0 0 6px;
+  font-size: var(--ms-fs-tiny); font-weight: 700; text-transform: uppercase; letter-spacing: .4px;
+  color: var(--vscode-descriptionForeground);
+}
+.ms-pf-section-title .codicon { font-size: 13px; }
+.ms-pf-verdict { display: flex; align-items: flex-start; gap: 6px; line-height: 1.5; }
+.ms-pf-verdict .codicon { margin-top: 2px; }
+.ms-pf-verdict[data-status="proven"] .codicon { color: var(--ms-prov-proven); }
+.ms-pf-verdict[data-status="not_proven"] .codicon { color: var(--ms-warn); }
+
+.ms-pf-checks { display: flex; flex-direction: column; gap: 4px; }
+.ms-pf-check { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; padding: 3px 6px; border-radius: 4px; border: 1px solid transparent; }
+.ms-pf-check.is-violated { border-color: var(--ms-fail); }
+.ms-pf-check-label { font-family: var(--ms-font-mono); font-size: var(--ms-fs-mono); min-width: 14em; color: var(--vscode-foreground); }
+.ms-pf-check-expr { display: inline-flex; align-items: baseline; gap: 2px; flex-wrap: wrap; font-variant-numeric: tabular-nums; }
+.ms-pf-check-state { margin-left: auto; }
+.ms-pf-operand { display: inline-flex; align-items: baseline; gap: 2px; }
+.ms-pf-operand-name { color: var(--vscode-descriptionForeground); font-family: var(--ms-font-mono); font-size: var(--ms-fs-tiny); }
+.ms-pf-const { font-family: var(--ms-font-mono); color: var(--vscode-textPreformat-foreground); }
+.ms-pf-hint { margin: 6px 0 0; line-height: 1.5; }
+
+.ms-pf-ranges { margin-bottom: 6px; }
+.ms-pf-ranges tr.is-violated td { background: color-mix(in srgb, var(--ms-fail) 12%, transparent); }
+.ms-pf-link { border: 0; background: none; padding: 0; color: var(--vscode-textLink-foreground); cursor: pointer; font-family: var(--ms-font-mono); font-size: var(--ms-fs-small); }
+.ms-pf-link:hover { text-decoration: underline; }
+.ms-pf-target { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; padding: 2px 0; }
+
+.ms-pf-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.ms-pf-chips .ms-chip.is-selected { border-color: var(--vscode-focusBorder); background: var(--vscode-list-inactiveSelectionBackground); }
+.ms-pf-chips .ms-chip.is-hovered { background: var(--ms-cone); }
+.ms-pf-section .ms-code { border-radius: 4px; max-height: 340px; }
+.ms-pf-note { margin: 0; line-height: 1.5; }
+.ms-pf-meaning {
+  display: flex; align-items: flex-start; gap: 6px;
+  margin: 12px 0 0; padding: 6px 8px;
+  border-left: 2px solid var(--vscode-textBlockQuote-border);
+  background: var(--vscode-textBlockQuote-background);
+  line-height: 1.5;
+}
+.ms-pf-meaning .codicon { margin-top: 2px; color: var(--vscode-descriptionForeground); }
+
+@container area (max-width: 560px) {
+  .ms-pf-body { flex-direction: column; }
+  .ms-pf-list { flex: 0 0 auto; max-width: none; max-height: 40%; border-right: 0; border-bottom: 1px solid var(--vscode-editorGroup-border); }
+  .ms-pf-check-label { min-width: 0; }
+}

@@ -1,0 +1,43 @@
+/* Scenarios */
+.ms-scn { flex-direction: row; }
+.ms-scn-side { flex: 0 0 210px; display: flex; flex-direction: column; min-height: 0; overflow-y: auto; border-right: 1px solid var(--vscode-editorGroup-border); background: var(--vscode-sideBar-background); }
+.ms-scn-side-head { display: flex; align-items: center; justify-content: space-between; height: 28px; padding: 0 6px 0 10px; font-size: var(--ms-fs-tiny); font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--vscode-sideBarSectionHeader-foreground); background: var(--vscode-sideBarSectionHeader-background); border-bottom: 1px solid var(--vscode-sideBarSectionHeader-border); }
+.ms-scn-tree { list-style: none; margin: 0; padding: 4px 0; }
+.ms-scn-item { display: flex; align-items: center; gap: 5px; height: 26px; padding-right: 4px; }
+.ms-scn-item:hover { background: var(--vscode-list-hoverBackground); }
+.ms-scn-item.is-active { background: var(--vscode-list-inactiveSelectionBackground); }
+.ms-scn-item input[type="checkbox"] { margin: 0; }
+.ms-scn-name { flex: 1 1 auto; min-width: 0; border: 0; background: none; padding: 0; color: var(--vscode-foreground); text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--ms-fs); }
+.ms-scn-item.is-active .ms-scn-name { font-weight: 600; }
+.ms-scn-note { padding: 6px 10px; margin: auto 0 0; }
+.ms-scn-main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
+.ms-scn-body { padding: 8px 12px 16px; }
+.ms-scn-compare { margin-bottom: 10px; }
+.ms-scn-compare td { padding: 4px 8px; }
+.ms-scn-compare .ms-legend-key { vertical-align: middle; }
+.ms-scn-delta { font-size: var(--ms-fs-tiny); color: var(--vscode-descriptionForeground); }
+.ms-scn-delta.is-pos { color: var(--ms-ok); }
+.ms-scn-delta.is-neg { color: var(--vscode-errorForeground); }
+.ms-scn-chart { height: 220px; flex: 0 0 auto; }
+.ms-scn-form { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+.ms-scn-form-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.ms-scn-form-label { flex: 0 0 78px; color: var(--vscode-descriptionForeground); font-size: var(--ms-fs-small); }
+.ms-scn-form-label.ms-checkbox { display: inline-flex; align-items: center; gap: 4px; }
+.ms-scn-form .ms-select { max-width: 170px; }
+.ms-scn-range { display: inline-flex; align-items: center; gap: 6px; }
+.ms-scn-form-row :disabled { opacity: .5; }
+.ms-scn-heat { display: block; margin-top: 6px; overflow: visible; }
+.ms-scn-heat .cell { cursor: pointer; stroke: transparent; }
+.ms-scn-heat .cell:hover, .ms-scn-heat .cell:focus { stroke: var(--vscode-focusBorder); stroke-width: 2; outline: none; }
+.ms-scn-heat .v { font-size: 10px; text-anchor: middle; pointer-events: none; font-variant-numeric: tabular-nums; }
+.ms-scn-heat .tick { font-size: 10px; fill: var(--vscode-descriptionForeground); text-anchor: middle; }
+.ms-scn-heat .axis-title { font-size: 11px; fill: var(--vscode-descriptionForeground); }
+.ms-scn-legend { display: flex; align-items: center; gap: 6px; margin: 4px 0 8px 90px; }
+.ms-scn-ramp { width: 160px; height: 8px; border-radius: 2px; }
+.ms-scn-sweep-table { max-height: 220px; margin-top: 4px; }
+.ms-scn-goal .ms-pcard { max-width: 520px; }
+.ms-scn-goal-line { margin: 4px 0; }
+.ms-scn-trace { display: block; margin-top: 6px; }
+.ms-scn-trace .pt { fill: var(--ms-series-1); stroke: var(--vscode-editorWidget-background); stroke-width: 2; }
+.ms-scn-trace .goal { stroke: var(--ms-fail); stroke-dasharray: 4 3; }
+@container area (max-width: 560px) { .ms-scn-side { flex-basis: 150px; } }

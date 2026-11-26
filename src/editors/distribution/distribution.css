@@ -1,0 +1,12 @@
+/* Distributions */
+.ms-dist-head { flex: 0 0 auto; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; padding: 6px 10px 2px; }
+.ms-dist-title { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.ms-dist-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ms-dist-prob { font-size: var(--ms-fs-small); display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px; }
+.ms-dist-prob .ms-bv { font-weight: 600; }
+.ms-dist-body { position: relative; flex: 1 1 auto; min-height: 80px; display: flex; flex-direction: column; padding: 2px 8px 0; }
+.ms-dist-point { padding: 16px 10px; color: var(--vscode-descriptionForeground); }
+.ms-dist-markers { flex: 0 0 auto; display: flex; flex-direction: column; gap: 2px; padding: 2px 10px 6px; font-size: var(--ms-fs-small); }
+.ms-dist-marker-row { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 6px; }
+.ms-dist-sname { font-weight: 600; margin-right: 4px; }
+.ms-dist .ms-legend-key { width: 12px; height: 3px; }

@@ -1,0 +1,99 @@
+/* Swarm blackboard */
+.ms-swarm { background: var(--vscode-sideBar-background); color: var(--vscode-sideBar-foreground, var(--vscode-foreground)); }
+.ms-swarm-toolbar { gap: 8px; }
+.ms-swarm-build { max-width: 220px; }
+.ms-swarm-body { padding: 6px 0 12px; }
+
+/* lanes */
+.ms-swarm-lanes { display: flex; flex-direction: column; }
+.ms-swarm-lane { display: grid; grid-template-columns: 128px minmax(0, 1fr); align-items: stretch; border-bottom: 1px solid var(--vscode-editorGroup-border); }
+.ms-swarm-lane-label { display: grid; grid-template-columns: 12px 1fr; grid-template-rows: auto auto; align-content: center; column-gap: 6px; padding: 6px 8px 6px 10px; border-right: 1px solid var(--vscode-editorGroup-border); }
+.ms-swarm-lane-label .ms-swarm-state { grid-row: 1 / span 2; align-self: center; }
+.ms-swarm-role { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ms-swarm-state-label { font-size: var(--ms-fs-tiny); color: var(--vscode-descriptionForeground); }
+.ms-swarm-track { display: flex; align-items: flex-start; gap: 6px; padding: 6px 8px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; }
+.ms-swarm-none { align-self: center; padding: 0 2px; }
+
+/* role state dots: shape + label, never color alone */
+.ms-swarm-state { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--vscode-descriptionForeground); opacity: .5; flex: 0 0 auto; }
+.ms-swarm-state.is-thinking { background: var(--vscode-progressBar-background, var(--vscode-focusBorder)); opacity: 1; animation: ms-swarm-pulse 1.2s ease-in-out infinite; }
+.ms-swarm-state.is-proposed { background: var(--ms-warn); opacity: 1; }
+.ms-swarm-state.is-accepted { background: var(--ms-ok); opacity: 1; }
+.ms-swarm-state.is-rejected { background: var(--ms-fail); opacity: 1; border-radius: 2px; }
+.ms-swarm-state.is-done { background: transparent; border: 2px solid var(--ms-ok); opacity: 1; width: 9px; height: 9px; box-sizing: border-box; }
+@keyframes ms-swarm-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+
+/* cards */
+.ms-swarm-card { flex: 0 0 228px; display: flex; flex-direction: column; gap: 3px; padding: 6px 8px; border: 1px solid var(--vscode-widget-border, var(--vscode-editorGroup-border)); border-left: 3px solid var(--vscode-descriptionForeground); border-radius: var(--ms-radius); background: var(--vscode-editorWidget-background); cursor: pointer; scroll-snap-align: start; min-width: 0; }
+.ms-swarm-card:hover { border-color: var(--vscode-focusBorder); border-left-color: inherit; }
+.ms-swarm-card:focus-visible { outline: 1px solid var(--vscode-focusBorder); outline-offset: 1px; }
+.ms-swarm-card.is-accepted { border-left-color: var(--ms-ok); }
+.ms-swarm-card.is-rejected { border-left-color: var(--ms-fail); }
+.ms-swarm-card.is-proposed { border-left-color: var(--ms-warn); }
+.ms-swarm-card.is-thinking { border-left-color: var(--vscode-focusBorder); border-left-style: dashed; }
+.ms-swarm-card.is-mirror { opacity: .8; border-style: dashed; }
+.ms-swarm-card.is-stream { flex: 0 0 auto; max-width: 680px; margin: 0 10px 6px; }
+.ms-swarm-card-head { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: var(--ms-fs-small); }
+.ms-swarm-seq { font-family: var(--ms-font-mono); font-size: var(--ms-fs-tiny); color: var(--vscode-descriptionForeground); }
+.ms-swarm-kind { display: inline-flex; align-items: center; gap: 2px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--vscode-descriptionForeground); }
+.ms-swarm-kind .codicon { font-size: 12px; }
+.ms-swarm-card-head .ms-status { margin-left: auto; flex: 0 0 auto; }
+.ms-swarm-text { line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.ms-swarm-reason { font-size: var(--ms-fs-small); color: var(--vscode-descriptionForeground); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.ms-swarm-reason.is-rejected { color: var(--vscode-errorForeground); }
+.ms-swarm-hint { font-size: var(--ms-fs-small); color: var(--vscode-textLink-foreground); display: none; }
+.ms-swarm-card.is-expanded .ms-swarm-text, .ms-swarm-card.is-expanded .ms-swarm-reason { -webkit-line-clamp: unset; display: block; }
+.ms-swarm-card.is-expanded .ms-swarm-hint { display: block; }
+.ms-swarm-card-foot { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; margin-top: 1px; }
+.ms-swarm-card-foot .ms-chip { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ms-swarm-time { margin-left: auto; font-size: var(--ms-fs-tiny); color: var(--vscode-descriptionForeground); font-variant-numeric: tabular-nums; }
+.ms-swarm-stream { display: flex; flex-direction: column; padding-top: 4px; }
+
+/* Delphi */
+.ms-delphi-intro { margin: 4px 12px 10px; max-width: 720px; }
+.ms-delphi { margin: 0 12px 14px; padding: 8px 10px 10px; border: 1px solid var(--vscode-widget-border, var(--vscode-editorGroup-border)); border-radius: var(--ms-radius); background: var(--vscode-editorWidget-background); }
+.ms-delphi.is-contested { border-color: var(--ms-contested-color, var(--ms-warn)); }
+.ms-delphi-head { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; margin-bottom: 6px; }
+.ms-delphi-title { margin: 0; font-size: var(--ms-fs); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ms-delphi-flag { display: inline-flex; align-items: center; gap: 3px; padding: 0 6px; border-radius: 9px; font-size: var(--ms-fs-tiny); color: var(--ms-contested-color, var(--ms-warn)); border: 1px solid currentColor; }
+.ms-delphi-head .ms-btn { margin-left: auto; }
+.ms-delphi-axis { position: relative; height: 16px; margin-left: 116px; margin-right: 150px; border-bottom: 1px solid var(--vscode-editorGroup-border); }
+.ms-delphi-tick { position: absolute; bottom: 2px; transform: translateX(-50%); font-size: var(--ms-fs-tiny); color: var(--vscode-descriptionForeground); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.ms-delphi-rows { display: flex; flex-direction: column; }
+.ms-delphi-group { margin: 8px 0 2px; font-size: var(--ms-fs-tiny); font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--vscode-sideBarSectionHeader-foreground, var(--vscode-foreground)); }
+.ms-delphi-group .ms-muted { text-transform: none; letter-spacing: 0; font-weight: 400; }
+.ms-delphi-row { display: grid; grid-template-columns: 116px minmax(0, 1fr) 150px; align-items: center; min-height: 22px; }
+.ms-delphi-who { font-size: var(--ms-fs-small); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ms-delphi-track { position: relative; height: 22px; }
+.ms-delphi-track::before { content: ''; position: absolute; left: 0; right: 0; top: 50%; border-top: 1px dotted var(--vscode-editorGroup-border); }
+.ms-delphi-bar { position: absolute; top: 6px; height: 10px; border-radius: 4px; background: var(--c, var(--vscode-foreground)); opacity: .85; }
+.ms-delphi-med { position: absolute; top: 3px; width: 2px; height: 16px; margin-left: -1px; background: var(--vscode-foreground); border-radius: 1px; }
+.ms-delphi-row.is-mix .ms-delphi-bar { background: var(--vscode-foreground); opacity: .55; height: 12px; top: 5px; }
+.ms-delphi.is-contested .ms-delphi-row.is-mix .ms-delphi-bar { background: repeating-linear-gradient(135deg, var(--ms-contested-color, var(--ms-warn)) 0 4px, transparent 4px 7px); opacity: 1; outline: 1px solid var(--ms-contested-color, var(--ms-warn)); }
+.ms-delphi-row.is-mix .ms-delphi-who { font-weight: 600; }
+.ms-delphi-vals.is-link { cursor: pointer; border-radius: 3px; }
+.ms-delphi-vals.is-link:hover { background: var(--vscode-list-hoverBackground); }
+.ms-delphi-vals.is-link:focus-visible { outline: 1px solid var(--vscode-focusBorder); }
+.ms-delphi-vals { padding-left: 8px; font-size: var(--ms-fs-small); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+.ms-delphi-seal { position: absolute; inset: 4px 0; display: flex; align-items: center; justify-content: center; gap: 4px; font-size: var(--ms-fs-tiny); color: var(--vscode-descriptionForeground); border: 1px dashed var(--vscode-widget-border, var(--vscode-editorGroup-border)); border-radius: 4px; background: repeating-linear-gradient(45deg, transparent 0 6px, var(--vscode-toolbar-hoverBackground) 6px 8px); }
+.ms-delphi-row.is-revealing { animation: ms-delphi-reveal .45s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(var(--i) * 90ms); }
+@keyframes ms-delphi-reveal { from { opacity: 0; transform: translateY(-4px); filter: blur(3px); } to { opacity: 1; transform: none; filter: none; } }
+.ms-delphi-out { margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--vscode-editorGroup-border); }
+@media (prefers-reduced-motion: reduce) {
+  .ms-delphi-row.is-revealing { animation: none; }
+  .ms-swarm-state.is-thinking { animation: none; }
+}
+@container area (max-width: 520px) {
+  .ms-swarm-lane { grid-template-columns: 92px minmax(0, 1fr); }
+  .ms-swarm-card { flex-basis: 188px; }
+  .ms-delphi { margin: 0 6px 12px; padding: 6px; }
+  .ms-delphi-title { flex: 1 1 100%; white-space: normal; }
+  .ms-delphi-head .ms-btn { margin-left: 0; }
+  .ms-delphi-row { grid-template-columns: 84px minmax(0, 1fr) 96px; }
+  .ms-delphi-axis { margin-left: 84px; margin-right: 96px; }
+  .ms-delphi-vals .ms-muted { display: none; }
+}
+
+/* sidebar legend */
+.ms-swarm-legend { list-style: none; margin: 0; padding: 6px 10px; display: flex; flex-direction: column; gap: 4px; font-size: var(--ms-fs-small); }
+.ms-swarm-legend li { display: flex; align-items: center; gap: 4px; }

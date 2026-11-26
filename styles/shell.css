@@ -1,0 +1,208 @@
+/* ==========================================================================
+   shell.css: app frame, top bar, workspace tabs, status bar.
+   ========================================================================== */
+
+.ms-app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* ---------- top bar ---------- */
+.ms-topbar {
+  flex: 0 0 var(--ms-h-topbar);
+  height: var(--ms-h-topbar);
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+  background: var(--vscode-titleBar-activeBackground);
+  color: var(--vscode-titleBar-activeForeground);
+  border-bottom: 1px solid var(--vscode-titleBar-border);
+  user-select: none;
+  position: relative;
+  z-index: 3;
+}
+.ms-app.is-window-inactive .ms-topbar {
+  background: var(--vscode-titleBar-inactiveBackground);
+  color: var(--vscode-titleBar-inactiveForeground);
+}
+
+.ms-logo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px 0 12px;
+  font-weight: 600;
+  letter-spacing: .2px;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+.ms-logo-mark {
+  color: var(--vscode-activityBarBadge-background);
+  font-size: 14px;
+  line-height: 1;
+}
+
+.ms-menubar { display: flex; align-items: stretch; flex: 0 0 auto; }
+.ms-menubar-item {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 0 8px;
+  border-radius: 0;
+  font-size: var(--ms-fs);
+}
+.ms-menubar-item:hover,
+.ms-menubar-item[aria-expanded="true"] { background: var(--vscode-toolbar-hoverBackground); }
+
+/* workspace tabs */
+.ms-ws-tabs {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+  flex: 0 1 auto;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  margin-left: 8px;
+  border-left: 1px solid var(--vscode-tab-border);
+}
+.ms-ws-tabs::-webkit-scrollbar { display: none; }
+.ms-ws-tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: var(--ms-h-tab);
+  padding: 0 12px;
+  border: 0;
+  border-right: 1px solid var(--vscode-tab-border);
+  background: var(--vscode-tab-inactiveBackground);
+  color: var(--vscode-tab-inactiveForeground);
+  white-space: nowrap;
+  font-size: var(--ms-fs);
+  flex: 0 0 auto;
+}
+.ms-ws-tab:hover { background: var(--vscode-tab-hoverBackground); }
+.ms-ws-tab[aria-selected="true"] {
+  background: var(--vscode-tab-activeBackground);
+  color: var(--vscode-tab-activeForeground);
+}
+.ms-ws-tab[aria-selected="true"]::before {
+  content: "";
+  position: absolute; left: 0; right: 0; top: 0; height: 2px;
+  background: var(--vscode-tab-activeBorderTop);
+}
+.ms-ws-tab .codicon { font-size: 14px; opacity: .85; }
+.ms-ws-tab.is-drop-before { box-shadow: inset 2px 0 0 var(--vscode-focusBorder); }
+.ms-ws-tab.is-drop-after { box-shadow: inset -2px 0 0 var(--vscode-focusBorder); }
+.ms-ws-tab-input {
+  width: 110px; height: 20px;
+  border: 1px solid var(--vscode-focusBorder);
+  background: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+  padding: 0 4px;
+}
+.ms-ws-add {
+  align-self: center;
+  margin: 0 4px;
+}
+
+.ms-topbar-center { flex: 1 1 auto; display: flex; align-items: center; justify-content: center; min-width: 40px; padding: 0 8px; }
+.ms-command-center {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: min(38vw, 420px);
+  min-width: 40px;
+  height: 22px;
+  padding: 0 8px;
+  border: 1px solid var(--vscode-widget-border);
+  border-radius: 6px;
+  background: var(--vscode-input-background);
+  color: var(--vscode-descriptionForeground);
+  font-size: var(--ms-fs-small);
+  overflow: hidden;
+}
+.ms-command-center:hover { background: var(--vscode-toolbar-hoverBackground); }
+.ms-command-center .codicon { font-size: 14px; }
+.ms-command-center .ms-kbd { margin-left: auto; }
+
+.ms-topbar-right { display: flex; align-items: center; gap: 2px; padding: 0 6px; flex: 0 0 auto; }
+
+/* ---------- status bar ---------- */
+.ms-statusbar {
+  flex: 0 0 var(--ms-h-status);
+  height: var(--ms-h-status);
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  min-width: 0;
+  background: var(--vscode-statusBar-background);
+  color: var(--vscode-statusBar-foreground);
+  border-top: 1px solid var(--vscode-statusBar-border);
+  font-size: var(--ms-fs-small);
+  user-select: none;
+  position: relative;
+  z-index: 3;
+}
+.ms-sb-group { display: flex; align-items: stretch; min-width: 0; overflow: hidden; }
+.ms-sb-group.is-right { justify-content: flex-end; flex-shrink: 1; }
+.ms-sb-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 6px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  white-space: nowrap;
+  font-size: var(--ms-fs-small);
+  line-height: 1;
+  flex: 0 0 auto;
+}
+button.ms-sb-item:hover {
+  background: var(--vscode-statusBarItem-hoverBackground);
+  color: var(--vscode-statusBarItem-hoverForeground);
+}
+button.ms-sb-item:focus-visible { outline: 1px solid var(--vscode-statusBarItem-focusBorder); outline-offset: -1px; }
+.ms-sb-item .codicon { font-size: 14px; }
+.ms-sb-item.is-highlight {
+  background: var(--vscode-statusBarItem-remoteBackground);
+  color: var(--vscode-statusBarItem-remoteForeground);
+}
+.ms-sb-item.is-error {
+  background: var(--vscode-statusBarItem-errorBackground);
+  color: var(--vscode-statusBarItem-errorForeground);
+}
+.ms-sb-item.is-warn { color: var(--ms-warn); }
+.ms-sb-item.is-prominent { background: var(--vscode-statusBarItem-prominentBackground); }
+.ms-sb-item.is-collapsible-1 { }
+.ms-sb-sep { width: 1px; margin: 4px 2px; background: var(--vscode-statusBar-border); flex: 0 0 auto; }
+.ms-sb-item .ms-badge { height: 14px; min-width: 14px; font-size: 10px; }
+
+/* compact status bar at narrow widths */
+@media (max-width: 1180px) {
+  .ms-sb-item[data-collapse="1"] .ms-sb-label { display: none; }
+}
+@media (max-width: 1080px) {
+  .ms-sb-item[data-collapse="2"] { display: none; }
+  .ms-menubar-item[data-collapse="1"] { display: none; }
+}
+
+/* fullscreen area: hide chrome except the composer */
+.ms-app.is-fullscreen-area .ms-topbar,
+.ms-app.is-fullscreen-area .ms-statusbar { display: none; }
+
+/* screen */
+.ms-screen {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  background: var(--vscode-editorGroup-border);
+}

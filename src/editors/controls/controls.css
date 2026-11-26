@@ -1,0 +1,25 @@
+/* Controls (assumption board) */
+.ms-ctl-top { flex: 0 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(120px, 40%); gap: 8px; padding: 8px 10px; border-bottom: 1px solid var(--vscode-sideBarSectionHeader-border, var(--vscode-editorGroup-border)); }
+.ms-ctl-out-name { font-size: var(--ms-fs-small); color: var(--vscode-descriptionForeground); }
+.ms-ctl-out-value { font-size: 22px; font-weight: 600; line-height: 1.2; }
+.ms-ctl-out-value .ms-bv { padding: 0; }
+.ms-ctl-out-sub { font-size: var(--ms-fs-small); color: var(--vscode-descriptionForeground); }
+.ms-ctl-prob { margin-top: 2px; font-size: var(--ms-fs-small); }
+.ms-ctl-chart { position: relative; height: 58px; align-self: end; }
+.ms-ctl-chart canvas { position: absolute; inset: 0; }
+.ms-ctl-list { padding: 4px 0 10px; }
+.ms-ctl-row { padding: 6px 10px; border-bottom: 1px solid var(--vscode-editorGroup-border); }
+.ms-ctl-row.is-hovered { background: var(--ms-cone); }
+.ms-ctl-row-head { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.ms-ctl-name { border: 0; background: none; padding: 0; color: var(--vscode-foreground); font-weight: 600; font-size: var(--ms-fs); text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.ms-ctl-name:hover { color: var(--vscode-textLink-foreground); }
+.ms-ctl-sens { margin-left: auto; width: 60px; height: 4px; border-radius: 2px; background: var(--vscode-input-background); position: relative; flex: 0 0 60px; }
+.ms-ctl-sens::after { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: var(--w); border-radius: 2px; background: var(--vscode-descriptionForeground); }
+.ms-ctl-row-ctl { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+.ms-ctl-row-ctl .ms-range { flex: 1 1 auto; min-width: 60px; }
+.ms-ctl-row-ctl .ms-unit { width: 66px; flex: 0 0 66px; overflow: hidden; text-overflow: ellipsis; }
+.ms-ctl-dist { margin-top: 2px; font-size: var(--ms-fs-tiny); color: var(--ms-prov-estimated); }
+.ms-ctl-more { margin: 8px 10px 0; }
+@media (max-width: 1100px) { .ms-ctl-top { grid-template-columns: 1fr; } }
+
+.ms-area-tools select[aria-label="Focused output"] { min-width: 110px; }

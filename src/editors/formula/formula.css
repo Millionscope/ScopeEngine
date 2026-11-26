@@ -1,0 +1,60 @@
+/* Formula editor (KaTeX) */
+.ms-fx-scroll { padding: 8px 14px 18px; }
+.ms-fx-head { display: flex; align-items: center; gap: 6px; padding: 2px 0 8px; border-bottom: 1px solid var(--vscode-editorGroup-border); flex-wrap: wrap; }
+.ms-fx-name { border: 0; background: none; padding: 0; color: var(--vscode-foreground); font-size: 15px; font-weight: 600; cursor: pointer; }
+.ms-fx-name:hover { color: var(--vscode-textLink-foreground); }
+.ms-fx-path { font-size: var(--ms-fs-small); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.ms-fx-value { font-size: 15px; font-weight: 600; }
+
+.ms-fx-eq { padding: 10px 2px 6px; overflow-x: auto; overflow-y: hidden; color: var(--vscode-editor-foreground); }
+.ms-fx-eq .katex-display { margin: 4px 0; text-align: left; }
+.ms-fx-eq .katex-display > .katex, .ms-fx-dep-eq .katex-display > .katex { text-align: left; }
+.ms-fx-eq .katex { font-size: 1.12em; }
+.ms-fx-eq.is-ref .katex { font-size: 1.05em; }
+.ms-formula .katex [data-node] { cursor: pointer; border-radius: 3px; transition: background-color .12s; }
+.ms-formula .katex [data-node]:hover,
+.ms-formula .katex [data-node].is-hovered { background: var(--ms-cone); }
+.ms-formula .katex [data-node].is-selected { outline: 1px solid var(--vscode-focusBorder); outline-offset: 1px; }
+/* MathML stays in the accessibility tree, visually hidden (as KaTeX's own CSS does) */
+.ms-formula .katex .katex-mathml { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(1px, 1px, 1px, 1px); border: 0; }
+
+.ms-fx-row { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 8px; align-items: baseline; padding: 6px 0; border-top: 1px solid var(--vscode-editorGroup-border); }
+.ms-fx-row-title { display: inline-flex; align-items: center; gap: 6px; font-size: var(--ms-fs-tiny); font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--vscode-descriptionForeground); }
+.ms-fx-row-title .codicon { font-size: 13px; }
+.ms-fx-row-body { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; min-width: 0; }
+.ms-fx-units { overflow-x: auto; max-width: 100%; }
+.ms-fx-units .katex { font-size: 1em; }
+.ms-fx-unitnote { flex: 1 1 200px; }
+.ms-fx-subst { font-variant-numeric: tabular-nums; line-height: 1.9; overflow-wrap: anywhere; }
+.ms-fx-subst sup { font-size: .75em; }
+.ms-fx-const { color: var(--vscode-textPreformat-foreground); font-family: var(--ms-font-mono); font-size: var(--ms-fs-mono); }
+
+.ms-fx-derivation { margin-top: 8px; border-top: 1px solid var(--vscode-editorGroup-border); padding-top: 6px; }
+.ms-fx-derivation-head { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.ms-fx-derivation-head .ms-fx-row-title { margin-right: auto; }
+.ms-fx-tree { display: flex; flex-direction: column; }
+.ms-fx-dep { padding-left: calc(var(--depth, 0) * 16px); }
+.ms-fx-dep-line { display: flex; align-items: center; gap: 4px; min-height: 24px; border-bottom: 1px dashed var(--vscode-editorGroup-border); font-size: var(--ms-fs-small); }
+.ms-fx-dep-line:hover { background: var(--vscode-list-hoverBackground); }
+.ms-fx-twisty { width: 20px; height: 20px; min-width: 20px; font-size: 14px; }
+.ms-fx-twisty-space { width: 20px; flex: 0 0 20px; }
+.ms-fx-dep-name { border: 0; background: none; padding: 0 2px; color: var(--vscode-foreground); cursor: pointer; font-size: var(--ms-fs-small); border-radius: 3px; white-space: nowrap; }
+.ms-fx-dep-name:hover, .ms-fx-dep-name.is-hovered { background: var(--ms-cone); color: var(--vscode-textLink-activeForeground); }
+.ms-fx-dep-name.is-selected { outline: 1px solid var(--vscode-focusBorder); }
+.ms-fx-dep-name:focus-visible, .ms-fx-name:focus-visible { outline: 1px solid var(--vscode-focusBorder); outline-offset: 1px; }
+.ms-fx-dep .ms-unit { width: 74px; flex: 0 0 74px; overflow: hidden; text-overflow: ellipsis; }
+.ms-fx-dep-eq { padding: 2px 0 2px 24px; overflow-x: auto; }
+.ms-fx-dep-eq .katex-display { margin: 2px 0; text-align: left; }
+.ms-fx-dep-eq .katex { font-size: 1em; }
+
+.ms-fx-ref { padding: 8px 0 10px; border-bottom: 1px solid var(--vscode-editorGroup-border); }
+.ms-fx-ref-title { margin: 0 0 2px; font-size: var(--ms-fs-small); font-weight: 600; color: var(--vscode-foreground); }
+.ms-fx-ref-note { margin: 2px 0 0; line-height: 1.5; }
+.ms-fx-bindings { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font-size: var(--ms-fs-small); }
+.ms-fx-bind-label { color: var(--vscode-descriptionForeground); font-family: var(--ms-font-mono); font-size: var(--ms-fs-tiny); margin-left: 4px; }
+.ms-fx-quick { justify-content: center; flex-wrap: wrap; margin-top: 4px; }
+
+@container area (max-width: 460px) {
+  .ms-fx-row { grid-template-columns: 1fr; }
+  .ms-fx-dep .ms-unit { display: none; }
+}

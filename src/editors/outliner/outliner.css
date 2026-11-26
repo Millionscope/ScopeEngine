@@ -1,0 +1,14 @@
+/* Scope Outliner */
+.ms-outliner .ms-vlist { padding: 2px 0; }
+.ms-outliner .ms-list-row { gap: 3px; font-size: var(--ms-fs); }
+.ms-ol-twisty { width: 16px; flex: 0 0 16px; font-size: 14px; display: inline-grid; place-items: center; cursor: pointer; color: var(--vscode-icon-foreground); }
+.ms-ol-icon { font-size: 14px; color: var(--vscode-icon-foreground); opacity: .85; flex: 0 0 auto; }
+.ms-ol-name { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.ms-ol-name.is-scope { font-weight: 600; }
+.ms-ol-proto { color: var(--vscode-descriptionForeground); font-size: var(--ms-fs-tiny); white-space: nowrap; flex: 0 0 auto; }
+.ms-ol-summary { color: var(--vscode-descriptionForeground); font-size: var(--ms-fs-tiny); margin-left: 8px; overflow: hidden; text-overflow: ellipsis; min-width: 0; font-variant-numeric: tabular-nums; }
+.ms-ol-mark { margin-right: 1px; }
+.ms-ol-value { font-size: var(--ms-fs-small); }
+.ms-ol-unit { width: 74px; text-align: left; overflow: hidden; text-overflow: ellipsis; flex: 0 0 74px; }
+.ms-ol-rename { height: 18px; width: 160px; }
+.ms-list-row.is-selected .ms-ol-proto, .ms-list-row.is-selected .ms-ol-summary { color: inherit; opacity: .85; }

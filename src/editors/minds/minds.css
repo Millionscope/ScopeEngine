@@ -1,0 +1,305 @@
+/* Minds editor. Colors only through --vscode-* and --ms-* variables. */
+.ms-minds-panel { padding: 10px 12px 18px; font-size: var(--ms-fs-small); }
+.ms-minds-panel:focus { outline: none; }
+
+/* ---------- shared bits ---------- */
+.ms-mind-strip {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  margin: 0 0 8px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--vscode-editorGroup-border);
+}
+.ms-mind-strip > .codicon { color: var(--ms-sim-voice-fg); }
+.ms-mind-spacer { flex: 1 1 auto; }
+.ms-mind-name {
+  border: 0; background: none; padding: 0; color: var(--vscode-foreground);
+  font: inherit; font-weight: 600; font-size: var(--ms-fs); cursor: pointer; text-align: left;
+}
+.ms-mind-name:hover { color: var(--vscode-textLink-foreground); text-decoration: underline; }
+.ms-mind-role { color: var(--vscode-descriptionForeground); font-size: var(--ms-fs-small); min-width: 0; overflow-wrap: anywhere; }
+.ms-mind-sec { margin-top: 10px; }
+.ms-mind-sec-h {
+  display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 6px;
+  margin: 0 0 5px;
+  font-size: var(--ms-fs-tiny); font-weight: 700; letter-spacing: .4px; text-transform: uppercase;
+  color: var(--vscode-descriptionForeground);
+}
+.ms-mind-sec-h .codicon { font-size: 13px; align-self: center; }
+.ms-mind-sec-hint { font-weight: 400; text-transform: none; letter-spacing: 0; opacity: .85; }
+.ms-mind-foot-note { margin: 10px 0 0; color: var(--vscode-descriptionForeground); font-size: var(--ms-fs-tiny); line-height: 1.5; max-width: 72ch; }
+.ms-mind-const { color: var(--vscode-descriptionForeground); white-space: nowrap; }
+
+/* meters: track = lighter step, fill = data; no numerals */
+.ms-mind-meter {
+  position: relative; display: block; height: 6px; min-width: 40px;
+  border-radius: 3px;
+  background: var(--vscode-editorWidget-background);
+  box-shadow: inset 0 0 0 1px var(--vscode-widget-border);
+  overflow: hidden;
+}
+.ms-mind-meter-fill { position: absolute; top: 0; bottom: 0; left: 0; width: 0; border-radius: 3px; background: var(--ms-series-1); }
+.ms-mind-meter.is-diverging::after {
+  content: ""; position: absolute; top: -1px; bottom: -1px; left: 50%; width: 1px;
+  background: var(--vscode-descriptionForeground);
+}
+.ms-mind-meter.is-diverging[data-sign="neg"] .ms-mind-meter-fill { background: var(--ms-series-2); }
+.ms-mind-meter.is-claim { height: 8px; margin: 6px 0 2px; }
+.ms-mind-meter.is-claim .ms-mind-meter-fill { background: var(--ms-prov-estimated); }
+
+/* ---------- cards ---------- */
+.ms-mind-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 10px; align-items: start; }
+.ms-mind-card[aria-current="true"] { border-color: var(--vscode-focusBorder); box-shadow: 0 0 0 1px var(--vscode-focusBorder); }
+.ms-mind-card-head { align-items: flex-start; flex-wrap: wrap; }
+.ms-mind-card-head > .codicon { margin-top: 2px; color: var(--ms-sim-voice-fg); }
+.ms-mind-card-title { flex: 1 1 120px; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.ms-mind-badges { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.ms-mind-card-body { display: flex; flex-direction: column; }
+.ms-mind-card-body > .ms-mind-sec:first-child { margin-top: 0; }
+.ms-mind-card-foot {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  padding: 6px 10px; border-top: 1px solid var(--vscode-widget-border);
+}
+
+.ms-mind-hidden {
+  padding: 6px 8px; border-radius: 4px;
+  background: var(--vscode-textBlockQuote-background);
+  border-left: 2px solid var(--ms-prov-estimated);
+}
+.ms-mind-hidden-label { display: inline-flex; align-items: center; gap: 5px; font-weight: 600; }
+.ms-mind-hidden-label .codicon { color: var(--ms-prov-estimated); }
+.ms-mind-hidden-row { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; margin-top: 4px; }
+.ms-mind-hidden-src { margin-top: 2px; color: var(--vscode-descriptionForeground); font-size: var(--ms-fs-tiny); font-family: var(--ms-font-mono); }
+.ms-mind-iv { color: var(--vscode-descriptionForeground); white-space: nowrap; }
+.ms-mind-spark-host { display: inline-flex; align-items: center; min-width: 0; }
+
+.ms-mind-rows { display: grid; grid-template-columns: minmax(84px, max-content) minmax(48px, 1fr) max-content; gap: 4px 8px; align-items: center; }
+.ms-mind-row { display: contents; }
+.ms-mind-row-label { color: var(--vscode-foreground); min-width: 0; overflow-wrap: anywhere; }
+.ms-mind-row.is-sub .ms-mind-row-label { padding-left: 10px; color: var(--vscode-descriptionForeground); }
+.ms-mind-row > .ms-bv, .ms-mind-row > .ms-mind-const { justify-self: end; }
+.ms-mind-affect-vis { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.ms-mind-affect-vis .ms-mind-meter { flex: 1 1 auto; }
+.ms-mind-decay { flex: 0 0 auto; overflow: visible; }
+.ms-mind-decay .base { stroke: var(--vscode-editorGroup-border); stroke-width: 1; }
+.ms-mind-decay .curve { fill: none; stroke: var(--vscode-descriptionForeground); stroke-width: 1.5; stroke-linecap: round; }
+
+.ms-mind-know { display: flex; flex-wrap: wrap; gap: 4px; }
+.ms-mind-know-item { display: inline-flex; max-width: 100%; }
+.ms-mind-know-chip { font-family: var(--ms-font-mono); font-size: var(--ms-fs-tiny); max-width: 220px; }
+.ms-mind-know-chip:disabled { opacity: .6; cursor: default; }
+.ms-mind-world { display: flex; align-items: center; gap: 6px; margin: 2px 0 4px; }
+.ms-mind-world-label { color: var(--vscode-descriptionForeground); font-size: var(--ms-fs-tiny); text-transform: uppercase; letter-spacing: .4px; }
+
+/* ---------- per-party views ---------- */
+.ms-mind-viewbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.ms-mind-depths { display: flex; flex-wrap: wrap; gap: 4px 12px; flex: 1 1 auto; color: var(--vscode-descriptionForeground); font-size: var(--ms-fs-tiny); }
+.ms-mind-depth-item { display: inline-flex; align-items: center; gap: 5px; }
+.ms-mind-depth-badge {
+  display: inline-flex; align-items: center; height: 16px; padding: 0 5px; border-radius: 8px;
+  background: var(--vscode-badge-background); color: var(--vscode-badge-foreground);
+  font-size: 10px; font-weight: 700; white-space: nowrap;
+}
+
+/* nested beliefs */
+.ms-mind-tree { position: relative; min-width: 0; }
+.ms-mind-tree-svg { position: absolute; left: 0; top: 0; overflow: visible; }
+.ms-mind-tree-svg .link { fill: none; stroke: var(--vscode-descriptionForeground); stroke-opacity: .55; stroke-width: 1.5; }
+.ms-mind-tree-svg .ring { fill: none; stroke: var(--vscode-editorGroup-border); stroke-width: 1; }
+.ms-mind-tree.is-radial .ms-mind-tree-svg { overflow: hidden; }
+.ms-mind-tnode {
+  position: absolute; z-index: 1;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 3px;
+  padding: 5px 8px 6px;
+  border: 1px solid var(--vscode-widget-border);
+  border-radius: 6px;
+  background: var(--vscode-editorWidget-background);
+  box-shadow: 0 1px 3px var(--ms-shadow);
+}
+.ms-mind-tnode.is-middle { transform: translateY(-50%); }
+.ms-mind-tnode.is-centered { transform: translate(-50%, -50%); align-items: center; text-align: center; }
+.ms-mind-tnode[data-depth="0"] { border-color: var(--ms-sim-voice-fg); background: var(--ms-sim-voice-bg); }
+.ms-mind-tnode[data-depth="2"] { border-style: dashed; }
+.ms-mind-tnode.is-hovered { box-shadow: 0 0 0 2px var(--ms-cone-strong); }
+.ms-mind-tnode-head { display: flex; align-items: center; gap: 4px; }
+.ms-mind-tnode-head .codicon { font-size: 12px; color: var(--ms-sim-voice-fg); }
+.ms-mind-tnode-label {
+  border: 0; background: none; padding: 0; margin: 0;
+  color: var(--vscode-foreground); font: inherit; text-align: inherit; cursor: pointer;
+  line-height: 1.35; overflow-wrap: anywhere;
+}
+.ms-mind-tnode-label:hover { color: var(--vscode-textLink-foreground); text-decoration: underline; }
+.ms-mind-tnode-sub { color: var(--vscode-descriptionForeground); font-size: var(--ms-fs-tiny); }
+.ms-mind-tbl-indent { display: inline-block; }
+
+/* relationship graph */
+.ms-mind-force-box { position: relative; border: 1px solid var(--vscode-widget-border); border-radius: 6px; background: var(--vscode-editor-background); overflow: hidden; }
+.ms-mind-force { display: block; max-width: 100%; height: auto; touch-action: none; }
+.ms-mind-force .edge-line { fill: none; stroke: var(--edge-color); stroke-linecap: round; opacity: .85; }
+.ms-mind-force .edge-head { fill: var(--edge-color); opacity: .9; }
+.ms-mind-force .edge-hit { fill: none; stroke: transparent; pointer-events: stroke; cursor: pointer; outline: none; }
+.ms-mind-force .edge.is-hot .edge-line, .ms-mind-force .edge.is-hovered .edge-line { opacity: 1; filter: brightness(1.15); }
+.ms-mind-force .edge.is-selected .edge-line { opacity: 1; }
+.ms-mind-force .edge-hit:focus-visible { stroke: var(--vscode-focusBorder); stroke-opacity: .35; }
+.ms-mind-force .fnode { cursor: grab; outline: none; }
+.ms-mind-force .fnode circle { fill: var(--vscode-editorWidget-background); stroke: var(--vscode-widget-border); stroke-width: 1.5; }
+.ms-mind-force .fnode .ring { fill: none; stroke: transparent; }
+.ms-mind-force .fnode.is-mind circle:not(.ring) { fill: var(--ms-sim-voice-bg); stroke: var(--ms-sim-voice-fg); stroke-dasharray: 3 2; }
+.ms-mind-force .fnode text { fill: var(--vscode-foreground); font-size: 11px; font-family: var(--ms-font-ui); paint-order: stroke; stroke: var(--vscode-editor-background); stroke-width: 3px; stroke-linejoin: round; }
+.ms-mind-force .fnode text.glyph { fill: var(--vscode-descriptionForeground); font-size: 10px; font-weight: 700; stroke: none; }
+.ms-mind-force .fnode.is-mind text.glyph { fill: var(--ms-sim-voice-fg); }
+.ms-mind-force .fnode:hover .ring, .ms-mind-force .fnode.is-hovered .ring { stroke: var(--ms-cone-strong); stroke-width: 2; }
+.ms-mind-force .fnode.is-selected .ring { stroke: var(--vscode-focusBorder); stroke-width: 2; }
+.ms-mind-force .fnode:focus-visible .ring { stroke: var(--vscode-focusBorder); stroke-width: 2; }
+.ms-mind-edges { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
+.ms-mind-edge-row { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; }
+.ms-mind-edge-key { display: inline-block; width: 18px; border-radius: 2px; flex: 0 0 auto; }
+.ms-mind-edge-name { min-width: 0; }
+.ms-mind-edge-k { color: var(--vscode-descriptionForeground); }
+
+/* evidence trail */
+.ms-mind-trail-top { display: grid; grid-template-columns: minmax(0, 1fr) minmax(200px, 300px); gap: 8px 14px; align-items: start; }
+.ms-mind-trail-hidden { padding: 6px 8px; border-radius: 4px; background: var(--vscode-textBlockQuote-background); border-left: 2px solid var(--ms-prov-estimated); min-width: 0; }
+.ms-mind-trail-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.ms-mind-why { margin: 0; color: var(--vscode-descriptionForeground); font-size: var(--ms-fs-tiny); line-height: 1.45; }
+.ms-mind-downstream { grid-column: 1 / -1; display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; }
+.ms-mind-ds-label { color: var(--vscode-descriptionForeground); font-size: var(--ms-fs-tiny); text-transform: uppercase; letter-spacing: .4px; }
+.ms-mind-ds-item { display: inline-flex; align-items: center; gap: 4px; }
+
+.ms-mind-trail-charts { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+.ms-mind-trail-charts.is-side { flex-direction: row; align-items: flex-start; flex-wrap: wrap; gap: 16px; }
+.ms-mind-fig { margin: 0; min-width: 0; }
+.ms-mind-fig.is-empty { flex: 1 1 280px; border: 1px dashed var(--vscode-widget-border); border-radius: 6px; }
+.ms-mind-fig-cap { margin-bottom: 4px; }
+.ms-mind-fig-title { font-weight: 600; font-size: var(--ms-fs-small); }
+.ms-mind-fig-sub { color: var(--vscode-descriptionForeground); font-size: var(--ms-fs-tiny); }
+.ms-mind-legend { margin: 2px 0 4px; }
+.ms-legend-key.is-pos { background: var(--ms-series-1); }
+.ms-legend-key.is-neg { background: var(--ms-series-2); }
+.ms-legend-key.is-total { background: var(--ms-prov-computed); }
+.ms-legend-key.is-prior-line, .ms-mind-readout-key.is-prior-line { background: repeating-linear-gradient(90deg, var(--ms-prov-computed) 0 4px, transparent 4px 6px); }
+.ms-legend-key.is-post-line, .ms-mind-readout-key.is-post-line { background: var(--ms-prov-estimated); }
+.ms-mind-chart { position: relative; }
+.ms-mind-chart svg { display: block; overflow: visible; }
+
+.ms-mind-wf .grid { stroke: var(--vscode-editorGroup-border); stroke-width: 1; }
+.ms-mind-wf .zero { stroke: var(--vscode-descriptionForeground); stroke-width: 1; }
+.ms-mind-wf .hit { fill: transparent; }
+.ms-mind-wf .wf-row { outline: none; }
+.ms-mind-wf .wf-row:hover .hit, .ms-mind-wf .wf-row:focus-visible .hit { fill: var(--vscode-list-hoverBackground); }
+.ms-mind-wf .wf-row:focus-visible .hit { stroke: var(--vscode-focusBorder); stroke-width: 1; }
+.ms-mind-wf .bar.is-pos { fill: var(--ms-series-1); }
+.ms-mind-wf .bar.is-neg { fill: var(--ms-series-2); }
+.ms-mind-wf .bar.is-total { fill: var(--ms-prov-computed); }
+.ms-mind-wf .conn { stroke: var(--vscode-descriptionForeground); stroke-width: 1; opacity: .7; }
+.ms-mind-wf text { font-family: var(--ms-font-ui); font-size: 11px; }
+.ms-mind-wf .lab { fill: var(--vscode-foreground); }
+.ms-mind-wf .lab.is-total { font-weight: 700; }
+.ms-mind-wf .val { fill: var(--vscode-descriptionForeground); font-variant-numeric: tabular-nums; }
+.ms-mind-wf .axis-title, .ms-mind-curves .axis-title { fill: var(--vscode-descriptionForeground); font-size: 11px; font-family: var(--ms-font-ui); }
+.ms-mind-chart .axis path, .ms-mind-chart .axis line { stroke: var(--vscode-editorGroup-border); }
+.ms-mind-chart .axis text { fill: var(--vscode-descriptionForeground); font-size: 10px; font-family: var(--ms-font-ui); }
+
+.ms-mind-curves { outline: none; }
+.ms-mind-curves:focus-visible { outline: 1px solid var(--vscode-focusBorder); outline-offset: 2px; }
+.ms-mind-curves .grid { stroke: var(--vscode-editorGroup-border); stroke-width: 1; }
+.ms-mind-curves .split { stroke: var(--vscode-descriptionForeground); stroke-width: 1; }
+.ms-mind-curves .hyp { fill: var(--vscode-descriptionForeground); font-size: 10px; font-family: var(--ms-font-ui); }
+.ms-mind-curves .prior { fill: none; stroke: var(--ms-prov-computed); stroke-width: 2; stroke-dasharray: 5 3; stroke-linecap: round; }
+.ms-mind-curves .prior.is-only { stroke-dasharray: none; }
+.ms-mind-curves .post { fill: none; stroke: var(--ms-prov-estimated); stroke-width: 2; stroke-linejoin: round; }
+.ms-mind-curves .post-area { fill: var(--ms-prov-estimated); opacity: .12; }
+.ms-mind-curves .mean { stroke: var(--vscode-editor-background); stroke-width: 2; }
+.ms-mind-curves .mean.is-prior, .ms-mind-curves .cross .is-prior { fill: var(--ms-prov-computed); }
+.ms-mind-curves .mean.is-post, .ms-mind-curves .cross .is-post { fill: var(--ms-prov-estimated); }
+.ms-mind-curves .cross line { stroke: var(--vscode-foreground); stroke-width: 1; opacity: .6; }
+.ms-mind-curves .cross circle { stroke: var(--vscode-editor-background); stroke-width: 2; }
+.ms-mind-curves .direct { fill: var(--vscode-foreground); font-size: 11px; font-family: var(--ms-font-ui); paint-order: stroke; stroke: var(--vscode-editor-background); stroke-width: 3px; stroke-linejoin: round; }
+.ms-mind-curves .overlay { fill: transparent; pointer-events: all; cursor: crosshair; }
+.ms-mind-readout {
+  position: absolute; z-index: 2; width: max-content; max-width: 220px; pointer-events: none; white-space: nowrap;
+  padding: 4px 8px; border-radius: 4px;
+  border: 1px solid var(--vscode-editorHoverWidget-border, var(--vscode-widget-border));
+  background: var(--vscode-editorHoverWidget-background, var(--vscode-editorWidget-background));
+  color: var(--vscode-editorHoverWidget-foreground, var(--vscode-foreground));
+  box-shadow: 0 2px 8px var(--ms-shadow);
+  font-size: var(--ms-fs-tiny); line-height: 1.5; font-variant-numeric: tabular-nums;
+}
+.ms-mind-readout strong { font-weight: 700; }
+.ms-mind-readout-row { display: flex; align-items: center; gap: 5px; }
+.ms-mind-readout-key { display: inline-block; width: 12px; height: 2px; border-radius: 1px; }
+
+.ms-mind-tbl { margin-bottom: 10px; }
+.ms-mind-tbl .ms-mind-fig-title { margin: 0 0 4px; }
+
+.ms-mind-obs { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.ms-mind-ob {
+  display: grid; grid-template-columns: 64px minmax(0, 1fr) minmax(120px, max-content); gap: 4px 10px; align-items: start;
+  padding: 6px 8px; border: 1px solid var(--vscode-widget-border); border-radius: 6px;
+  background: var(--vscode-editorWidget-background);
+  border-left-width: 3px;
+}
+.ms-mind-ob[data-dir="pos"] { border-left-color: var(--ms-series-1); }
+.ms-mind-ob[data-dir="neg"] { border-left-color: var(--ms-series-2); }
+.ms-mind-ob-when { color: var(--vscode-descriptionForeground); font-size: var(--ms-fs-tiny); padding-top: 2px; white-space: nowrap; }
+.ms-mind-ob-body { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.ms-mind-ob-text { margin: 0; line-height: 1.45; }
+.ms-mind-ob-body .ms-mind-speech { margin: 0; align-self: stretch; }
+.ms-mind-speech-head { display: flex; align-items: center; flex-wrap: wrap; }
+.ms-mind-ob-lbf { display: flex; align-items: center; flex-wrap: wrap; gap: 2px 5px; justify-content: flex-end; font-variant-numeric: tabular-nums; }
+.ms-mind-ob[data-dir="pos"] .ms-mind-ob-lbf > .codicon { color: var(--ms-series-1); }
+.ms-mind-ob[data-dir="neg"] .ms-mind-ob-lbf > .codicon { color: var(--ms-series-2); }
+.ms-mind-ob-lbf-v { font-weight: 600; }
+.ms-mind-ob-lbf-w { flex-basis: 100%; text-align: right; color: var(--vscode-descriptionForeground); font-size: var(--ms-fs-tiny); }
+
+/* claims */
+.ms-mind-claims { display: flex; flex-direction: column; gap: 10px; }
+.ms-mind-claim { max-width: 760px; }
+.ms-mind-claim .ms-mind-speech { margin-top: 0; }
+.ms-mind-claim-est { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+.ms-mind-claim-p { display: inline-flex; align-items: baseline; gap: 3px; }
+.ms-mind-claim-num { font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.ms-mind-claim-lab { display: flex; flex-direction: column; min-width: 0; }
+.ms-mind-claim-what { font-weight: 600; }
+.ms-mind-claim-note { color: var(--vscode-descriptionForeground); font-style: italic; }
+.ms-mind-reasons { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.ms-mind-reason-head { display: grid; grid-template-columns: max-content minmax(0, 1fr) minmax(60px, 140px) 3.5em; align-items: center; gap: 8px; }
+.ms-mind-reason-kind { display: inline-flex; align-items: center; gap: 5px; font-weight: 600; }
+.ms-mind-reason-kind .codicon { color: var(--vscode-descriptionForeground); }
+.ms-mind-reason-hint { color: var(--vscode-descriptionForeground); font-size: var(--ms-fs-tiny); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ms-mind-reason-head .ms-mind-meter-fill { background: var(--ms-prov-estimated); }
+.ms-mind-reason-p { text-align: right; font-variant-numeric: tabular-nums; }
+.ms-mind-reason-text { margin: 3px 0 0 20px; line-height: 1.45; }
+
+/* tabs: full labels, short labels in narrow areas, horizontal scroll as a last resort */
+.ms-minds-tabs { overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
+.ms-minds-tabs::-webkit-scrollbar { display: none; }
+.ms-minds-tabs .ms-tab { flex: 0 0 auto; }
+.ms-mind-tab-short { display: none; }
+.ms-mind-narrowbar { display: none; justify-content: flex-end; margin: -4px 0 6px; }
+
+/* ---------- narrow areas ---------- */
+@container area (max-width: 560px) {
+  .ms-mind-trail-top { grid-template-columns: minmax(0, 1fr); }
+  .ms-mind-ob { grid-template-columns: minmax(0, 1fr); }
+  .ms-mind-ob-lbf { justify-content: flex-start; }
+  .ms-mind-ob-lbf-w { flex-basis: auto; text-align: left; }
+  .ms-mind-reason-head { grid-template-columns: max-content minmax(48px, 1fr) 3.5em; }
+  .ms-mind-reason-hint { display: none; }
+  .ms-mind-cards { grid-template-columns: minmax(0, 1fr); }
+}
+@container area (max-width: 460px) {
+  .ms-mind-tab-full { display: none; }
+  .ms-mind-tab-short { display: inline; }
+  .ms-minds-tabs .ms-tab { padding: 0 6px; }
+}
+@container area (max-width: 380px) {
+  .ms-area-tools .ms-mind-tt { display: none; }
+  .ms-mind-narrowbar { display: flex; }
+  .ms-mind-rows { grid-template-columns: minmax(64px, max-content) minmax(32px, 1fr) max-content; }
+  .ms-mind-strip .ms-mind-role { flex-basis: 100%; order: 5; }
+}
+
+@media (forced-colors: active) {
+  .ms-mind-meter-fill, .ms-legend-key, .ms-mind-edge-key { background: CanvasText !important; }
+  .ms-mind-force .edge-line { stroke: CanvasText; }
+  .ms-mind-force .edge-head { fill: CanvasText; }
+}

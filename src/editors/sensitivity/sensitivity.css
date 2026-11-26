@@ -1,0 +1,18 @@
+/* Sensitivity */
+.ms-sens-head { flex: 0 0 auto; padding: 6px 10px 0; }
+.ms-sens-title { display: flex; flex-direction: column; gap: 1px; }
+.ms-sens-body { position: relative; padding: 6px 8px 10px; }
+.ms-sens-svg { display: block; overflow: visible; font-size: 11px; }
+.ms-sens-svg .label { fill: var(--vscode-foreground); font-size: 12px; }
+.ms-sens-svg .glyph { font-size: 11px; font-weight: 700; }
+.ms-sens-svg .value { fill: var(--vscode-descriptionForeground); font-size: 11px; font-variant-numeric: tabular-nums; }
+.ms-sens-svg .hit { fill: transparent; }
+.ms-sens-svg g.row { cursor: pointer; outline: none; }
+.ms-sens-svg g.row:hover .hit, .ms-sens-svg g.row.is-hovered .hit { fill: var(--ms-cone); }
+.ms-sens-svg g.row:focus-visible .hit { stroke: var(--vscode-focusBorder); stroke-width: 1; }
+.ms-sens-svg .bar { opacity: .9; }
+.ms-sens-svg .ms-sens-base { stroke: var(--vscode-foreground); stroke-width: 1; stroke-dasharray: 2 2; }
+.ms-sens-axis text { font-size: 10px; }
+.ms-sens-actions { position: absolute; top: 6px; right: 10px; width: 80px; pointer-events: none; }
+.ms-sens-actions .ms-btn { position: absolute; right: 0; pointer-events: auto; height: 18px; font-size: var(--ms-fs-tiny); }
+.ms-sens-more { margin: 6px 0 0 8px; }

@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MillionScope tests</title>
+  <style>
+    :root { color-scheme: light dark; --ok: #2e7d32; --fail: #c62828; --muted: GrayText; }
+    @media (prefers-color-scheme: dark) { :root { --ok: #73c991; --fail: #f48771; } }
+    body { margin: 0; padding: 16px 20px 40px; font: 13px/1.5 -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", system-ui, Ubuntu, sans-serif; background: Canvas; color: CanvasText; }
+    h1 { font-size: 16px; margin: 0 0 4px; }
+    #summary { margin: 0 0 12px; font-weight: 600; }
+    #summary.ok { color: var(--ok); }
+    #summary.fail { color: var(--fail); }
+    h2 { font-size: 13px; margin: 14px 0 4px; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); }
+    ol { list-style: none; margin: 0; padding: 0; }
+    li { display: grid; grid-template-columns: 20px 1fr auto; gap: 6px; padding: 2px 0; }
+    li .mark { font-weight: 700; }
+    li.ok .mark { color: var(--ok); }
+    li.fail .mark { color: var(--fail); }
+    li .ms { color: var(--muted); font-variant-numeric: tabular-nums; }
+    pre { grid-column: 2 / -1; margin: 2px 0 6px; padding: 6px 8px; white-space: pre-wrap; font: 12px/1.45 "Cascadia Code", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace; border-left: 3px solid var(--fail); background: color-mix(in srgb, var(--fail) 8%, Canvas); }
+  </style>
+</head>
+<body>
+  <h1>MillionScope Workbench · tests</h1>
+  <p id="summary" role="status">Running…</p>
+  <div id="out"></div>
+  <script type="module">
+    import { run, suite } from './harness.js';
+
+    const FILES = ['./area-tree.test.js', './units.test.js', './binding.test.js', './delta.test.js', './engine.test.js', './deps.test.js'];
+    for (const f of FILES) {
+      try {
+        await import(f);
+      } catch (e) {
+        suite('load')(f, () => { throw e; });
+      }
+    }
+    const out = document.getElementById('out');
+    const lists = new Map();
+    const results = await run((r) => {
+      let ol = lists.get(r.suite);
+      if (!ol) {
+        const h = document.createElement('h2');
+        h.textContent = r.suite;
+        ol = document.createElement('ol');
+        out.append(h, ol);
+        lists.set(r.suite, ol);
+      }
+      const li = document.createElement('li');
+      li.className = r.ok ? 'ok' : 'fail';
+      const mark = document.createElement('span');
+      mark.className = 'mark';
+      mark.textContent = r.ok ? '✓' : '✗';
+      mark.setAttribute('aria-label', r.ok ? 'passed' : 'failed');
+      const name = document.createElement('span');
+      name.textContent = r.name;
+      const ms = document.createElement('span');
+      ms.className = 'ms';
+      ms.textContent = `${r.ms.toFixed(1)} ms`;
+      li.append(mark, name, ms);
+      if (!r.ok) {
+        const pre = document.createElement('pre');
+        pre.textContent = r.error;
+        li.appendChild(pre);
+      }
+      ol.appendChild(li);
+    });
+    const failed = results.filter((r) => !r.ok).length;
+    const summary = document.getElementById('summary');
+    summary.textContent = failed ? `${failed} of ${results.length} tests failed` : `All ${results.length} tests passed`;
+    summary.className = failed ? 'fail' : 'ok';
+    document.title = `${failed ? '✗' : '✓'} MillionScope tests (${results.length - failed}/${results.length})`;
+    window.__testResults = { total: results.length, passed: results.length - failed, failed, results };
+  </script>
+</body>
+</html>

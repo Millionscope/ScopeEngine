@@ -1,0 +1,93 @@
+/* ScopeLang editor */
+.ms-sl-banner {
+  flex: 0 0 auto;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 4px 10px;
+  border-bottom: 1px solid var(--vscode-editorGroup-border);
+  background: var(--vscode-textBlockQuote-background);
+  color: var(--vscode-foreground);
+  font-size: var(--ms-fs-small);
+}
+.ms-sl-banner[hidden] { display: none; }
+.ms-sl-banner > span:nth-child(2) { flex: 1 1 260px; }
+.ms-sl-banner .codicon { color: var(--vscode-descriptionForeground); }
+
+.ms-sl-body { flex: 1 1 auto; display: flex; min-height: 0; }
+.ms-sl-code {
+  flex: 1 1 auto; min-width: 0; min-height: 0;
+  overflow: auto; position: relative;
+  background: var(--vscode-editor-background);
+  color: var(--vscode-editor-foreground);
+  outline: none;
+}
+.ms-sl-code:focus-visible { outline: 1px solid var(--vscode-focusBorder); outline-offset: -1px; }
+.ms-sl-sizer { position: relative; min-width: 100%; width: max-content; }
+.ms-sl-code .ms-code.ms-sl-pre { background: transparent; overflow: visible; min-width: 100%; width: max-content; }
+.ms-sl-code .ms-code.ms-sl-pre.is-windowed { position: absolute; left: 0; padding: 0; }
+.ms-sl-code .ms-code-line { cursor: default; }
+/* line-number column sized to the longest number (stress graphs reach six digits) */
+.ms-sl-code .ms-code-ln { flex-basis: calc(var(--ms-sl-digits, 3) * 1ch + 1.4em); }
+.ms-sl-code .ms-code-diag { margin-left: calc(var(--ms-sl-digits, 3) * 1ch + 1.4em + 18px); }
+.ms-sl-code .ms-code-line.has-id { cursor: pointer; }
+.ms-sl-code .ms-code-line.is-hovered { background: var(--ms-cone); }
+.ms-sl-code .ms-code-line.is-selected { background: var(--vscode-list-inactiveSelectionBackground); box-shadow: inset 2px 0 0 var(--vscode-focusBorder); }
+.ms-sl-code .ms-code-line.is-selected .ms-code-ln { color: var(--vscode-editorLineNumber-activeForeground); }
+.ms-sl-code:focus .ms-code-line.is-active { outline: 1px solid var(--vscode-focusBorder); outline-offset: -1px; }
+.ms-sl-code .ms-code-line.is-active:not(.is-selected) { background: var(--vscode-list-hoverBackground); }
+.ms-sl-fold { opacity: .55; }
+.ms-sl-code .ms-code-line:hover .ms-sl-fold,
+.ms-sl-fold.codicon-chevron-right { opacity: 1; }
+
+.ms-sl-ir {
+  flex: 0 0 38%; min-width: 220px; max-width: 520px;
+  display: flex; flex-direction: column; min-height: 0;
+  border-left: 1px solid var(--vscode-editorGroup-border);
+  background: var(--vscode-sideBar-background);
+}
+.ms-sl-ir[hidden] { display: none; }
+.ms-sl-ir-head {
+  flex: 0 0 auto; display: flex; align-items: center; gap: 6px;
+  height: 26px; padding: 0 4px 0 10px;
+  border-bottom: 1px solid var(--vscode-editorGroup-border);
+  font-size: var(--ms-fs-small);
+}
+.ms-sl-ir-title { font-size: var(--ms-fs-tiny); font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--vscode-descriptionForeground); flex: 0 0 auto; }
+.ms-sl-ir-path { flex: 1 1 auto; font-family: var(--ms-font-mono); font-size: var(--ms-fs-tiny); min-width: 0; }
+.ms-sl-ir .ms-code.ms-sl-ir-code { flex: 1 1 auto; min-height: 0; background: transparent; }
+.ms-sl-irbtn { gap: 4px; padding: 0 6px; font-size: var(--ms-fs-small); color: var(--vscode-foreground); }
+
+.ms-sl-foot { gap: 12px; white-space: nowrap; overflow: hidden; }
+.ms-sl-pos { flex: 0 1 auto; overflow: hidden; text-overflow: ellipsis; min-width: 7ch; font-family: var(--ms-font-mono); }
+.ms-sl-foot > span:not(.ms-sl-pos):not(.ms-spacer) { flex: 0 0 auto; }
+.ms-sl-problems { display: inline-flex; align-items: center; gap: 3px; }
+.ms-sl-problems .codicon { font-size: 12px; }
+.ms-sl-problems .codicon-error { color: var(--vscode-editorError-foreground); }
+.ms-sl-problems .codicon-warning { color: var(--vscode-editorWarning-foreground); margin-left: 4px; }
+
+/* N region: problems */
+.ms-sl-side-title { padding: 6px 10px 2px; font-size: var(--ms-fs-tiny); font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--vscode-descriptionForeground); }
+.ms-sl-problems-list { list-style: none; margin: 0; padding: 2px 0; }
+.ms-sl-problem {
+  display: flex; align-items: flex-start; gap: 6px; width: 100%;
+  padding: 4px 10px; border: 0; background: none; text-align: left;
+  color: var(--vscode-foreground); font-size: var(--ms-fs-small); cursor: pointer;
+}
+.ms-sl-problem:hover { background: var(--vscode-list-hoverBackground); }
+.ms-sl-problem:focus-visible { outline: 1px solid var(--vscode-focusBorder); outline-offset: -1px; }
+.ms-sl-problem .codicon { margin-top: 2px; font-size: 13px; }
+.ms-sl-problem[data-severity="error"] .codicon { color: var(--vscode-editorError-foreground); }
+.ms-sl-problem[data-severity="warning"] .codicon { color: var(--vscode-editorWarning-foreground); }
+.ms-sl-problem-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ms-sl-problem-msg { overflow-wrap: anywhere; line-height: 1.4; }
+.ms-sl-problem-where { color: var(--vscode-descriptionForeground); font-size: var(--ms-fs-tiny); font-family: var(--ms-font-mono); }
+
+@container area (max-width: 640px) {
+  .ms-sl-foot .ms-sl-ro, .ms-sl-foot .ms-sl-ver { display: none; }
+}
+@container area (max-width: 420px) {
+  .ms-sl-foot .ms-sl-count { display: none; }
+}
+@container area (max-width: 560px) {
+  .ms-sl-body { flex-direction: column; }
+  .ms-sl-ir { flex: 0 0 42%; max-width: none; min-width: 0; border-left: 0; border-top: 1px solid var(--vscode-editorGroup-border); }
+}
