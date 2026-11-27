@@ -19,6 +19,7 @@
     "three-globe": "2.40.0"
   },
   "devDependencies": {
+    "playwright-core": "^1.65.1",
     "vite": "^7.3.8"
   }
 }
