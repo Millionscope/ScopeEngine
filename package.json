@@ -11,7 +11,7 @@
     "@rcsb/rcsb-molstar": "^2.15.2",
     "chart.js": "4.4.1",
     "d3": "7.9.0",
-    "highcharts": "11.4.8",
+    "highcharts": "13.1.1",
     "katex": "0.16.9",
     "maplibre-gl": "6.19.0",
     "mermaid": "10.9.1",

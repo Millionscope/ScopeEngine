@@ -54,6 +54,7 @@ export const EDITORS = [
   { id: 'protein', label: 'Protein', icon: 'beaker', group: 'Scope', needs: ['molstar'], kind: 'editor', shortcut: null, usesScenario: false, loader: lazy('protein', () => import('./protein/index.js')) },
   { id: 'building', label: 'Building', icon: 'home', group: 'Scope', needs: ['three', 'threefx', 'gltf'], kind: 'editor', shortcut: null, usesScenario: false, loader: lazy('building', () => import('./building/index.js')) },
   { id: 'atom', label: 'Atom', icon: 'symbol-misc', group: 'Scope', needs: ['three', 'threefx'], kind: 'editor', shortcut: null, usesScenario: false, loader: lazy('atom', () => import('./atom/index.js')) },
+  { id: 'candlestick', label: 'Candlestick', icon: 'graph-line', group: 'Scope', needs: ['highcharts'], kind: 'editor', shortcut: null, usesScenario: false, loader: lazy('candlestick', () => import('./candlestick/index.js')) },
   { id: 'game', label: 'Game', icon: 'game', group: 'Scope', needs: [], kind: 'editor', shortcut: null, usesScenario: false, loader: lazy('game', () => import('./game/index.js')) },
   { id: 'sheet', label: 'Sheet', icon: 'table', group: 'Scope', needs: [], kind: 'editor', shortcut: 'shift+f6', usesScenario: true, loader: lazy('sheet', () => import('./sheet/index.js')) },
   { id: 'inspector', label: 'Properties', icon: 'symbol-property', group: 'Scope', needs: [], kind: 'panel', shortcut: 'shift+f7', usesScenario: true, loader: lazy('inspector', () => import('./inspector/index.js')) },

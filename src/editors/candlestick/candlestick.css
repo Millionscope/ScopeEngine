@@ -1,0 +1,17 @@
+/* Candlestick: Highcharts plot over the scope hologram stage, with scanlines and a vignette. */
+.ms-cs .ms-sc-host { background: radial-gradient(circle at 50% 45%, #0c2a4a 0%, #061426 55%, #02060d 100%); }
+.ms-cs-plot { position: absolute; inset: 0 0 0 0; }
+.ms-cs .ms-sc-host::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: repeating-linear-gradient(0deg, rgba(63, 216, 255, .035) 0 1px, transparent 1px 3px);
+}
+.ms-cs .ms-sc-col.is-left { bottom: auto; }
+.ms-cs-ticker h3 { font-family: var(--ms-font-mono); font-size: 20px; color: var(--c); }
+.ms-cs-ticker .ms-sc-meta { flex-wrap: wrap; }
+.ms-cs .highcharts-label-box { filter: drop-shadow(0 0 4px #3fd8ff); }
+.ms-cs .ms-cs-last { filter: drop-shadow(0 0 3px #3fd8ff); }
+.ms-cs .highcharts-plot-line-label { text-shadow: 0 0 6px #3fd8ff; }

@@ -72,7 +72,8 @@ export const LIBS = {
     version: 'katex@0.16.9',
     init: (m) => m.default,
   },
-  highcharts: { load: () => import('highcharts'), version: 'highcharts@11.4.8', init: (m) => m.default },
+  // Candlestick editor: Highcharts Stock (a superset of Highcharts with the OHLC series)
+  highcharts: { load: () => import('highcharts/highstock'), version: 'highcharts@13.1.1', init: (m) => m.default },
 };
 
 /** @type {Map<string, Promise<any>>} */
