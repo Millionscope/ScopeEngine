@@ -42,6 +42,8 @@ export const LIBS = {
     version: 'three@0.160.0 addons',
     init: ([ec, rp, ub, op, bgu]) => ({ EffectComposer: ec.EffectComposer, RenderPass: rp.RenderPass, UnrealBloomPass: ub.UnrealBloomPass, OutputPass: op.OutputPass, mergeGeometries: bgu.mergeGeometries }),
   },
+  // Building editor: glTF model loader
+  gltf: { load: () => import('three/examples/jsm/loaders/GLTFLoader.js'), version: 'three@0.160.0 addons', init: (m) => m.GLTFLoader },
   // three-globe (Globe.GL's layer engine). 2.40.0 is the last release without a `three/webgpu` import,
   // which three 0.160 lacks; globe.gl itself needs three >= 0.179.
   threeglobe: { load: () => import('three-globe'), version: 'three-globe@2.40.0', init: (m) => m.default },

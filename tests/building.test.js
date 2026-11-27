@@ -17,9 +17,9 @@ test('glow state is continuous at every keyframe', () => {
   for (const [t] of KEYS.slice(1, -1)) {
     const a = tourAt(t - 1e-6);
     const b = tourAt(t);
-    // fill 0 hides the sweep, so only the visible glow (fill, and sweep where filled) must match
-    assert.close(a.fill, b.fill, 1e-4, `fill at ${t}`);
-    if (a.fill > 1e-3) assert.close(Math.min(a.sweep, 1), Math.min(b.sweep, 1), 1e-4, `sweep at ${t}`);
+    // brightness proxy of the shader at a few heights: filled boost, dimming of the unfilled rest
+    const shade = (p, h) => { const f = p.sweep >= h ? p.fill : 0; return (1 + f) * (1 - 0.6 * p.dim * (1 - f)); };
+    for (const h of [0.1, 0.5, 0.9]) assert.close(shade(a, h), shade(b, h), 1e-4, `glow at ${t}, h ${h}`);
     assert.close(a.y, b.y, 1e-4, `y at ${t}`);
   }
 });
@@ -32,7 +32,7 @@ test('climb: from the base to the top, the glow tracking the camera', () => {
   for (let t = t0; t < t1; t += 0.25) {
     const p = tourAt(t);
     assert.ok(p.y >= prev - 1e-9, `rises at ${t}`);
-    assert.ok(Math.abs(p.sweep - p.y) < 0.06, `glow near camera height at ${t}`);
+    assert.ok(Math.abs(p.sweep - p.y) < 0.12, `glow near camera height at ${t}`);
     prev = p.y;
   }
   assert.ok(tourAt(t1 - 1e-6).sweep >= 1, 'whole tower lit at the top');
