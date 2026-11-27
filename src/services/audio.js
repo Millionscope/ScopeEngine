@@ -17,6 +17,8 @@
  *    public/audio/sfx/<name>.mp3 when present, else a synthesized hologram chirp.
  *  - an AnalyserNode drives the hologram: --ms-audio (level) and --ms-a0..4 (bands) are written each
  *    frame on the playing area and the status bar only (not :root, so the whole tree does not restyle).
+ *  - choose(key) (the status bar song menu) pins one track over all of the above, Game aside;
+ *    choose(null) goes back to Auto.
  * Mute persists as ui.audioMuted; the current title is status.audio.
  * @module services/audio
  */
@@ -96,6 +98,8 @@ export class AudioDirector {
     this.wantScope = /** @type {string|null} */ (null);
     /** false until the user changes tab or scope: HOME plays on first load */
     this.follow = false;
+    /** track the user picked from the status bar; null = Auto */
+    this.choice = /** @type {string|null} */ (null);
     /** the welcome plays only on a first load that lands on Home */
     this.introDone = ws.activeId !== HOME_WORKSPACE;
     this.missing = new Set();
@@ -144,6 +148,13 @@ export class AudioDirector {
 
   get muted() { return !!this.store.get('ui.audioMuted'); }
 
+  /** Pin a track (unmuting), or null for Auto. @param {string|null} key */
+  choose(key) {
+    this.choice = key;
+    if (key && this.muted) this.store.set('ui.audioMuted', false); // ui listener re-syncs
+    this.pick();
+  }
+
   /** Choose the track the layout asks for, and the area that glows with it. */
   pick() {
     const areas = (this.ws.activeAreas?.() || []).filter((a) => a.isVisible());
@@ -153,6 +164,7 @@ export class AudioDirector {
     let scope = null;
     let want = HOME;
     if (types.includes('game')) want = null;
+    else if (this.choice) want = this.choice;
     else if (!this.introDone && this.ws.activeId === HOME_WORKSPACE) want = INTRO;
     else if (this.follow && this.ws.activeId !== HOME_WORKSPACE) {
       if (at && SCOPES[at]) scope = at;

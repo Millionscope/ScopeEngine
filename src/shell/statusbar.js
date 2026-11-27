@@ -6,6 +6,7 @@
  * @module shell/statusbar
  */
 import { DisposableStore, listen } from '../core/disposable.js';
+import { TRACKS } from '../services/audio.js';
 
 /** @param {number} n */
 const fmtInt = (n) => Number(n || 0).toLocaleString('en-US');
@@ -58,7 +59,7 @@ export class StatusBar {
     this.cert = this.item('button', 'verified', 'Certificate: open the full certificate');
     this.themeItem = this.item('button', 'color-mode', 'Theme (click to cycle Dark, Light, Auto)');
     this.bell = this.item('button', 'bell', 'Notifications');
-    this.audio = this.item('button', 'unmute', 'Scope music and sound effects (Ctrl+Alt+M)');
+    this.audio = this.item('button', 'unmute', 'Scope music: pick a song, or mute (Ctrl+Alt+M)');
     this.audio.classList.add('ms-sb-audio');
     this.audio.insertAdjacentHTML('beforeend', '<span class="ms-sb-eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>');
     right.append(this.selection, this.scenario, this.swarm, this.cert, this.audio, this.themeItem, this.bell);
@@ -84,7 +85,18 @@ export class StatusBar {
     this.d.add(listen(this.cert, 'click', () => commands.execute('view.reveal', 'certificate')));
     this.d.add(listen(this.themeItem, 'click', () => theme.cycle()));
     this.d.add(listen(this.bell, 'click', () => this.showNotifications()));
-    this.d.add(listen(this.audio, 'click', () => commands.execute('audio.toggle')));
+    this.d.add(listen(this.audio, 'click', () => {
+      const a = services.audio;
+      if (!a) return;
+      const songs = Object.entries(TRACKS).filter(([k]) => k !== 'intro' && k !== 'home');
+      menus.show([
+        { label: 'Auto (follow scope)', checked: !a.choice, run: () => a.choose(null) },
+        { separator: true },
+        ...songs.map(([k, t]) => ({ label: t.title, checked: a.choice === k, run: () => a.choose(k) })),
+        { separator: true },
+        { command: 'audio.toggle', label: 'Mute', checked: !!store.get('ui.audioMuted') },
+      ], this.audio, { label: 'Music' });
+    }));
 
     this.d.add(store.select('status', () => this.render()));
     this.d.add(store.select('ui', () => this.render()));

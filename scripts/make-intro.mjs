@@ -138,9 +138,10 @@ async function screencast(page, id, ms) {
   });
   list += `file ${String(frames.length - 1).padStart(5, '0')}.jpg\n`; // concat demuxer drops the last duration otherwise
   writeFileSync(join(dir, 'list.txt'), list);
-  sh('ffmpeg', ['-y', '-v', 'error', '-f', 'concat', '-safe', '0', '-i', join(dir, 'list.txt'),
+  sh('ffmpeg', ['-nostdin', '-y', '-v', 'error', '-f', 'concat', '-safe', '0', '-i', join(dir, 'list.txt'),
     '-vf', `scale=${W}:${H}:flags=lanczos,fps=${FPS},format=yuv420p`, '-fps_mode', 'cfr',
     '-c:v', 'libx264', '-crf', '12', '-preset', 'medium', join(CLIPS, `${id}.mp4`)]);
+  rmSync(dir, { recursive: true, force: true }); // drop the JPEGs: Spotlight indexing thousands of frames slows ffmpeg to a crawl
   console.log(`clip ${id}: ${frames.length} frames over ${(ms / 1000).toFixed(1)}s (${(frames.length / (ms / 1000)).toFixed(1)} fps captured)`);
 }
 
@@ -187,7 +188,7 @@ function compose() {
 
   mkdirSync(OUT, { recursive: true });
   const dst = join(OUT, 'millionscope-intro.mp4');
-  sh('ffmpeg', ['-y', '-v', 'error', '-stats', ...inputs, '-filter_complex', [...vf, ...af].join(';'),
+  sh('ffmpeg', ['-nostdin', '-y', '-v', 'error', '-stats', ...inputs, '-filter_complex', [...vf, ...af].join(';'),
     '-map', '[vout]', '-map', '[aout]', '-c:v', 'libx264', '-crf', '18', '-preset', 'slow', '-pix_fmt', 'yuv420p',
     '-c:a', 'aac', '-ac', '2', '-b:a', '192k', '-movflags', '+faststart', '-t', total.toFixed(3), dst]);
   console.log(`\n${dst}  (${total.toFixed(1)}s)`);
