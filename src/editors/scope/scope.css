@@ -162,8 +162,9 @@
 .ms-sc-credit:hover { color: var(--sc-cyan); }
 
 /* small areas: keep the model, drop the panels that would cover it */
+@container (max-width: 1299px) { .ms-sc-col.is-right { display: none; } } /* System overview: large, full-width viewers only */
 @container (max-width: 760px) { .ms-sc-col.is-left .ms-sc-panel:first-child { display: none; } }
-@container (max-width: 560px) { .ms-sc-col.is-right { display: none; } .ms-sc-col.is-left { width: auto; right: 10px; } }
+@container (max-width: 560px) { .ms-sc-col.is-left { width: auto; right: 10px; } }
 @container (max-height: 420px) { .ms-sc-col.is-left .ms-sc-panel:first-child, .ms-sc-col.is-right { display: none; } }
 
 /* guided tour: only the toured part's callout and leader line */

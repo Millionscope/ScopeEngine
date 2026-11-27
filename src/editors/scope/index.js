@@ -941,7 +941,7 @@ export default class ScopeEditor extends BaseEditor {
         // keep the whole callout between the HUD panels
         a.wid ||= a.el.offsetWidth;
         const colX = side === 'L' ? Math.max(col, freeL + a.wid) : Math.min(col, freeR - a.wid);
-        const ly = Math.max(14, a.ly);
+        const ly = Math.max(24, a.ly);
         const tx = side === 'L' ? `calc(${colX}px - 100%)` : `${colX}px`;
         a.el.style.transform = `translate(${tx}, calc(${ly}px - 50%))`;
         a.el.classList.toggle('is-behind', a.behind && a !== this.selected?.anno);
