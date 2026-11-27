@@ -58,7 +58,10 @@ export class StatusBar {
     this.cert = this.item('button', 'verified', 'Certificate: open the full certificate');
     this.themeItem = this.item('button', 'color-mode', 'Theme (click to cycle Dark, Light, Auto)');
     this.bell = this.item('button', 'bell', 'Notifications');
-    right.append(this.selection, this.scenario, this.swarm, this.cert, this.themeItem, this.bell);
+    this.audio = this.item('button', 'unmute', 'Scope music and sound effects (Ctrl+Alt+M)');
+    this.audio.classList.add('ms-sb-audio');
+    this.audio.insertAdjacentHTML('beforeend', '<span class="ms-sb-eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>');
+    right.append(this.selection, this.scenario, this.swarm, this.cert, this.audio, this.themeItem, this.bell);
 
     el.append(left, right);
 
@@ -81,6 +84,7 @@ export class StatusBar {
     this.d.add(listen(this.cert, 'click', () => commands.execute('view.reveal', 'certificate')));
     this.d.add(listen(this.themeItem, 'click', () => theme.cycle()));
     this.d.add(listen(this.bell, 'click', () => this.showNotifications()));
+    this.d.add(listen(this.audio, 'click', () => commands.execute('audio.toggle')));
 
     this.d.add(store.select('status', () => this.render()));
     this.d.add(store.select('ui', () => this.render()));
@@ -161,6 +165,12 @@ export class StatusBar {
       certIcon.className = 'codicon codicon-verified';
       this.setLabel(this.cert, 'no certificate');
     }
+
+    const muted = !!ui.audioMuted;
+    /** @type {HTMLElement} */ (this.audio.firstElementChild).className = `codicon codicon-${muted ? 'mute' : 'unmute'}`;
+    this.setLabel(this.audio, muted ? 'muted' : (s.audio || ''));
+    this.audio.classList.toggle('is-playing', !muted && !!s.audio);
+    this.audio.setAttribute('aria-pressed', String(!muted));
 
     this.setLabel(this.themeItem, this.theme.label());
     const unread = this.notify.unread;

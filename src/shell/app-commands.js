@@ -93,6 +93,7 @@ export function registerAppCommands({ env, ws, keymap, palette, composer, menus,
         env.scheduler.reducedMotion = on || matchMedia('(prefers-reduced-motion: reduce)').matches;
       },
     },
+    { id: 'audio.toggle', title: 'Toggle Scope Music & Sound Effects', category: 'View', icon: 'unmute', checked: () => !store.get('ui.audioMuted'), run: () => store.set('ui.audioMuted', !store.get('ui.audioMuted')) },
     { id: 'palette.open', title: 'Command Palette', category: 'View', icon: 'search', run: () => palette.open('all') },
     { id: 'palette.quickOpen', title: 'Quick Open Scope…', category: 'View', icon: 'go-to-file', run: () => palette.open('scopes') },
     { id: 'composer.focus', title: 'Focus Composer', category: 'Chat', icon: 'comment', run: () => composer.focus() },
@@ -173,6 +174,7 @@ export function registerAppCommands({ env, ws, keymap, palette, composer, menus,
   k('ctrl+shift+p', 'palette.open', { allowInInput: true });
   k('ctrl+p', 'palette.quickOpen', { allowInInput: true });
   k('/', 'composer.focus');
+  k('ctrl+alt+m', 'audio.toggle', { allowInInput: true });
   k('?', 'help.shortcuts');
   k('ctrl+/', 'help.shortcuts', { allowInInput: true });
   k('ctrl+alt+d', 'debug.overlay', { allowInInput: true });

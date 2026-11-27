@@ -26,6 +26,7 @@ import { ChatService } from './services/chat.js';
 import { CompilerService } from './services/compiler.js';
 import { MindService } from './services/mind.js';
 import { SimService } from './services/sim.js';
+import { AudioDirector } from './services/audio.js';
 import { WorkspaceManager } from './workspace/workspaces.js';
 import { loadLayout, loadPrefs, savePrefs, loadDeltaLog, saveDeltaLog, clearDeltaLog } from './workspace/persistence.js';
 import { MenuService } from './shell/context-menu.js';
@@ -56,6 +57,7 @@ async function boot() {
       mcSamples: [200, 1000, 5000].includes(prefs.mcSamples) ? prefs.mcSamples : 1000,
       composerMode: prefs.composerMode || 'answer',
       reducedMotion: !!prefs.reducedMotion,
+      audioMuted: !!prefs.audioMuted,
     },
     status: { engine: 'js-mock', version: null, hash: null, recompute: null, tokens: { count: 0, local: true, touched: false }, swarm: { running: false, roles: 0, label: '' } },
   });
@@ -194,6 +196,7 @@ async function boot() {
   tooltip.setCardProvider(makePreviewCardProvider({ engine, services, commands }));
   ws.init(loadLayout());
   new TopBar({ el: /** @type {HTMLElement} */ (document.getElementById('topbar')), ws, commands, theme, events, menus });
+  services.audio = new AudioDirector({ events, store, ws });
   new StatusBar({ el: /** @type {HTMLElement} */ (document.getElementById('statusbar')), store, commands, theme, events, menus, notify, services });
   const composer = new Composer({ el: /** @type {HTMLElement} */ (document.getElementById('composer')), env, ws, menus });
   const palette = new Palette({ env, ws });
@@ -206,7 +209,7 @@ async function boot() {
   registerModelCommands({ env, ws, keymap, reload });
   keymap.attach(window);
 
-  store.select('ui', (u) => savePrefs({ mcSamples: u.mcSamples, composerMode: u.composerMode, reducedMotion: u.reducedMotion }));
+  store.select('ui', (u) => savePrefs({ mcSamples: u.mcSamples, composerMode: u.composerMode, reducedMotion: u.reducedMotion, audioMuted: u.audioMuted }));
 
   document.getElementById('app')?.removeAttribute('aria-busy');
   log.info('app', `workbench ready in ${Math.round(performance.now() - t0)} ms${replayed ? ` (replayed ${replayed} saved change(s))` : ''}`);

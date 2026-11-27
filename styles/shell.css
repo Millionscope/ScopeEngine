@@ -223,3 +223,39 @@ button.ms-sb-item:focus-visible { outline: 1px solid var(--vscode-statusBarItem-
   overflow: hidden;
   background: var(--vscode-editorGroup-border);
 }
+
+/* ---------- audio-reactive hologram (vars written per frame by services/audio.js) ---------- */
+.ms-sb-audio .ms-sb-label { max-width: 180px; overflow: hidden; text-overflow: ellipsis; }
+.ms-sb-eq { display: none; align-items: flex-end; gap: 1px; height: 12px; }
+.ms-sb-audio.is-playing .ms-sb-eq { display: inline-flex; }
+.ms-sb-eq i {
+  width: 2px; height: 100%; background: #5ff4ff; box-shadow: 0 0 4px #5ff4ff;
+  transform-origin: bottom; transform: scaleY(calc(0.12 + var(--b, 0) * 1.4));
+}
+.ms-sb-eq i:nth-child(1) { --b: var(--ms-a0); }
+.ms-sb-eq i:nth-child(2) { --b: var(--ms-a1); }
+.ms-sb-eq i:nth-child(3) { --b: var(--ms-a2); }
+.ms-sb-eq i:nth-child(4) { --b: var(--ms-a3); }
+.ms-sb-eq i:nth-child(5) { --b: var(--ms-a4); }
+
+/* the area whose scope is playing: a cyan rim that breathes with the level, scanlines, and a sweep band
+   whose brightness follows the bass; everything is pointer-transparent */
+.ms-area.is-audio {
+  box-shadow:
+    inset 0 0 0 1px rgb(95 244 255 / calc(0.15 + var(--ms-audio, 0) * 0.85)),
+    inset 0 0 calc(6px + var(--ms-audio, 0) * 40px) rgb(95 244 255 / calc(var(--ms-audio, 0) * 0.45));
+}
+.ms-area.is-audio .ms-editor-host::after {
+  content: "";
+  position: absolute; inset: 0;
+  pointer-events: none; z-index: 7;
+  mix-blend-mode: screen;
+  background:
+    linear-gradient(180deg, transparent 0 42%, rgb(95 244 255 / calc(var(--ms-a0, 0) * 0.18)) 50%, transparent 58% 100%) 0 0 / 100% 300% no-repeat,
+    repeating-linear-gradient(0deg, rgb(140 255 255 / 0.05) 0 1px, transparent 1px 3px);
+  opacity: calc(0.35 + var(--ms-audio, 0) * 0.65);
+  filter: hue-rotate(calc(var(--ms-a3, 0) * 60deg));
+  animation: ms-holo-sweep 6s linear infinite;
+}
+@keyframes ms-holo-sweep { from { background-position: 0 100%, 0 0; } to { background-position: 0 -200%, 0 0; } }
+.ms-reduced-motion .ms-area.is-audio .ms-editor-host::after { animation: none; }
