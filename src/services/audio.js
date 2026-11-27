@@ -3,6 +3,9 @@
  *  - TRACKS are the files in public/audio (see CREDITS.txt); a long track is split into <4 MB chunks
  *    that play in order and loop. SCOPES maps every immersive editor to a track; scopes without their
  *    own download reuse the closest one, so two scopes can share a track (it just keeps playing).
+ *  - INTRO (welcome music and welcome speech together, from public/speech) plays once, only when the
+ *    page loads on the Home tab; it ends with its longest layer, and leaving Home cuts it short for good.
+ *    Then HOME follows.
  *  - HOME (Science and Technology) plays on first load and on the Home tab (whose left area cycles
  *    scopes on its own). Once the user changes tab or scope, the active area's scope picks the track,
  *    else the current one keeps playing while its scope is visible, else the first visible scope,
@@ -18,8 +21,12 @@
  * @module services/audio
  */
 
-/** track -> { title, files } (files play in order, then loop) */
+/** track -> { title, files, vols?, once?, layers? }: files play in order, then loop (once: stop after the
+ *  last); with layers they all play together and the track ends when the longest one does.
+ *  vols: per-file gain x MUSIC_VOL, from measured loudness: songs -17.6 LUFS play at about -24.5; the welcome
+ *  speech (-19.2) sits ~3 dB above them with the welcome music (-25.5) ~10 dB under the voice. */
 export const TRACKS = {
+  intro: { title: 'Welcome to MillionScope', files: ['/speech/welcome-millionscope-music.mp3', '/speech/welcome-millionscope-speech.mp3'], vols: [1.2, 1.8], once: true, layers: true },
   science: { title: 'Science and Technology', files: ['science'] },
   ionosphere: { title: 'Ionosphere · Karl Casey', files: ['ionosphere'] },
   aetheris: { title: 'Aetheris · Deep Cosmic Ambient', files: ['aetheris'] },
@@ -30,6 +37,9 @@ export const TRACKS = {
   bladerunner: { title: 'This is Blade Runner City', files: ['blade-runner-city-1', 'blade-runner-city-2', 'blade-runner-city-3'] },
 };
 const HOME = 'science';
+const INTRO = 'intro';
+/** @param {string} f */
+const url = (f) => (f.startsWith('/') ? f : `/audio/${f}.mp3`);
 const HOME_WORKSPACE = 'home';
 
 /** editorId -> track. Panels (outliner, sheet, inspector) and game have none on purpose. */
@@ -69,7 +79,7 @@ export class AudioDirector {
     this.ws = ws;
     /** @type {AudioContext|null} */
     this.ctx = null;
-    /** @type {{key: string, el: HTMLAudioElement, gain: GainNode, src: MediaElementAudioSourceNode}|null} */
+    /** @type {{key: string, els: HTMLAudioElement[], gain: GainNode}|null} */
     this.cur = null;
     /** track that is playing or about to (after the previous one has faded out) */
     this.curKey = /** @type {string|null} */ (null);
@@ -79,6 +89,8 @@ export class AudioDirector {
     this.wantScope = /** @type {string|null} */ (null);
     /** false until the user changes tab or scope: HOME plays on first load */
     this.follow = false;
+    /** the welcome plays only on a first load that lands on Home */
+    this.introDone = ws.activeId !== HOME_WORKSPACE;
     this.missing = new Set();
     this._token = 0;
     this._quietAt = 0; // performance.now() when the last fade-out ends
@@ -134,6 +146,7 @@ export class AudioDirector {
     let scope = null;
     let want = HOME;
     if (types.includes('game')) want = null;
+    else if (!this.introDone && this.ws.activeId === HOME_WORKSPACE) want = INTRO;
     else if (this.follow && this.ws.activeId !== HOME_WORKSPACE) {
       if (at && SCOPES[at]) scope = at;
       else if (this.wantScope && types.includes(this.wantScope)) scope = this.wantScope;
@@ -190,6 +203,7 @@ export class AudioDirector {
     this.curKey = key;
     const token = ++this._token;
     if (this.cur) {
+      if (this.cur.key === INTRO) this.introDone = true; // cut short: never comes back
       this._fadeOut(this.cur);
       this.cur = null;
       this._quietAt = performance.now() + FADE_OUT_S * 1000;
@@ -202,44 +216,70 @@ export class AudioDirector {
   /** @param {string} key */
   _start(key) {
     const ctx = /** @type {AudioContext} */ (this.ctx);
-    const files = TRACKS[key].files;
-    let i = 0;
-    const el = new Audio(`/audio/${files[0]}.mp3`);
-    el.loop = files.length === 1;
-    // chunked track: next chunk on end, back to the first after the last
-    el.addEventListener('ended', () => {
-      i = (i + 1) % files.length;
-      el.src = `/audio/${files[i]}.mp3`;
-      el.play().catch(() => {});
-    });
-    const src = ctx.createMediaElementSource(el);
-    const gain = ctx.createGain();
+    const track = TRACKS[key];
+    const files = track.files;
+    const gain = ctx.createGain(); // track fader: fade in / out
     gain.gain.value = 0;
-    src.connect(gain).connect(/** @type {GainNode} */ (this.master));
-    const cur = { key, el, gain, src };
+    gain.connect(/** @type {GainNode} */ (this.master));
+    /** one element per layer, or one element that walks through the chunks */
+    const els = (track.layers ? files : [files[0]]).map((f, k) => {
+      const el = new Audio(url(f));
+      const g = ctx.createGain(); // per-file level
+      g.gain.value = track.vols?.[k] ?? 1;
+      ctx.createMediaElementSource(el).connect(g).connect(gain);
+      return { el, g };
+    });
+    const cur = { key, els: els.map((e) => e.el), gain };
     this.cur = cur;
-    el.addEventListener('error', () => {
-      this.missing.add(key);
-      if (this.cur !== cur) return;
-      this.cur = null;
-      this.curKey = null;
-      src.disconnect();
-      this.sync();
-    }, { once: true });
-    el.play().then(() => {
+    const finish = () => {
+      if (key === INTRO) this.introDone = true;
+      if (this.cur === cur) { this.cur = null; this.curKey = null; gain.disconnect(); }
+      this.pick();
+    };
+    if (track.layers) {
+      let left = els.length;
+      for (const { el } of els) el.addEventListener('ended', () => { if (--left === 0) finish(); });
+    } else {
+      const { el, g } = els[0];
+      el.loop = files.length === 1 && !track.once;
+      let i = 0;
+      // chunked track: next chunk on end, back to the first after the last (a `once` track ends instead)
+      el.addEventListener('ended', () => {
+        if (track.once && i === files.length - 1) return finish();
+        i = (i + 1) % files.length;
+        el.src = url(files[i]);
+        g.gain.value = track.vols?.[i] ?? 1;
+        el.play().catch(() => {});
+      });
+    }
+    for (const { el } of els) {
+      el.addEventListener('error', () => {
+        this.missing.add(key);
+        if (key === INTRO) this.introDone = true;
+        if (this.cur !== cur) return;
+        this._fadeOut(cur);
+        this.cur = null;
+        this.curKey = null;
+        this.sync();
+      }, { once: true });
+    }
+    Promise.all(els.map(({ el }) => el.play())).then(() => {
       const t = ctx.currentTime;
       gain.gain.setValueAtTime(0, t);
-      gain.gain.linearRampToValueAtTime(MUSIC_VOL, t + FADE_IN_S);
+      gain.gain.linearRampToValueAtTime(MUSIC_VOL, t + (track.once ? 0.3 : FADE_IN_S));
     }).catch(() => {});
   }
 
-  /** @param {{el: HTMLAudioElement, gain: GainNode, src: MediaElementAudioSourceNode}} c */
+  /** @param {{els: HTMLAudioElement[], gain: GainNode}} c */
   _fadeOut(c) {
     const t = /** @type {AudioContext} */ (this.ctx).currentTime;
     c.gain.gain.cancelScheduledValues(t);
     c.gain.gain.setValueAtTime(c.gain.gain.value, t);
     c.gain.gain.linearRampToValueAtTime(0, t + FADE_OUT_S);
-    setTimeout(() => { c.el.pause(); c.el.removeAttribute('src'); c.src.disconnect(); }, FADE_OUT_S * 1000);
+    setTimeout(() => {
+      for (const el of c.els) { el.pause(); el.removeAttribute('src'); }
+      c.gain.disconnect();
+    }, FADE_OUT_S * 1000);
   }
 
   /** @param {keyof typeof SYNTH} name */
