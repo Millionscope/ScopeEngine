@@ -6,8 +6,8 @@
  *  - INTRO (welcome music and welcome speech together, from public/speech) plays once, only when the
  *    page loads on the Home tab; it ends with its longest layer, and leaving Home cuts it short for good.
  *    Then HOME follows.
- *  - HOME (Science and Technology) plays on first load and on the Home tab (whose left area cycles
- *    scopes on its own). Once the user changes tab or scope, the active area's scope picks the track,
+ *  - HOME plays on first load and on the Home tab (whose left area cycles scopes on its own): a
+ *    playlist that starts with Science and Technology, then every other song, then around again. Once the user changes tab or scope, the active area's scope picks the track,
  *    else the current one keeps playing while its scope is visible, else the first visible scope,
  *    else HOME. Switching fades the old track out completely before the next one fades in.
  *  - the Game scope has its own audio: no music while it is visible. A missing file falls back to HOME.
@@ -21,7 +21,7 @@
  * @module services/audio
  */
 
-/** track -> { title, files, vols?, once?, layers? }: files play in order, then loop (once: stop after the
+/** track -> { title, files, titles?, vols?, once?, layers? }: files play in order, then loop (once: stop after the
  *  last); with layers they all play together and the track ends when the longest one does.
  *  vols: per-file gain x MUSIC_VOL, from measured loudness: songs -17.6 LUFS play at about -24.5; the welcome
  *  speech (-19.2) sits ~3 dB above them with the welcome music (-25.5) ~10 dB under the voice. */
@@ -36,7 +36,14 @@ export const TRACKS = {
   apex: { title: 'Apex', files: ['apex'] },
   bladerunner: { title: 'This is Blade Runner City', files: ['blade-runner-city-1', 'blade-runner-city-2', 'blade-runner-city-3'] },
 };
-const HOME = 'science';
+/** Home playlist order: Science and Technology first, then the rest. */
+const PLAYLIST = ['science', 'ionosphere', 'aetheris', 'earth', 'mirrors', 'distance', 'apex', 'bladerunner'];
+TRACKS.home = {
+  title: TRACKS.science.title,
+  files: PLAYLIST.flatMap((k) => TRACKS[k].files),
+  titles: PLAYLIST.flatMap((k) => TRACKS[k].files.map(() => TRACKS[k].title)),
+};
+const HOME = 'home';
 const INTRO = 'intro';
 /** @param {string} f */
 const url = (f) => (f.startsWith('/') ? f : `/audio/${f}.mp3`);
@@ -79,7 +86,7 @@ export class AudioDirector {
     this.ws = ws;
     /** @type {AudioContext|null} */
     this.ctx = null;
-    /** @type {{key: string, els: HTMLAudioElement[], gain: GainNode}|null} */
+    /** @type {{key: string, els: HTMLAudioElement[], gain: GainNode, title: string}|null} */
     this.cur = null;
     /** track that is playing or about to (after the previous one has faded out) */
     this.curKey = /** @type {string|null} */ (null);
@@ -196,7 +203,7 @@ export class AudioDirector {
   sync() {
     let key = this.muted ? null : this.want;
     if (key && this.missing.has(key)) key = this.missing.has(HOME) ? null : HOME;
-    this.store.set('status.audio', key ? TRACKS[key].title : null);
+    this.store.set('status.audio', key ? (this.cur?.key === key ? this.cur.title : TRACKS[key].title) : null);
     this.areaEl?.classList.toggle('is-audio', !!key);
     const ctx = this.ctx;
     if (!ctx || ctx.state !== 'running' || this.curKey === key) return;
@@ -229,7 +236,7 @@ export class AudioDirector {
       ctx.createMediaElementSource(el).connect(g).connect(gain);
       return { el, g };
     });
-    const cur = { key, els: els.map((e) => e.el), gain };
+    const cur = { key, els: els.map((e) => e.el), gain, title: track.title };
     this.cur = cur;
     const finish = () => {
       if (key === INTRO) this.introDone = true;
@@ -249,6 +256,8 @@ export class AudioDirector {
         i = (i + 1) % files.length;
         el.src = url(files[i]);
         g.gain.value = track.vols?.[i] ?? 1;
+        cur.title = track.titles?.[i] ?? track.title;
+        if (this.cur === cur) this.store.set('status.audio', cur.title);
         el.play().catch(() => {});
       });
     }
