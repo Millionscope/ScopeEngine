@@ -1,9 +1,13 @@
 /**
- * Audio director: one soundtrack for the whole workbench.
- *  - every immersive scope has a looping track at public/audio/<editorId>.mp3 (see CREDITS.txt there);
- *    the active area's scope wins, else the current track keeps playing while its scope is still
- *    visible, else the first visible scope; tracks crossfade. A missing file just stays silent.
- *  - the Game scope has its own audio: no music while it is visible.
+ * Audio director: one soundtrack for the whole workbench, and only ever one track audible.
+ *  - TRACKS are the files in public/audio (see CREDITS.txt); a long track is split into <4 MB chunks
+ *    that play in order and loop. SCOPES maps every immersive editor to a track; scopes without their
+ *    own download reuse the closest one, so two scopes can share a track (it just keeps playing).
+ *  - HOME (Science and Technology) plays on first load and on the Home tab (whose left area cycles
+ *    scopes on its own). Once the user changes tab or scope, the active area's scope picks the track,
+ *    else the current one keeps playing while its scope is visible, else the first visible scope,
+ *    else HOME. Switching fades the old track out completely before the next one fades in.
+ *  - the Game scope has its own audio: no music while it is visible. A missing file falls back to HOME.
  *  - browsers block autoplay until a gesture, so the first pointerdown / keydown unlocks the
  *    AudioContext and starts the pending track.
  *  - interaction SFX (click, hover tick, selection sweep, workspace whoosh) play
@@ -14,25 +18,40 @@
  * @module services/audio
  */
 
-/** editorId -> title. Panels (outliner, sheet, inspector) and game have none on purpose. */
+/** track -> { title, files } (files play in order, then loop) */
 export const TRACKS = {
-  graph: 'Archetype · Karl Casey',
-  space3d: 'Space Ambience · Alexander Nakarada',
-  scope: 'Science and Technology',
-  solar: 'Aetheris · Deep Cosmic Ambient',
-  globe: 'Epic Drone Music',
-  terrain: 'Ionosphere · Karl Casey',
-  city: 'This is Blade Runner City',
-  protein: 'Dream of Mirrors · Karl Casey',
-  building: 'Apex',
-  atom: 'SINGULARIS',
-  choropleth: 'Distance · Karl Casey',
-  candlestick: 'Trading Synthwave',
-  sp500: 'Wall Street Synthwave',
+  science: { title: 'Science and Technology', files: ['science'] },
+  ionosphere: { title: 'Ionosphere · Karl Casey', files: ['ionosphere'] },
+  aetheris: { title: 'Aetheris · Deep Cosmic Ambient', files: ['aetheris'] },
+  earth: { title: 'Epic Drone Music', files: ['earth-drone'] },
+  mirrors: { title: 'Dream of Mirrors · Karl Casey', files: ['dream-of-mirrors'] },
+  distance: { title: 'Distance · Karl Casey', files: ['distance'] },
+  apex: { title: 'Apex', files: ['apex'] },
+  bladerunner: { title: 'This is Blade Runner City', files: ['blade-runner-city-1', 'blade-runner-city-2', 'blade-runner-city-3'] },
+};
+const HOME = 'science';
+const HOME_WORKSPACE = 'home';
+
+/** editorId -> track. Panels (outliner, sheet, inspector) and game have none on purpose. */
+export const SCOPES = {
+  scope: 'science',
+  solar: 'aetheris',
+  space3d: 'aetheris',
+  globe: 'earth',
+  terrain: 'ionosphere',
+  graph: 'ionosphere',
+  city: 'bladerunner',
+  protein: 'mirrors',
+  atom: 'mirrors',
+  building: 'apex',
+  sp500: 'apex',
+  choropleth: 'distance',
+  candlestick: 'distance',
 };
 
 const MUSIC_VOL = 0.45;
-const FADE_S = 1.5;
+const FADE_IN_S = 1.2;
+const FADE_OUT_S = 0.8;
 /** synth fallback: [f0, f1, seconds, gain, wave] */
 const SYNTH = {
   click: [1900, 700, 0.07, 0.06, 'triangle'],
@@ -50,10 +69,19 @@ export class AudioDirector {
     this.ws = ws;
     /** @type {AudioContext|null} */
     this.ctx = null;
-    /** @type {{id: string, el: HTMLAudioElement, gain: GainNode, src: MediaElementAudioSourceNode}|null} */
+    /** @type {{key: string, el: HTMLAudioElement, gain: GainNode, src: MediaElementAudioSourceNode}|null} */
     this.cur = null;
+    /** track that is playing or about to (after the previous one has faded out) */
+    this.curKey = /** @type {string|null} */ (null);
+    /** track the layout asks for (before mute / missing files) */
     this.want = /** @type {string|null} */ (null);
+    /** editor whose scope chose `want` (keeps it while that scope stays visible) */
+    this.wantScope = /** @type {string|null} */ (null);
+    /** false until the user changes tab or scope: HOME plays on first load */
+    this.follow = false;
     this.missing = new Set();
+    this._token = 0;
+    this._quietAt = 0; // performance.now() when the last fade-out ends
     /** @type {Record<string, AudioBuffer|null>} */
     this.sfxBuf = {};
     /** @type {HTMLElement|null} */
@@ -64,7 +92,11 @@ export class AudioDirector {
     this._raf = 0;
 
     const pick = () => setTimeout(() => this.pick()); // after the workspace settles visibility
-    for (const t of ['area:focused', 'area:typeChanged', 'workspace:changed', 'layout:changed']) events.on(t, pick);
+    const userPick = () => { this.follow = true; pick(); };
+    events.on('workspace:changed', userPick);
+    events.on('area:typeChanged', userPick);
+    events.on('area:focused', pick);
+    events.on('layout:changed', pick);
     events.on('workspace:changed', () => this.sfx('whoosh'));
     events.on('selection:changed', (s) => { if (s?.source !== 'reload') this.sfx('select'); });
     store.select('ui', () => this.sync());
@@ -93,22 +125,30 @@ export class AudioDirector {
 
   get muted() { return !!this.store.get('ui.audioMuted'); }
 
-  /** Choose the scope whose track should play. */
+  /** Choose the track the layout asks for, and the area that glows with it. */
   pick() {
     const areas = (this.ws.activeAreas?.() || []).filter((a) => a.isVisible());
     const types = areas.map((a) => a.leaf.editorType);
     const active = this.ws.activeArea();
     const at = active?.isVisible() ? active.leaf.editorType : null;
-    let id = null;
-    if (types.includes('game')) id = null;
-    else if (at && TRACKS[at]) id = at;
-    else if (this.want && types.includes(this.want)) id = this.want;
-    else id = types.find((t) => TRACKS[t]) || null;
-    this.want = id;
-    const owner = (at === id ? active : areas.find((a) => a.leaf.editorType === id))?.el || null;
-    if (owner !== this.areaEl) {
+    let scope = null;
+    let want = HOME;
+    if (types.includes('game')) want = null;
+    else if (this.follow && this.ws.activeId !== HOME_WORKSPACE) {
+      if (at && SCOPES[at]) scope = at;
+      else if (this.wantScope && types.includes(this.wantScope)) scope = this.wantScope;
+      else scope = types.find((t) => SCOPES[t]) || null;
+      if (scope) want = SCOPES[scope];
+    }
+    this.want = want;
+    this.wantScope = scope;
+    const owner = scope
+      ? (at === scope ? active : areas.find((a) => a.leaf.editorType === scope))
+      : (areas.find((a) => SCOPES[a.leaf.editorType] === want) || active);
+    const el = want ? owner?.el || null : null;
+    if (el !== this.areaEl) {
       this.areaEl?.classList.remove('is-audio');
-      this.areaEl = owner;
+      this.areaEl = el;
     }
     this.sync();
   }
@@ -139,32 +179,57 @@ export class AudioDirector {
       .catch(() => { this.sfxBuf[name] = null; });
   }
 
-  /** Bring the playing track in line with want + mute (crossfade). */
+  /** Bring the playing track in line with want + mute: fade the old one out, then start the new one. */
   sync() {
-    const id = this.muted || this.missing.has(/** @type {string} */ (this.want)) ? null : this.want;
-    this.store.set('status.audio', id ? TRACKS[id] : null);
-    this.areaEl?.classList.toggle('is-audio', !!id);
+    let key = this.muted ? null : this.want;
+    if (key && this.missing.has(key)) key = this.missing.has(HOME) ? null : HOME;
+    this.store.set('status.audio', key ? TRACKS[key].title : null);
+    this.areaEl?.classList.toggle('is-audio', !!key);
     const ctx = this.ctx;
-    if (!ctx || ctx.state !== 'running' || this.cur?.id === id) return;
-    if (this.cur) this._fadeOut(this.cur);
-    this.cur = null;
-    if (!id) return;
-    const el = new Audio(`/audio/${id}.mp3`);
-    el.loop = true;
+    if (!ctx || ctx.state !== 'running' || this.curKey === key) return;
+    this.curKey = key;
+    const token = ++this._token;
+    if (this.cur) {
+      this._fadeOut(this.cur);
+      this.cur = null;
+      this._quietAt = performance.now() + FADE_OUT_S * 1000;
+    }
+    if (!key) return;
+    // start only once every earlier track has gone quiet: one track audible at a time
+    setTimeout(() => { if (token === this._token) this._start(key); }, Math.max(0, this._quietAt - performance.now()));
+  }
+
+  /** @param {string} key */
+  _start(key) {
+    const ctx = /** @type {AudioContext} */ (this.ctx);
+    const files = TRACKS[key].files;
+    let i = 0;
+    const el = new Audio(`/audio/${files[0]}.mp3`);
+    el.loop = files.length === 1;
+    // chunked track: next chunk on end, back to the first after the last
+    el.addEventListener('ended', () => {
+      i = (i + 1) % files.length;
+      el.src = `/audio/${files[i]}.mp3`;
+      el.play().catch(() => {});
+    });
     const src = ctx.createMediaElementSource(el);
     const gain = ctx.createGain();
     gain.gain.value = 0;
     src.connect(gain).connect(/** @type {GainNode} */ (this.master));
-    const cur = { id, el, gain, src };
+    const cur = { key, el, gain, src };
     this.cur = cur;
     el.addEventListener('error', () => {
-      this.missing.add(id);
-      if (this.cur === cur) { this.cur = null; this.sync(); }
+      this.missing.add(key);
+      if (this.cur !== cur) return;
+      this.cur = null;
+      this.curKey = null;
+      src.disconnect();
+      this.sync();
     }, { once: true });
     el.play().then(() => {
       const t = ctx.currentTime;
       gain.gain.setValueAtTime(0, t);
-      gain.gain.linearRampToValueAtTime(MUSIC_VOL, t + FADE_S);
+      gain.gain.linearRampToValueAtTime(MUSIC_VOL, t + FADE_IN_S);
     }).catch(() => {});
   }
 
@@ -173,8 +238,8 @@ export class AudioDirector {
     const t = /** @type {AudioContext} */ (this.ctx).currentTime;
     c.gain.gain.cancelScheduledValues(t);
     c.gain.gain.setValueAtTime(c.gain.gain.value, t);
-    c.gain.gain.linearRampToValueAtTime(0, t + FADE_S);
-    setTimeout(() => { c.el.pause(); c.el.removeAttribute('src'); c.src.disconnect(); }, FADE_S * 1000 + 100);
+    c.gain.gain.linearRampToValueAtTime(0, t + FADE_OUT_S);
+    setTimeout(() => { c.el.pause(); c.el.removeAttribute('src'); c.src.disconnect(); }, FADE_OUT_S * 1000);
   }
 
   /** @param {keyof typeof SYNTH} name */

@@ -7,3 +7,6 @@ dist/
 Atlas26/
 *.local
 .env
+
+# source WAVs for public/audio (958 MB)
+raw_audio/

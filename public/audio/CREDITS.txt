@@ -1,0 +1,15 @@
+Scope soundtrack (services/audio.js). Encoded from raw_audio/*.wav: ffmpeg loudnorm I=-18 TP=-1.5,
+128 kbps stereo (Blade Runner City: first 12 min, 3 x 4-min chunks at 96 kbps). Every file < 4 MB.
+Licences are bought separately by the project owner; note the licence/receipt next to each line.
+
+science.mp3            Science and Technology (Home, first load, Human Atlas)   https://www.youtube.com/watch?v=kGlihniSNoE
+ionosphere.mp3         Ionosphere, Karl Casey @ White Bat Audio (Terrain, Scope Graph)  https://www.youtube.com/watch?v=CGCdbA55qPg
+aetheris.mp3           Aetheris, Deep Cosmic Sci-Fi Ambient (Solar, 3D Scope Space)     https://www.youtube.com/watch?v=S94hTZ9OA7k
+earth-drone.mp3        Epic Drone Music (Earth Globe)                                    https://www.youtube.com/watch?v=jfJ2-1iQ0dE
+dream-of-mirrors.mp3   Dream of Mirrors, Karl Casey @ White Bat Audio (Protein, Atom)    https://www.youtube.com/watch?v=qK1OzBpVPK0
+distance.mp3           Distance, Karl Casey @ White Bat Audio (Choropleth, Candlestick)  https://www.youtube.com/watch?v=L4ho390u45s
+apex.mp3               Apex (Building, S&P500)                                           https://www.youtube.com/watch?v=kdKvhKoe0Tw
+blade-runner-city-N.mp3  This is Blade Runner City (Holo City)                           https://www.youtube.com/watch?v=SmEAYNjhz58
+
+Optional SFX: sfx/click.mp3 sfx/hover.mp3 sfx/select.mp3 sfx/whoosh.mp3 (synthesized chirps play when missing)
+  https://www.youtube.com/watch?v=PObGk3dQHXo  https://www.youtube.com/watch?v=sv7MRXgafRA  https://www.youtube.com/watch?v=HrmSJj-EgxY
