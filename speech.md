@@ -19,7 +19,13 @@ Second:
 ```text
 Welcome to Million Scope.
 Ask one question, and see it from a million perspectives.
-Language by AI. Math you can verify. All in a living hologram.
+Wonderful science in your hand with super artificial intelligence.
 From the human body to the solar system, from city streets to the molecules of life, explore it all as a living hologram.
 Million Scope. See every possibility.
+```
+
+
+```
+#MillionScope #AI #DecisionMaking #DataVisualization #Simulation #3D
+MillionScope, AI, DecisionMaking, DataVisualization, Simulation, 3D 
 ```
