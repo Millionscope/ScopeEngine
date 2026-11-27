@@ -445,6 +445,7 @@ export default class SolarEditor extends BaseEditor {
 
     if (this.touring && moving) {
       this.tourT += dt;
+      this.loopCheck(this.tourT - dt, this.tourT, TOUR_LEN);
       this.phase = this.tourPose(this._v.set(0, 0, 0), this._tgt ??= new THREE.Vector3());
       if (this.fly) this.blendFly(dt, this._v, this._tgt);
       else { cam.copy(this._v); tgt.copy(this._tgt); }

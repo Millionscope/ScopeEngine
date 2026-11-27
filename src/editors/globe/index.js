@@ -269,7 +269,10 @@ export default class GlobeEditor extends BaseEditor {
     if (this.touring) {
       // tour off (or reduced motion): fly to the picked city and stay at its hold pose
       const hold = Math.floor(this.tourT / CYCLE) * CYCLE + IN;
-      if (this.state.tour && moving) this.tourT += dt;
+      if (this.state.tour && moving) {
+        this.tourT += dt;
+        this.loopCheck(this.tourT - dt, this.tourT, CYCLE * CITIES.length);
+      }
       else this.tourT = moving ? Math.min(this.tourT + dt, hold) : hold;
       if (!moving) this.fly = null;
       this.phase = this.tourPose(this._p, this._t);

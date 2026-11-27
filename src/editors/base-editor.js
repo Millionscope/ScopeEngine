@@ -209,6 +209,16 @@ export class BaseEditor {
     this.ctx?.services.selection?.hover(id, this.ctx?.areaId);
   }
 
+  /** The editor's animation finished one full loop (the Home workspace cycles its left area on it). */
+  loopDone() {
+    this.ctx?.events.emit('editor:loopDone', { areaId: this.ctx.areaId });
+  }
+
+  /** loopDone() when a tour clock moving from prev to t crosses a multiple of len. */
+  loopCheck(prev, t, len) {
+    if (Math.floor(t / len) > Math.floor(prev / len)) this.loopDone();
+  }
+
   /** Persist editor state into the area leaf. */
   save() {
     this.ctx?.saveState(this.getState());

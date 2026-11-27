@@ -253,6 +253,7 @@ export default class AtomEditor extends BaseEditor {
     // orbits always loop; reduced motion slows them instead of stopping (S pauses them outright)
     const k = this.state.spin ? (info.reducedMotion ? 0.35 : 1) : 0;
     this.uTime.value += dt * k;
+    this.loopCheck(this.uTime.value - dt * k, this.uTime.value, (4 * Math.PI) / 0.7);
     for (const s of this.spins) s.rotation.z += s.userData.w * dt * k;
     this.nucleus.rotation.y += 0.25 * dt * k;
     this.particles.rotation.y += 0.02 * dt * k;

@@ -5,7 +5,7 @@
  * Also the single entry point for area operations, focus tracking and persistence.
  * @module workspace/workspaces
  */
-import { DisposableStore, listen } from '../core/disposable.js';
+import { DisposableStore, listen, toDisposable } from '../core/disposable.js';
 import { uid } from '../core/ids.js';
 import { log } from '../core/log.js';
 import { debounce } from '../core/scheduler.js';
@@ -27,6 +27,9 @@ import { clearLayout, saveLayout } from './persistence.js';
  * @property {HTMLElement} container
  * @property {string|null} activeAreaId
  */
+
+// ponytail: one fixed fallback; 5 min covers the Globe's full 20-city tour (~216 s) plus loading
+const CYCLE_MAX_MS = 300000;
 
 export class WorkspaceManager {
   /**
@@ -55,6 +58,20 @@ export class WorkspaceManager {
     });
     this._save = debounce(() => this.saveNow(), 300);
     this.d.add(listen(window, 'beforeunload', () => this.saveNow()));
+    // areas with a `cycle` (Home's left area) move to the next editor type when the current one
+    // finishes its animation loop, or after CYCLE_MAX_MS shown if it never reports one (load error, tour off)
+    this._cycleSince = new Map();
+    this.d.add(this.events.on('editor:loopDone', ({ areaId }) => this._cycleNext(areaId)));
+    const iv = setInterval(() => {
+      const now = Date.now();
+      for (const w of this.workspaces) for (const leaf of w.tree.leaves()) {
+        if (!leaf.cycle) continue;
+        const since = this._cycleSince.get(leaf.id);
+        if (w.id !== this.activeId || since == null) this._cycleSince.set(leaf.id, now);
+        else if (now - since > CYCLE_MAX_MS) this._cycleNext(leaf.id);
+      }
+    }, 5000);
+    this.d.add(toDisposable(() => clearInterval(iv)));
   }
 
   // ------------------------------------------------------------------ setup
@@ -272,8 +289,17 @@ export class WorkspaceManager {
 
   // ------------------------------------------------------------------ area operations
 
-  /** @param {string} areaId @param {string} type */
-  setAreaType(areaId, type) {
+  /** Advance a cycling area to the next type in its cycle (stops if the user picked a type outside it). @param {string} areaId */
+  _cycleNext(areaId) {
+    const leaf = this.workspaceOf(areaId)?.tree.area(areaId);
+    const i = leaf?.cycle?.indexOf(leaf.editorType) ?? -1;
+    if (i < 0) return;
+    this._cycleSince.set(areaId, Date.now());
+    this.setAreaType(areaId, leaf.cycle[(i + 1) % leaf.cycle.length], { focus: false });
+  }
+
+  /** @param {string} areaId @param {string} type @param {{focus?: boolean}} [opts] */
+  setAreaType(areaId, type, { focus = true } = {}) {
     const w = this.workspaceOf(areaId);
     const area = this.getArea(areaId);
     if (!w || !getEditor(type)) return;
@@ -281,7 +307,7 @@ export class WorkspaceManager {
     if (from === type && area?.editor) return;
     w.tree.replaceEditor(areaId, type, {});
     area?.mount();
-    this.setActiveArea(areaId);
+    if (focus) this.setActiveArea(areaId);
     this.events.emit('area:typeChanged', { areaId, workspaceId: w.id, from, to: type });
     this._layoutChanged('type');
   }

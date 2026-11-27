@@ -412,7 +412,9 @@ export default class CityEditor extends BaseEditor {
     const b = map.getBearing();
     const turn = ((((want - b) % 360) + 540) % 360) - 180;
     map.jumpTo({ center: ll, bearing: b + turn * (1 - Math.exp(-dt * 1.2)) });
+    const prev = this.tourT;
     this.tourT += (SPEED * dt) / (this.stops.length * Math.max(q.len, 50));
+    this.loopCheck(prev, this.tourT, 1);
   }
 
   frameAll() {

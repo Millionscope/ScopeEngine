@@ -13,7 +13,7 @@ import { emptyState } from '../shared/empty-state.js';
 import { acquire, release, touch, isLost, glAvailable } from '../shared/gl-pool.js';
 import { surfaceOptions, ReadbackPresenter } from '../shared/gl-present.js';
 import { loadCss } from '../../core/lazy.js';
-import { tourAt } from './tour.js';
+import { tourAt, LOOP } from './tour.js';
 
 /** three.js and add-ons, set from ctx.libs on mount. */
 let THREE;
@@ -292,6 +292,7 @@ export default class BuildingEditor extends BaseEditor {
 
     if (this.touring && moving) {
       this.tourT += dt;
+      this.loopCheck(this.tourT - dt, this.tourT, LOOP);
       const p = tourAt(this.tourT);
       this.phase = p.phase;
       this.pose(p, this._v, this._t);

@@ -390,6 +390,7 @@ export default class ProteinEditor extends BaseEditor {
     const parts = this.entry?.parts;
     if (!this.state.tour || !this.ready || !parts?.length || now < this.tourUntil || now - this.idleSince < IDLE_RESUME_MS) return;
     this.step = (this.step + 1) % (parts.length * 2);
+    if (this.step === 0) this.loopDone();
     if (this.step % 2) {
       this.focusPart((this.step - 1) / 2);
       this.tourUntil = now + PART_MS;

@@ -345,7 +345,11 @@ export default class TerrainEditor extends BaseEditor {
     const moving = !info.reducedMotion;
     const easing = map.isEasing();
     if (moving) this.holo.time += dt;
-    if (this.state.rotate && moving && !easing && !this._down && now - this.idleSince > IDLE_RESUME_MS) map.setBearing(map.getBearing() + ROT_DEG_S * dt);
+    if (this.state.rotate && moving && !easing && !this._down && now - this.idleSince > IDLE_RESUME_MS) {
+      map.setBearing(map.getBearing() + ROT_DEG_S * dt);
+      this.spun = (this.spun ?? 0) + ROT_DEG_S * dt;
+      this.loopCheck(this.spun - ROT_DEG_S * dt, this.spun, 360);
+    }
     else if (this.state.holo && moving) map.triggerRepaint(); // keep the scan wave going
     // retry while terrain tiles are still streaming in (capped: tiles far off-screen may never load)
     if (this.holoDirty && !easing && now - (this._lastBuild ?? 0) > 1200 && this.holoTries < 15) {

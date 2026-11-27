@@ -61,6 +61,7 @@ export function makeArea(editorType, opts = {}) {
     scenarioId: opts.scenarioId ?? null,
     headerPos: opts.headerPos || 'top',
     headerCollapsed: !!opts.headerCollapsed,
+    ...(opts.cycle ? { cycle: [...opts.cycle] } : {}),
   };
 }
 

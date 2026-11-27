@@ -447,7 +447,9 @@ export default class ScopeEditor extends BaseEditor {
     const t = this.tour;
     t.time += dt;
     u.uTourY.value.z = Math.min(1.1, ((t.time - TOUR.scanStart) / TOUR.scan) * 1.2 - 0.1);
-    if (t.time >= step.dur) this.enterStep((t.i + 1) % t.steps.length);
+    if (t.time < step.dur) return;
+    if (t.i + 1 === t.steps.length) this.loopDone();
+    this.enterStep((t.i + 1) % t.steps.length);
   }
 
   startTour() {
