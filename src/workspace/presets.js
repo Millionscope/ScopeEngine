@@ -16,16 +16,16 @@ import { AreaTree, makeArea as A, makeSplit as S } from './area-tree.js';
 /** @type {Preset[]} */
 export const PRESETS = [
   {
-    key: 'answer',
-    name: 'Answer',
-    icon: 'comment-discussion',
-    description: 'Answer first: chat, the five most sensitive inputs, the main distribution and the certificate.',
+    key: 'home',
+    name: 'Home',
+    icon: 'home',
+    description: 'Human Atlas on the left; Earth Globe above Atom and Solar System on the right.',
     build: () => new AreaTree(
-      S('row', 0.55,
-        A('chat'),
-        S('col', 0.5,
-          A('controls'),
-          S('row', 0.55, A('distribution'), A('certificate')))),
+      S('row', 0.45,
+        A('scope'),
+        S('col', 0.55,
+          A('globe'),
+          S('row', 0.5, A('atom'), A('solar')))),
     ),
   },
   {

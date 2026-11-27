@@ -19,6 +19,7 @@ const SPIN = 0.05; // rotations per second
 const SWEEP_S = 4.5; // one bottom-to-top pass
 const FLY_MS = 1800;
 const OVERVIEW_MS = 4500;
+const INTRO_MS = 1500; // establishing shot after a load, then the tour opens with a zoom-in
 const PART_MS = 5500;
 const IDLE_RESUME_MS = 8000;
 
@@ -217,13 +218,15 @@ export default class ProteinEditor extends BaseEditor {
     this.retTop = el('span', 'ms-pr-rt is-top', 'Acquiring target');
     this.retBottom = el('span', 'ms-pr-rt is-bottom', '');
     this.reticle.append(this.retTop, this.retBottom);
-    this.host.append(this.glowEl, this.reticle);
+    this.caption = el('span', 'ms-pr-rt ms-pr-caption', '');
+    this.host.append(this.glowEl, this.reticle, this.caption);
     this.buildOverlay();
     this.createViewer();
 
     this.disposables.add(ctx.scheduler.animate(this, (info) => this.tick(info)));
     this.listen(this.host, 'keydown', (e) => this.onKey(/** @type {KeyboardEvent} */ (e)));
-    const touch = () => { this.idleSince = performance.now(); };
+    // only input on the molecule pauses the tour, not clicks on the HUD
+    const touch = (e) => { if (this.molEl?.contains(e.target)) this.idleSince = performance.now(); };
     this.listen(this.host, 'pointerdown', touch, { capture: true });
     this.listen(this.host, 'wheel', touch, { capture: true, passive: true });
   }
@@ -307,7 +310,8 @@ export default class ProteinEditor extends BaseEditor {
       this.entry = entry;
       this.ready = true;
       this.step = 0;
-      this.tourUntil = performance.now() + OVERVIEW_MS;
+      this.atoms = null; // the load cleared the state, ball & stick included
+      this.tourUntil = performance.now() + INTRO_MS;
       this.renderLoading(null);
       this.renderDetail();
       this.renderParts();
@@ -336,18 +340,37 @@ export default class ProteinEditor extends BaseEditor {
     const plugin = this.plugin;
     const structure = plugin?.managers.structure.hierarchy.current.structures[0]?.cell.obj?.data;
     if (!part || !structure) return;
-    this.viewer.select({ labelAsymId: this.entry.model.chain, labelSeqRange: { beg: part.beg, end: part.end } }, 'select', 'set');
+    const target = { labelAsymId: this.entry.model.chain, labelSeqRange: { beg: part.beg, end: part.end } };
+    this.viewer.select(target, 'select', 'set');
     const loci = plugin.managers.structure.selection.getLoci(structure);
-    // tighter than the part's bounding sphere, so the zoom reads as one
-    plugin.managers.camera.focusLoci(loci, { durationMs: this.reduce ? 0 : FLY_MS, extraRadius: -4, minRadius: 8 });
+    // tighter than the part's bounding sphere: close enough to read atoms and bonds
+    plugin.managers.camera.focusLoci(loci, { durationMs: this.reduce ? 0 : FLY_MS, extraRadius: -6, minRadius: 6 });
+    this.viewer.clearSelection('select'); // only needed for the loci; its tint would hide the element colours
+    this.showAtoms(target);
     this.part = i;
     this.lock();
+  }
+
+  /**
+   * The zoomed part's atoms as ball & stick over its cartoon (null clears). One at a time:
+   * rcsb-molstar keys these by label, which is the same for every range.
+   * @param {object|null} target
+   */
+  showAtoms(target) {
+    const v = this.viewer;
+    const prev = this.atoms;
+    this.atoms = target;
+    (async () => {
+      if (prev) await v.setBallAndStick(prev, 'off');
+      if (target && this.atoms === target && this.viewer === v) await v.setBallAndStick(target, 'on');
+    })().catch((err) => console.warn('[protein] ball & stick:', err));
   }
 
   /** Back out to the whole model. */
   overview() {
     if (!this.viewer || !this.ready) return;
     this.viewer.clearSelection('select');
+    this.showAtoms(null);
     this.viewer.resetCamera(this.reduce ? 0 : FLY_MS);
     this.part = -1;
     this.lock();
@@ -376,12 +399,15 @@ export default class ProteinEditor extends BaseEditor {
     }
   }
 
-  /** Re-run the reticle lock-on and relabel it. */
+  /** Show the reticle (whole model) or the part caption (zoomed in), and replay the lock-on. */
   lock() {
     const m = this.entry?.model;
     const part = this.entry?.parts[this.part];
+    // the reticle frames the whole model only; zoomed into a part, a caption names it instead
+    this.root.classList.toggle('is-zoomed', !!part);
     this.retTop.textContent = m ? `Target lock · ${m.id}` : 'Acquiring target';
-    this.retBottom.textContent = !m ? '' : part ? `Residues ${part.beg}–${part.end} · pLDDT ${part.plddt.toFixed(1)}` : `Full structure · ${m.length} aa · pLDDT ${m.plddt.toFixed(1)}`;
+    this.retBottom.textContent = m ? `Full structure · ${m.length} aa · pLDDT ${m.plddt.toFixed(1)}` : '';
+    this.caption.textContent = part ? `Residues ${part.beg}–${part.end} · pLDDT ${part.plddt.toFixed(1)} · atoms` : '';
     this.reticle.classList.remove('is-locking');
     void this.reticle.offsetWidth; // restart the CSS animation
     this.reticle.classList.add('is-locking');

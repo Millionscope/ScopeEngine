@@ -451,13 +451,6 @@
     }
   ],
   "asset": {
-    "extras": {
-      "author": "SDC PERFORMANCE™️ (https://sketchfab.com/3Duae)",
-      "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
-      "source": "https://sketchfab.com/3d-models/free-burj-khalifa-dubai-c1d6f5884c9c4a56b8d8f9c5555f1902",
-      "title": "( FREE ) Burj Khalifa Dubai"
-    },
-    "generator": "Sketchfab-12.82.3",
     "version": "2.0"
   },
   "bufferViews": [
@@ -690,7 +683,7 @@
         0.0,
         1.0
       ],
-      "name": "Sketchfab_model"
+      "name": "Burj Khalifa"
     },
     {
       "children": [
@@ -804,7 +797,7 @@
   "scene": 0,
   "scenes": [
     {
-      "name": "Sketchfab_Scene",
+      "name": "Burj_Khalifa_Scene",
       "nodes": [
         0
       ]

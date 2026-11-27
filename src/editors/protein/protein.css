@@ -61,7 +61,13 @@
 .ms-pr-r1 { animation: ms-pr-spin 40s linear infinite; }
 .ms-pr-r2 { animation: ms-pr-spin 22s linear infinite reverse; }
 .ms-pr-r3 { animation: ms-pr-pulse 2.6s ease-in-out infinite; }
-.ms-pr-reticle.is-locking svg { animation: ms-pr-lock .9s cubic-bezier(.2, .9, .3, 1.2); }
+/* lock-on waits for the zoom-out flight to land (delay ~ FLY_MS / 2) */
+.ms-pr-reticle.is-locking svg { animation: ms-pr-lock .9s cubic-bezier(.2, .9, .3, 1.2) .9s both; }
+/* only while zoomed out: hides fast on zoom-in, fades back in as the zoom-out lands */
+.ms-pr-reticle { transition: opacity .6s ease .9s; }
+.ms-protein.is-zoomed .ms-pr-reticle { opacity: 0; transition: opacity .3s ease; }
+.ms-pr-caption { top: auto; bottom: 40px; z-index: 2; opacity: 0; transition: opacity .3s ease; }
+.ms-protein.is-zoomed .ms-pr-caption { opacity: 1; transition: opacity .5s ease 1.2s; }
 .ms-pr-rt {
   position: absolute;
   left: 50%;

@@ -1,5 +1,5 @@
 /**
- * Workspace tabs (Answer, Model, Scenarios, Minds, Verify, Space, plus user tabs), each owning
+ * Workspace tabs (Home, Model, Scenarios, Minds, Verify, Space, plus user tabs), each owning
  * its own AreaTree and Screen. Switching tabs hides the previous screen (editors stay mounted,
  * keep their state and stop rendering) and lazily renders the next one on first show.
  * Also the single entry point for area operations, focus tracking and persistence.
@@ -67,7 +67,7 @@ export class WorkspaceManager {
       try {
         for (const w of saved.workspaces) {
           const tree = AreaTree.deserialize(w.tree, { knownTypes: known });
-          this._addWorkspace({ id: w.id || uid('ws'), name: w.name || 'Workspace', icon: w.icon || 'window', preset: w.preset || 'answer', tree, activeAreaId: w.activeAreaId || null });
+          this._addWorkspace({ id: w.id || uid('ws'), name: w.name || 'Workspace', icon: w.icon || 'window', preset: w.preset || 'home', tree, activeAreaId: w.activeAreaId || null });
         }
         // presets shipped after this layout was saved get their tab once (closing it later sticks)
         const seen = new Set(saved.presets || saved.workspaces.map((w) => w.preset));
@@ -79,9 +79,9 @@ export class WorkspaceManager {
       }
     }
     if (!restored) for (const p of PRESETS) this._addWorkspace({ id: p.key, name: p.name, icon: p.icon, preset: p.key, tree: p.build() });
-    // first load (nothing saved) opens Verify; later loads restore the last active tab
+    // first load (nothing saved) opens Home; later loads restore the last active tab
     const want = restored && saved.activeId && this.get(saved.activeId) ? saved.activeId
-      : (this.get('verify') ? 'verify' : this.workspaces[0].id);
+      : (this.get('home') ? 'home' : this.workspaces[0].id);
     this.switchTo(want, { initial: true });
     return restored;
   }
@@ -200,7 +200,7 @@ export class WorkspaceManager {
   }
 
   /** @param {string} presetKey @param {string} [name] */
-  addWorkspace(presetKey = 'answer', name) {
+  addWorkspace(presetKey = 'home', name) {
     const p = getPreset(presetKey) || PRESETS[0];
     const ws = this._addWorkspace({ id: uid('ws'), name: name || this._uniqueName(p.name), icon: p.icon, preset: p.key, tree: p.build() });
     this.switchTo(ws.id);
