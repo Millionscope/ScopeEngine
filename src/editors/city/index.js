@@ -197,7 +197,12 @@ export default class CityEditor extends BaseEditor {
   static needs = ['mapbox'];
 
   async mount(ctx, state) {
-    await Promise.all(['../scope/scope.css', '../solar/solar.css', '../globe/globe.css', '../terrain/terrain.css'].map((p) => loadCss(new URL(p, import.meta.url))));
+    await Promise.all([
+      loadCss(new URL('../scope/scope.css', import.meta.url)),
+      loadCss(new URL('../solar/solar.css', import.meta.url)),
+      loadCss(new URL('../globe/globe.css', import.meta.url)),
+      loadCss(new URL('../terrain/terrain.css', import.meta.url)),
+    ]);
     mapboxgl = ctx.libs.mapbox;
     this.reduce = ctx.store?.get?.('ui.reducedMotion') || matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.state = { tour: state.tour ?? !this.reduce, traffic: state.traffic !== false };

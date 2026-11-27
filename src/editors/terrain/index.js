@@ -158,7 +158,12 @@ export default class TerrainEditor extends BaseEditor {
   static needs = ['mapbox'];
 
   async mount(ctx, state) {
-    await Promise.all(['../scope/scope.css', '../solar/solar.css', '../globe/globe.css', './terrain.css'].map((p) => loadCss(new URL(p, import.meta.url))));
+    await Promise.all([
+      loadCss(new URL('../scope/scope.css', import.meta.url)),
+      loadCss(new URL('../solar/solar.css', import.meta.url)),
+      loadCss(new URL('../globe/globe.css', import.meta.url)),
+      loadCss(new URL('./terrain.css', import.meta.url)),
+    ]);
     mapboxgl = ctx.libs.mapbox;
     this.reduce = ctx.store?.get?.('ui.reducedMotion') || matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.state = { rotate: state.rotate ?? !this.reduce, holo: state.holo !== false };
