@@ -15,3 +15,8 @@
 /* no-token notice: readable on the dark stage */
 .ms-terrain .ms-empty { color: #d8f3ff; }
 .ms-terrain .ms-empty-text { color: #9fc4d8; max-width: 46ch; }
+/* clickable city marker: opens the Holo City */
+.ms-tr-pin { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 0; border: 0; background: none; color: #eafcff; font: 600 11px/1.2 var(--ms-font-ui, system-ui); letter-spacing: .04em; cursor: pointer; }
+.ms-tr-pin span { padding: 3px 8px; border: 1px solid rgba(63, 216, 255, .7); border-radius: 3px; background: rgba(2, 10, 22, .78); box-shadow: 0 0 12px rgba(63, 216, 255, .45); white-space: nowrap; }
+.ms-tr-pin i { order: 2; width: 2px; height: 34px; background: linear-gradient(#3fd8ff, transparent); box-shadow: 0 0 8px #3fd8ff; }
+.ms-tr-pin:hover span, .ms-tr-pin:focus-visible span { background: rgba(63, 216, 255, .25); outline: none; }

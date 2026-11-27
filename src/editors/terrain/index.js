@@ -6,6 +6,7 @@
  *    a scan wave pulsing out from the city centre (additive blending, so it glows);
  *  - the camera orbits the city on its own; dragging or scrolling pauses it for a few idle seconds.
  * The city comes from the store key `terrain.city`, which the Globe sets when a city is clicked.
+ * Clicking the city (its marker on the map or the list) opens its Holo City in place of this area.
  * Mapbox GL v3 needs a Mapbox access token (VITE_MAPBOX_TOKEN) even to render.
  * @module editors/terrain
  */
@@ -171,7 +172,7 @@ export default class TerrainEditor extends BaseEditor {
     this.host.tabIndex = 0;
     this.host.setAttribute('role', 'application');
     this.host.setAttribute('aria-roledescription', 'terrain viewer');
-    this.host.setAttribute('aria-label', 'Holographic 3D terrain of a city. Drag to orbit, scroll to zoom, pick a city to fly there. R toggles auto-rotation, G the holographic grid, arrow keys step through cities, Home resets the camera.');
+    this.host.setAttribute('aria-label', 'Holographic 3D terrain of a city. Drag to orbit, scroll to zoom, click the city marker or pick a city to open its holographic city. R toggles auto-rotation, G the holographic grid, arrow keys step through cities, Home resets the camera.');
     root.appendChild(this.host);
     ctx.el.appendChild(root);
 
@@ -212,6 +213,12 @@ export default class TerrainEditor extends BaseEditor {
       antialias: true,
     }));
     map.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), 'bottom-right');
+    const pin = el('button', 'ms-tr-pin');
+    pin.type = 'button';
+    pin.append(el('i'), (this.pinLabel = el('span', '', '')));
+    pin.addEventListener('click', () => this.enter(this.cityIdx));
+    this.pin = new mapboxgl.Marker({ element: pin, anchor: 'bottom' }).setLngLat([c.lng, c.lat]).addTo(map);
+    this.renderPin();
     this.holo = new HoloLayer();
     this.holoTries = 0;
     this.holoDirty = true;
@@ -247,6 +254,8 @@ export default class TerrainEditor extends BaseEditor {
     const map = this.map;
     if (!map) return;
     const c = CITIES[i];
+    this.pin?.setLngLat([c.lng, c.lat]);
+    this.renderPin();
     if (!same) map.setTerrain({ source: 'dem', exaggeration: this.view.exag });
     map.flyTo({ center: [c.lng, c.lat], zoom: this.view.zoom, pitch: PITCH, bearing: map.getBearing(), duration: this.reduce ? 0 : 4000, essential: true });
     this.holoDirty = true;
@@ -259,6 +268,19 @@ export default class TerrainEditor extends BaseEditor {
     i = ((i % n) + n) % n;
     if (this.ctx?.store.get(KEY) === i) this.setCity(i); // re-centre on the same city
     else this.ctx?.store.set(KEY, i);
+  }
+
+  /** A clicked city (map marker or list): open its holographic city in place of this terrain. @param {number} i */
+  enter(i) {
+    this.pick(i);
+    this.ctx?.commands.executeWith('area.openCity', { areaId: this.ctx.areaId, replace: true });
+  }
+
+  renderPin() {
+    const c = CITIES[this.cityIdx];
+    if (!this.pinLabel) return;
+    this.pinLabel.textContent = `${c.name} · enter city`;
+    this.pin.getElement().setAttribute('aria-label', `Open the holographic city of ${c.name}`);
   }
 
   /**
@@ -404,11 +426,11 @@ export default class TerrainEditor extends BaseEditor {
     this.cityBtns = CITIES.map((c, i) => {
       const btn = el('button', 'ms-sc-sys');
       btn.type = 'button';
-      btn.title = `Show the terrain around ${c.name}, ${c.country}`;
+      btn.title = `Open the holographic city of ${c.name}, ${c.country}`;
       btn.style.setProperty('--c', LIGHT);
       if (i === this.cityIdx) btn.setAttribute('aria-current', 'true');
       btn.append(el('i'), el('span', '', c.name), el('small', '', `×${VIEWS[c.name].exag}`));
-      btn.addEventListener('click', () => this.pick(i));
+      btn.addEventListener('click', () => this.enter(i));
       list.appendChild(btn);
       return btn;
     });

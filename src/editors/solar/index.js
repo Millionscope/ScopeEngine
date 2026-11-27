@@ -6,7 +6,7 @@
  *    Earth's night lights and clouds, orbit ellipses and an asteroid belt;
  *  - camera tour (loop): orbit the system → fly to Earth → closer to Earth → pull back to the whole
  *    system. Dragging pauses it; it resumes after a few idle seconds. Picking a planet follows it;
- *    picking Earth (label, list, key 3 or a click on its disc) also opens the Earth globe beside it;
+ *    clicking Earth (label, list or its disc) opens the Earth globe in place of this area (key 3 only follows it);
  *  - two clocks so both read on screen: spin (1 Earth day = 8 s) and orbits (1 Earth year = 2 min);
  *    each keeps the true ratios between bodies;
  *  - the WebGL renderer comes from the shared GL pool and is released while the area is hidden.
