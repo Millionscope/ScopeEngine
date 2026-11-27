@@ -1,0 +1,97 @@
+/* Protein: reuses the Scope HUD (scope.css), Solar facts and the Globe list; adds the Mol* stage,
+   the glow layer and the targeting reticle. */
+.ms-protein .ms-sc-host { background: radial-gradient(ellipse at 50% 55%, #0b2438 0%, #04101c 45%, #02060d 80%); }
+/* scanlines and vignette over everything but the HUD (z 2); clicks pass through */
+.ms-protein .ms-sc-host::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, rgba(63, 216, 255, .04) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at center, transparent 55%, rgba(2, 6, 13, .75) 100%);
+}
+
+/* Mol* fills the stage, with its light rcsb skin made transparent */
+.ms-pr-mol { position: absolute; inset: 0; }
+.ms-pr-mol .msp-plugin,
+.ms-pr-mol .msp-layout-standard,
+.ms-pr-mol .msp-layout-main,
+.ms-pr-mol .msp-viewport,
+.ms-pr-mol .msp-plugin-content { background: transparent !important; }
+.ms-pr-mol .msp-plugin { position: absolute; inset: 0; font-family: var(--ms-font-ui, system-ui); }
+/* Mol* paints an inline checkerboard behind a transparent canvas */
+.ms-pr-mol canvas { background: none !important; }
+/* Mol*'s hover label, as a HUD chip */
+.ms-pr-mol .msp-highlight-info {
+  background: rgba(6, 22, 40, .78) !important;
+  color: #d8f3ff !important;
+  border: 1px solid rgba(63, 216, 255, .35);
+  border-radius: 4px;
+  box-shadow: 0 0 12px rgba(63, 216, 255, .2);
+}
+
+/* glow pass: screen-blended, so its black is a no-op */
+.ms-pr-glow { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; mix-blend-mode: screen; }
+.ms-protein.is-nofx .ms-pr-glow { display: none; }
+
+/* ---- targeting reticle (left/top/size set per frame from the camera focus) */
+.ms-pr-reticle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 60cqmin;
+  height: 60cqmin;
+  translate: -50% -50%;
+  z-index: 1;
+  pointer-events: none;
+  color: #3fd8ff;
+  filter: drop-shadow(0 0 4px rgba(63, 216, 255, .75));
+}
+.ms-pr-reticle svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.ms-pr-reticle circle, .ms-pr-reticle path { fill: none; stroke: currentColor; vector-effect: non-scaling-stroke; }
+.ms-pr-reticle circle { stroke-width: 1; opacity: .55; }
+.ms-pr-reticle .is-thin { opacity: .25; }
+.ms-pr-reticle .is-ticks { stroke-width: 6; opacity: .45; }
+.ms-pr-reticle .is-lock { stroke-width: 2.5; opacity: .9; }
+.ms-pr-reticle .is-cross { stroke-width: 1.2; opacity: .8; }
+.ms-pr-reticle .is-bracket { stroke-width: 2; opacity: .9; color: #ffb15c; stroke: #ffb15c; }
+.ms-pr-r1, .ms-pr-r2, .ms-pr-r3 { transform-origin: 0 0; }
+.ms-pr-r1 { animation: ms-pr-spin 40s linear infinite; }
+.ms-pr-r2 { animation: ms-pr-spin 22s linear infinite reverse; }
+.ms-pr-r3 { animation: ms-pr-pulse 2.6s ease-in-out infinite; }
+.ms-pr-reticle.is-locking svg { animation: ms-pr-lock .9s cubic-bezier(.2, .9, .3, 1.2); }
+.ms-pr-rt {
+  position: absolute;
+  left: 50%;
+  translate: -50% 0;
+  padding: 1px 6px;
+  white-space: nowrap;
+  font: 600 var(--ms-fs-tiny, 10px)/1.4 var(--ms-font-mono, ui-monospace, monospace);
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  color: #d8f3ff;
+  background: rgba(2, 10, 22, .7);
+  border: 1px solid rgba(63, 216, 255, .4);
+  border-radius: 2px;
+}
+.ms-pr-rt.is-top { top: -6px; translate: -50% -100%; color: #ffb15c; border-color: rgba(255, 177, 92, .5); }
+.ms-pr-rt.is-bottom { bottom: -6px; translate: -50% 100%; }
+.ms-pr-rt:empty { display: none; }
+@keyframes ms-pr-spin { to { transform: rotate(360deg); } }
+@keyframes ms-pr-pulse { 0%, 100% { transform: rotate(-12deg) scale(1); opacity: .85; } 50% { transform: rotate(12deg) scale(.94); opacity: 1; } }
+@keyframes ms-pr-lock { from { transform: scale(1.6) rotate(-40deg); opacity: .2; } to { transform: none; opacity: 1; } }
+.ms-protein.is-still .ms-pr-reticle * { animation: none !important; }
+@media (prefers-reduced-motion: reduce) { .ms-pr-reticle * { animation: none !important; } }
+
+/* ---- HUD extras */
+.ms-pr-link { display: inline-block; margin-top: 6px; font-size: var(--ms-fs-tiny); color: #3fd8ff; text-decoration: none; }
+.ms-pr-link:hover, .ms-pr-link:focus-visible { text-decoration: underline; }
+.ms-pr-band { display: grid; grid-template-columns: 10px 1fr auto; align-items: center; gap: 2px 6px; padding: 3px 0; font-size: var(--ms-fs-tiny); color: #9cc9dd; }
+.ms-pr-band > i { width: 10px; height: 10px; border-radius: 2px; background: var(--c); box-shadow: 0 0 6px var(--c); }
+.ms-pr-band > b { font-weight: 600; color: #fff; font-variant-numeric: tabular-nums; }
+.ms-pr-bar { grid-column: 1 / -1; height: 2px; background: rgba(63, 216, 255, .12); }
+.ms-pr-bar b { display: block; width: var(--w); height: 100%; background: var(--c); box-shadow: 0 0 6px var(--c); transition: width .4s; }
+.ms-pr-parts .ms-sc-systems { max-height: 32vh; overflow-y: auto; }
+.ms-protein .ms-sc-sys span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

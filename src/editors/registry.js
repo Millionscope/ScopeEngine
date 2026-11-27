@@ -51,6 +51,7 @@ export const EDITORS = [
   { id: 'globe', label: 'Earth Globe', icon: 'globe', group: 'Scope', needs: ['three', 'threefx', 'threeglobe'], kind: 'editor', shortcut: null, usesScenario: false, loader: lazy('globe', () => import('./globe/index.js')) },
   { id: 'terrain', label: 'Terrain', icon: 'map', group: 'Scope', needs: ['mapbox'], kind: 'editor', shortcut: null, usesScenario: false, loader: lazy('terrain', () => import('./terrain/index.js')) },
   { id: 'city', label: 'Holo City', icon: 'layers', group: 'Scope', needs: ['mapbox'], kind: 'editor', shortcut: null, usesScenario: false, loader: lazy('city', () => import('./city/index.js')) },
+  { id: 'protein', label: 'Protein', icon: 'beaker', group: 'Scope', needs: ['molstar'], kind: 'editor', shortcut: null, usesScenario: false, loader: lazy('protein', () => import('./protein/index.js')) },
   { id: 'sheet', label: 'Sheet', icon: 'table', group: 'Scope', needs: [], kind: 'editor', shortcut: 'shift+f6', usesScenario: true, loader: lazy('sheet', () => import('./sheet/index.js')) },
   { id: 'inspector', label: 'Properties', icon: 'symbol-property', group: 'Scope', needs: [], kind: 'panel', shortcut: 'shift+f7', usesScenario: true, loader: lazy('inspector', () => import('./inspector/index.js')) },
   // Analysis

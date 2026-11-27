@@ -51,6 +51,15 @@ export const LIBS = {
     version: 'mapbox-gl@3.35.2',
     init: (m) => m.default,
   },
+  // Protein editor: the prebuilt UMD bundle (Mol* + React inside) as a classic script; it sets
+  // self.rcsbMolstar. The package's CJS sources are not consumable by Vite as-is.
+  molstar: {
+    load: () => Promise.all([
+      import('@rcsb/rcsb-molstar/build/dist/viewer/rcsb-molstar.js?url').then((m) => loadScript(m.default)),
+      import('@rcsb/rcsb-molstar/build/dist/viewer/rcsb-molstar.css'),
+    ]).then(() => /** @type {any} */ (self).rcsbMolstar),
+    version: '@rcsb/rcsb-molstar@2.15.2',
+  },
   mermaid: { load: () => import('mermaid'), version: 'mermaid@10.9.1', init: (m) => m.default },
   katex: {
     load: () => Promise.all([import('katex'), import('katex/dist/katex.min.css')]).then(([m]) => m),
@@ -105,6 +114,17 @@ export function loadCss(href) {
   });
   cssCache.set(url, p);
   return p;
+}
+
+/** Run a classic (non-module) script once; rejects on a load error. @param {string} src */
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = () => resolve(undefined);
+    s.onerror = () => { s.remove(); reject(new TypeError(`failed to fetch script ${src}`)); };
+    document.head.appendChild(s);
+  });
 }
 
 /**

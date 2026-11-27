@@ -8,6 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@rcsb/rcsb-molstar": "^2.15.2",
     "chart.js": "4.4.1",
     "d3": "7.9.0",
     "highcharts": "11.4.8",
