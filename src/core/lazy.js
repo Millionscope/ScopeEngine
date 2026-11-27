@@ -47,7 +47,17 @@ export const LIBS = {
   // three-globe (Globe.GL's layer engine). 2.40.0 is the last release without a `three/webgpu` import,
   // which three 0.160 lacks; globe.gl itself needs three >= 0.179.
   threeglobe: { load: () => import('three-globe'), version: 'three-globe@2.40.0', init: (m) => m.default },
-  // Terrain editor; v3 renders only with a Mapbox access token (VITE_MAPBOX_TOKEN)
+  // Terrain editor: open-source, renders free tiles without a token
+  maplibre: {
+    // its worker is found next to import.meta.url, which Vite's bundling moves: point it there explicitly
+    load: () => Promise.all([import('maplibre-gl'), import('maplibre-gl/dist/maplibre-gl-worker.mjs?url'), import('maplibre-gl/dist/maplibre-gl.css')]),
+    version: 'maplibre-gl@6.19.0',
+    init: ([m, worker]) => {
+      m.setWorkerUrl(worker.default);
+      return m;
+    },
+  },
+  // Holo City editor; v3 renders only with a Mapbox access token (VITE_MAPBOX_TOKEN)
   mapbox: {
     load: () => Promise.all([import('mapbox-gl'), import('mapbox-gl/dist/mapbox-gl.css')]).then(([m]) => m),
     version: 'mapbox-gl@3.35.2',

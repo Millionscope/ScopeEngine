@@ -1,22 +1,19 @@
 /**
- * Terrain: a futuristic holographic 3D terrain of one of the globe's 20 cities (mapbox-gl v3).
- *  - Mapbox DEM as 3D terrain, tinted by elevation in the style itself (`raster-color` decodes the raw
- *    DEM tiles to metres), neon hillshade, glowing contours, rivers and roads, dark fog;
+ * Terrain: a futuristic holographic 3D terrain of one of the globe's 20 cities (maplibre-gl, no token).
+ *  - AWS Terrarium DEM as 3D terrain, tinted by elevation (`color-relief`), neon hillshade,
+ *    OpenFreeMap rivers and roads, dark sky fog;
  *  - a custom WebGL layer draws a holographic lattice draped on the relief, coloured by height, with
  *    a scan wave pulsing out from the city centre (additive blending, so it glows);
  *  - the camera orbits the city on its own; dragging or scrolling pauses it for a few idle seconds.
  * The city comes from the store key `terrain.city`, which the Globe sets when a city is clicked.
  * Clicking the city (its marker on the map or the list) opens its Holo City in place of this area.
- * Mapbox GL v3 needs a Mapbox access token (VITE_MAPBOX_TOKEN) even to render.
  * @module editors/terrain
  */
 import { BaseEditor } from '../base-editor.js';
-import { emptyState } from '../shared/empty-state.js';
 import { loadCss } from '../../core/lazy.js';
 import { CITIES, fmtLatLng } from '../shared/cities.js';
 import { VIEWS } from './views.js';
 
-const TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 const KEY = 'terrain.city';
 const PITCH = 64;
 const ROT_DEG_S = 5; // auto-orbit speed
@@ -26,7 +23,7 @@ const GRID_EVERY = 4; // a lattice line every N samples
 const GRID_TILES = 1.6; // lattice half-size in tiles at the city's zoom
 const LIGHT = '#ffb15c';
 
-let mapboxgl;
+let maplibregl;
 
 const el = (tag, cls, text) => {
   const e = document.createElement(tag);
@@ -37,34 +34,32 @@ const el = (tag, cls, text) => {
 
 /** Elevation colours from lowland to summit, like a sci-fi relief table: blue, teal, green, amber, ember. */
 const RAMP = ['#0a2470', '#0e7fa0', '#22b35a', '#b9d23a', '#f0a32a', '#c2531a', '#3a1206'];
-/** `raster-color` over [lo, hi] metres. @param {number} lo @param {number} hi */
-const ramp = (lo, hi) => ['interpolate', ['linear'], ['raster-value'], ...RAMP.flatMap((c, i) => [lo + ((hi - lo) * i) / (RAMP.length - 1), c])];
+/** `color-relief-color` over [lo, hi] metres. @param {number} lo @param {number} hi */
+const ramp = (lo, hi) => ['interpolate', ['linear'], ['elevation'], ...RAMP.flatMap((c, i) => [lo + ((hi - lo) * i) / (RAMP.length - 1), c])];
 
+/** @param {number} exag */
+const DEM = { type: 'raster-dem', tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'], encoding: 'terrarium', tileSize: 256, maxzoom: 15, attribution: '<a href="https://github.com/tilezen/joerd/blob/master/docs/attribution.md">Mapzen Terrain Tiles</a>' };
 /** @param {number} exag */
 const style = (exag) => ({
   version: 8,
-  projection: { name: 'mercator' },
   sources: {
-    dem: { type: 'raster-dem', url: 'mapbox://mapbox.mapbox-terrain-dem-v1', tileSize: 512, maxzoom: 14 },
-    // the same DEM as plain RGB tiles, decoded to metres by raster-color-mix below (lossless pngraw)
-    hypso: { type: 'raster', tiles: [`https://api.mapbox.com/v4/mapbox.mapbox-terrain-dem-v1/{z}/{x}/{y}@2x.pngraw?access_token=${TOKEN}`], tileSize: 512, maxzoom: 14 },
-    contours: { type: 'vector', url: 'mapbox://mapbox.mapbox-terrain-v2' },
-    streets: { type: 'vector', url: 'mapbox://mapbox.mapbox-streets-v8' },
+    dem: DEM,
+    // hillshade and colour relief get their own copy: sharing the terrain source degrades them
+    relief: DEM,
+    streets: { type: 'vector', url: 'https://tiles.openfreemap.org/planet', attribution: '<a href="https://openfreemap.org">OpenFreeMap</a> © <a href="https://www.openmaptiles.org/">OpenMapTiles</a> © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' },
   },
   terrain: { source: 'dem', exaggeration: exag },
-  fog: { range: [0.8, 9], color: '#071a33', 'high-color': '#1a4f9c', 'horizon-blend': 0.18, 'space-color': '#01030a', 'star-intensity': 0.5 },
+  sky: { 'sky-color': '#01030a', 'horizon-color': '#1a4f9c', 'fog-color': '#071a33', 'fog-ground-blend': 0.6, 'horizon-fog-blend': 0.3, 'sky-horizon-blend': 0.5, 'atmosphere-blend': 0 },
   layers: [
     { id: 'bg', type: 'background', paint: { 'background-color': '#020a16' } },
-    // Mapbox DEM: height = -10000 + (R·65536 + G·256 + B) · 0.1, with R, G, B sampled as 0..1
-    { id: 'hypso', type: 'raster', source: 'hypso', paint: { 'raster-color': ramp(0, 500), 'raster-color-range': [0, 500], 'raster-color-mix': [1671168, 6528, 25.5, -10000], 'raster-resampling': 'nearest', 'raster-opacity': 0.92 } },
-    { id: 'shade', type: 'hillshade', source: 'dem', paint: { 'hillshade-shadow-color': 'rgba(2, 4, 12, 0.85)', 'hillshade-highlight-color': 'rgba(255, 170, 80, 0.55)', 'hillshade-accent-color': 'rgba(63, 216, 255, 0.35)', 'hillshade-exaggeration': 0.75, 'hillshade-illumination-anchor': 'map' } },
-    { id: 'contour', type: 'line', source: 'contours', 'source-layer': 'contour', paint: { 'line-color': '#5fe3ff', 'line-width': ['match', ['get', 'index'], [5, 10], 1.1, 0.5], 'line-opacity': ['match', ['get', 'index'], [5, 10], 0.55, 0.22], 'line-blur': 0.4 } },
+    { id: 'hypso', type: 'color-relief', source: 'relief', paint: { 'color-relief-color': ramp(0, 500), 'color-relief-opacity': 0.92 } },
+    { id: 'shade', type: 'hillshade', source: 'relief', paint: { 'hillshade-shadow-color': 'rgba(2, 4, 12, 0.85)', 'hillshade-highlight-color': 'rgba(255, 170, 80, 0.55)', 'hillshade-accent-color': 'rgba(63, 216, 255, 0.35)', 'hillshade-exaggeration': 0.75, 'hillshade-illumination-anchor': 'map' } },
     { id: 'water', type: 'fill', source: 'streets', 'source-layer': 'water', paint: { 'fill-color': '#0a3fb8', 'fill-opacity': 0.8 } },
     { id: 'water-edge', type: 'line', source: 'streets', 'source-layer': 'water', paint: { 'line-color': '#3fb4ff', 'line-width': 5, 'line-blur': 5, 'line-opacity': 0.55 } },
     { id: 'river-glow', type: 'line', source: 'streets', 'source-layer': 'waterway', paint: { 'line-color': '#2f8fff', 'line-width': 9, 'line-blur': 7, 'line-opacity': 0.6 } },
     { id: 'river', type: 'line', source: 'streets', 'source-layer': 'waterway', paint: { 'line-color': '#8fd8ff', 'line-width': 1.4 } },
-    { id: 'road-glow', type: 'line', source: 'streets', 'source-layer': 'road', filter: ['match', ['get', 'class'], ['motorway', 'trunk', 'primary'], true, false], paint: { 'line-color': '#ff8a2a', 'line-width': 7, 'line-blur': 6, 'line-opacity': 0.5 } },
-    { id: 'road', type: 'line', source: 'streets', 'source-layer': 'road', filter: ['match', ['get', 'class'], ['motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'street'], true, false], paint: { 'line-color': '#ffe0b0', 'line-width': ['match', ['get', 'class'], ['motorway', 'trunk', 'primary'], 1.3, 0.5], 'line-opacity': 0.75 } },
+    { id: 'road-glow', type: 'line', source: 'streets', 'source-layer': 'transportation', filter: ['match', ['get', 'class'], ['motorway', 'trunk', 'primary'], true, false], paint: { 'line-color': '#ff8a2a', 'line-width': 7, 'line-blur': 6, 'line-opacity': 0.5 } },
+    { id: 'road', type: 'line', source: 'streets', 'source-layer': 'transportation', filter: ['match', ['get', 'class'], ['motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'minor'], true, false], paint: { 'line-color': '#ffe0b0', 'line-width': ['match', ['get', 'class'], ['motorway', 'trunk', 'primary'], 1.3, 0.5], 'line-opacity': 0.75 } },
   ],
 });
 
@@ -88,7 +83,7 @@ void main() {
   gl_FragColor = vec4(c * a, a);
 }`;
 
-/** Mapbox custom layer: the holographic lattice (rebuilt from terrain samples by the editor). */
+/** MapLibre custom layer: the holographic lattice (rebuilt from terrain samples by the editor). */
 class HoloLayer {
   constructor() {
     this.id = 'holo';
@@ -126,10 +121,10 @@ class HoloLayer {
     this.count = verts.length / 4;
   }
 
-  render(gl, matrix) {
+  render(gl, args) {
     if (!this.count) return;
     gl.useProgram(this.prog);
-    gl.uniformMatrix4fv(this.loc.matrix, false, matrix);
+    gl.uniformMatrix4fv(this.loc.matrix, false, args.defaultProjectionData.mainMatrix);
     gl.uniform2f(this.loc.center, this.center[0], this.center[1]);
     gl.uniform1f(this.loc.span, this.span);
     gl.uniform1f(this.loc.time, this.time);
@@ -155,7 +150,7 @@ export default class TerrainEditor extends BaseEditor {
   static label = 'Terrain';
   static icon = 'map';
   static group = 'Scope';
-  static needs = ['mapbox'];
+  static needs = ['maplibre'];
 
   async mount(ctx, state) {
     await Promise.all([
@@ -164,7 +159,7 @@ export default class TerrainEditor extends BaseEditor {
       loadCss(new URL('../globe/globe.css', import.meta.url)),
       loadCss(new URL('./terrain.css', import.meta.url)),
     ]);
-    mapboxgl = ctx.libs.mapbox;
+    maplibregl = ctx.libs.maplibre;
     this.reduce = ctx.store?.get?.('ui.reducedMotion') || matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.state = { rotate: state.rotate ?? !this.reduce, holo: state.holo !== false };
     const stored = ctx.store?.get(KEY);
@@ -181,10 +176,6 @@ export default class TerrainEditor extends BaseEditor {
     root.appendChild(this.host);
     ctx.el.appendChild(root);
 
-    if (!TOKEN) {
-      this.host.replaceChildren(emptyState({ icon: 'key', title: 'Mapbox access token needed', text: 'Mapbox GL JS v3 only renders with a Mapbox access token. Add VITE_MAPBOX_TOKEN=pk.… to .env.local (or to the Pages build environment) and restart the dev server.' }));
-      return;
-    }
     this.mapEl = el('div', 'ms-tr-map');
     this.host.appendChild(this.mapEl);
     this.buildOverlay();
@@ -205,9 +196,8 @@ export default class TerrainEditor extends BaseEditor {
 
   createMap() {
     if (this.map) return;
-    mapboxgl.accessToken = TOKEN;
     const c = CITIES[this.cityIdx];
-    const map = (this.map = new mapboxgl.Map({
+    const map = (this.map = new maplibregl.Map({
       container: this.mapEl,
       style: style(this.view.exag),
       center: [c.lng, c.lat],
@@ -217,12 +207,12 @@ export default class TerrainEditor extends BaseEditor {
       maxPitch: 80,
       antialias: true,
     }));
-    map.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), 'bottom-right');
+    map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
     const pin = el('button', 'ms-tr-pin');
     pin.type = 'button';
     pin.append(el('i'), (this.pinLabel = el('span', '', '')));
     pin.addEventListener('click', () => this.enter(this.cityIdx));
-    this.pin = new mapboxgl.Marker({ element: pin, anchor: 'bottom' }).setLngLat([c.lng, c.lat]).addTo(map);
+    this.pin = new maplibregl.Marker({ element: pin, anchor: 'bottom' }).setLngLat([c.lng, c.lat]).addTo(map);
     this.renderPin();
     this.holo = new HoloLayer();
     this.holoTries = 0;
@@ -232,11 +222,7 @@ export default class TerrainEditor extends BaseEditor {
       map.setLayoutProperty('holo', 'visibility', this.state.holo ? 'visible' : 'none');
     });
     map.on('load', () => this.renderLoading(null));
-    map.on('error', (e) => {
-      const err = e.error;
-      if (err?.status === 401 || /access token/i.test(String(err?.message))) this.showMsg(`Mapbox rejected the access token: ${err.message}`);
-      else console.warn('[terrain]', err?.message ?? err);
-    });
+    map.on('error', (e) => console.warn('[terrain]', e.error?.message ?? e.error));
     this.renderLoading('Raising terrain');
     this.renderDetail();
   }
@@ -294,7 +280,8 @@ export default class TerrainEditor extends BaseEditor {
    */
   buildHolo() {
     const map = this.map;
-    const M = mapboxgl.MercatorCoordinate;
+    const M = maplibregl.MercatorCoordinate;
+    const exag = this.view.exag;
     const c = CITIES[this.cityIdx];
     const mc = M.fromLngLat([c.lng, c.lat]);
     const half = GRID_TILES / 2 ** this.view.zoom; // mercator units: a tile at zoom z spans 1/2^z
@@ -306,8 +293,10 @@ export default class TerrainEditor extends BaseEditor {
     let missing = 0;
     for (let j = 0; j < S; j++) {
       for (let i = 0; i < S; i++) {
-        const e = map.queryTerrainElevation(new M(mc.x - half + i * step, mc.y - half + j * step).toLngLat(), { exaggerated: false });
-        if (e == null) { h[j * S + i] = NaN; missing++; continue; }
+        // drawn surface only: queryTerrainElevation gives 0 where no DEM has loaded yet
+        const ex = map.terrain?.getDrawnElevationForLngLat(new M(mc.x - half + i * step, mc.y - half + j * step).toLngLat());
+        if (ex == null) { h[j * S + i] = NaN; missing++; continue; }
+        const e = ex / exag;
         h[j * S + i] = e;
         if (e < lo) lo = e;
         if (e > hi) hi = e;
@@ -315,7 +304,6 @@ export default class TerrainEditor extends BaseEditor {
     }
     if (!Number.isFinite(lo)) return false;
     hi = Math.max(hi, lo + 20);
-    const exag = this.view.exag;
     const unit = mc.meterInMercatorCoordinateUnits();
     const lift = 12 * exag; // metres above the surface so the lines do not z-fight it
     const out = [];
@@ -333,8 +321,7 @@ export default class TerrainEditor extends BaseEditor {
     this.holo.center = [mc.x, mc.y];
     this.holo.span = half;
     this.range = [lo, hi];
-    map.setPaintProperty('hypso', 'raster-color-range', [lo, hi]);
-    map.setPaintProperty('hypso', 'raster-color', ramp(lo, hi));
+    map.setPaintProperty('hypso', 'color-relief-color', ramp(lo, hi));
     this.renderDetail();
     return missing === 0;
   }
@@ -348,7 +335,7 @@ export default class TerrainEditor extends BaseEditor {
     const now = performance.now();
     const dt = Math.min(info.dt / 1000, 0.1);
     const moving = !info.reducedMotion;
-    const easing = map.isEasing();
+    const easing = map.isMoving();
     if (moving) this.holo.time += dt;
     if (this.state.rotate && moving && !easing && !this._down && now - this.idleSince > IDLE_RESUME_MS) {
       map.setBearing(map.getBearing() + ROT_DEG_S * dt);
@@ -375,8 +362,7 @@ export default class TerrainEditor extends BaseEditor {
 
   /** @param {boolean} visible */
   onVisibility(visible) {
-    if (!TOKEN) return;
-    // mapbox owns a WebGL context outside the GL pool: give it back while hidden
+    // maplibre owns a WebGL context outside the GL pool: give it back while hidden
     if (!visible) this.dropMap();
     else this.createMap();
   }
@@ -446,24 +432,15 @@ export default class TerrainEditor extends BaseEditor {
     panel.append(listHead, list);
     right.append(panel);
 
-    this.msg = el('div', 'ms-sc-msg');
-    this.msg.hidden = true;
     this.loading = el('div', 'ms-sc-loading');
     this.loading.setAttribute('role', 'status');
-    this.host.append(left, right, this.loading, this.msg);
+    this.host.append(left, right, this.loading);
   }
 
   /** @param {string|null} text */
   renderLoading(text) {
     this.loading.hidden = !text;
     if (text) this.loading.innerHTML = `<span>${text}…</span>`;
-  }
-
-  /** @param {string} text */
-  showMsg(text) {
-    this.msg.textContent = text;
-    this.msg.hidden = false;
-    this.msg.setAttribute('role', 'status');
   }
 
   updateTelemetry() {
