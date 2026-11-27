@@ -384,8 +384,12 @@ export default class SolarEditor extends BaseEditor {
     this.renderPlanets();
     this.renderDetail();
     this.invalidate();
-    // picking Earth opens the Earth globe beside this area (or focuses it)
-    if (body && body === this.earth) this.ctx?.commands.executeWith('area.openGlobe', { areaId: this.ctx.areaId });
+  }
+
+  /** A click on a body: Earth drills into the Earth globe (replacing this area), others are followed. */
+  enter(body) {
+    if (body && body === this.earth) this.ctx?.commands.executeWith('area.openGlobe', { areaId: this.ctx.areaId, replace: true });
+    else this.setFocus(this.focus === body ? null : body);
   }
 
   /** A click (not a drag) on or near Earth's disc on the canvas picks Earth. @param {PointerEvent} e */
@@ -400,7 +404,7 @@ export default class SolarEditor extends BaseEditor {
     const px = (this.earth.p.radius / (dist * Math.tan((this.camera.fov * Math.PI) / 360))) * (r.height / 2);
     const dx = r.left + (p.x * 0.5 + 0.5) * r.width - e.clientX;
     const dy = r.top + (-p.y * 0.5 + 0.5) * r.height - e.clientY;
-    if (Math.hypot(dx, dy) <= Math.max(px, 12)) this.setFocus(this.earth);
+    if (Math.hypot(dx, dy) <= Math.max(px, 12)) this.enter(this.earth);
   }
 
   startTour() {
@@ -643,7 +647,7 @@ export default class SolarEditor extends BaseEditor {
       b.type = 'button';
       b.style.setProperty('--c', p.color);
       b.append(el('b', '', p.name));
-      b.addEventListener('click', () => (i === 0 ? this.frameAll() : this.setFocus(this.focus === this.bodies[i - 1] ? null : this.bodies[i - 1])));
+      b.addEventListener('click', () => (i === 0 ? this.frameAll() : this.enter(this.bodies[i - 1])));
       this.labelLayer.appendChild(b);
       return b;
     });
@@ -711,7 +715,7 @@ export default class SolarEditor extends BaseEditor {
       btn.title = `Follow ${b.p.name} (${i + 1})`;
       btn.style.setProperty('--c', b.p.color);
       btn.append(el('i'), el('span', '', b.p.name), el('small', '', fmtHours(b.p.rotationHours)));
-      btn.addEventListener('click', () => this.setFocus(this.focus === b ? null : b));
+      btn.addEventListener('click', () => this.enter(b));
       list.appendChild(btn);
     });
     this.planetsPanel.replaceChildren(head, list);

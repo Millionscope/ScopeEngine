@@ -236,11 +236,10 @@ export default class GlobeEditor extends BaseEditor {
     this.startTour();
   }
 
-  /** A clicked city (label or list): fly there and open its holographic terrain beside the globe. */
+  /** A clicked city (label or list): open its holographic terrain in place of the globe. */
   pick(i) {
-    this.goTo(i);
     this.ctx?.store.set('terrain.city', i);
-    this.ctx?.commands.executeWith('area.openTerrain', { areaId: this.ctx.areaId });
+    this.ctx?.commands.executeWith('area.openTerrain', { areaId: this.ctx.areaId, replace: true });
   }
 
   startTour() {

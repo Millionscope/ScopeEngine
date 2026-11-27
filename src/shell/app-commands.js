@@ -29,9 +29,12 @@ export function registerAppCommands({ env, ws, keymap, palette, composer, menus,
 
   const target = (ctx) => (ctx.areaId ? ws.getArea(ctx.areaId) : ws.targetArea());
   const hasArea = (ctx) => !!target(ctx);
-  const openBeside = (ctx, type) => {
+  /** Open a child scope: in place of the area when a click drills down ({replace: true}), else beside it. */
+  const openScope = (ctx, type) => {
     const a = target(ctx);
     if (!a) return;
+    // deferred: the click that asked for it is still running inside the editor being replaced
+    if (ctx.replace) return void setTimeout(() => ws.setAreaType(a.id, type));
     const open = ws.treeOf(a.id)?.leaves().find((l) => l.editorType === type);
     if (open) ws.setActiveArea(open.id);
     else ws.splitArea(a.id, 'row', 0.5, { type });
@@ -46,9 +49,11 @@ export function registerAppCommands({ env, ws, keymap, palette, composer, menus,
     { id: 'area.toggleSidebar', title: 'Toggle Sidebar', category: 'Area', icon: 'layout-sidebar-right', when: hasArea, checked: (ctx) => !!target(ctx)?.leaf.regions.sidebar, run: (ctx) => { const a = target(ctx); if (a) ws.toggleRegion(a.id, 'sidebar'); } },
     { id: 'area.splitVertical', title: 'Split Area Vertically', category: 'Area', icon: 'split-horizontal', when: hasArea, run: (ctx) => { const a = target(ctx); if (a) ws.splitArea(a.id, 'row'); } },
     { id: 'area.splitHorizontal', title: 'Split Area Horizontally', category: 'Area', icon: 'split-vertical', when: hasArea, run: (ctx) => { const a = target(ctx); if (a) ws.splitArea(a.id, 'col'); } },
-    // Solar → Earth opens the globe, Globe → city opens its terrain: beside the area, or focus the one already open
-    { id: 'area.openGlobe', title: 'Open Earth Globe', category: 'Area', icon: 'globe', when: hasArea, run: (ctx) => openBeside(ctx, 'globe') },
-    { id: 'area.openTerrain', title: 'Open Holographic Terrain', category: 'Area', icon: 'map', when: hasArea, run: (ctx) => openBeside(ctx, 'terrain') },
+    // Solar → Earth → Globe → city → Terrain → city → Holo City: a click replaces the area with the child scope;
+    // from the palette they open beside the area (or focus the one already open)
+    { id: 'area.openGlobe', title: 'Open Earth Globe', category: 'Area', icon: 'globe', when: hasArea, run: (ctx) => openScope(ctx, 'globe') },
+    { id: 'area.openTerrain', title: 'Open Holographic Terrain', category: 'Area', icon: 'map', when: hasArea, run: (ctx) => openScope(ctx, 'terrain') },
+    { id: 'area.openCity', title: 'Open Holographic City', category: 'Area', icon: 'layers', when: hasArea, run: (ctx) => openScope(ctx, 'city') },
     { id: 'area.duplicate', title: 'Duplicate Area', category: 'Area', icon: 'copy', when: hasArea, run: (ctx) => { const a = target(ctx); if (a) ws.duplicateArea(a.id); } },
     { id: 'area.close', title: 'Close Area', category: 'Area', icon: 'close', when: (ctx) => (ws.activeTree()?.size || 0) > 1 && hasArea(ctx), run: (ctx) => { const a = target(ctx); if (a) ws.closeArea(a.id); } },
     { id: 'area.typeMenu', title: 'Change Editor Type…', category: 'Area', icon: 'window', when: hasArea, run: (ctx) => target(ctx)?.header.openTypeMenu() },

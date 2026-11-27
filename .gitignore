@@ -2,6 +2,7 @@
 .DS_Store
 human-atlas/
 node_modules/
+slop-newyork/
 dist/
 Atlas26/
 *.local
