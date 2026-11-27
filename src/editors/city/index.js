@@ -1,8 +1,8 @@
 /**
- * Holo City: a holographic 3D city of one of the globe's 20 cities (mapbox-gl v3), opened from the
+ * Holo City: a holographic 3D city of one of the globe's 20 cities (maplibre-gl, no token), opened from the
  * Terrain scope when a city is clicked.
- *  - Mapbox Streets buildings extruded as glowing glass: colour by height and building type, the
- *    tallest towers (the tour stops) highlighted, flood light at their feet, outlines on the ground;
+ *  - OpenFreeMap (OpenMapTiles) buildings extruded as glowing glass, coloured by height, the
+ *    tallest towers (the tour stops) highlighted, outlines on the ground;
  *  - a custom WebGL layer draws traffic: every road is a ribbon of two opposing lanes with glowing
  *    streaks running along them, coloured by road class (additive blending);
  *  - the camera loops on its own along a spline through the tallest towers (an orbit until the
@@ -11,14 +11,12 @@
  * @module editors/city
  */
 import { BaseEditor } from '../base-editor.js';
-import { emptyState } from '../shared/empty-state.js';
 import { loadCss } from '../../core/lazy.js';
 import { CITIES, fmtLatLng } from '../shared/cities.js';
 import { pickStops, loopAt, ribbons, STRIDE } from './tour.js';
 
-const TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 const KEY = 'terrain.city';
-const ZOOM = 15.6; // buildings only exist in the tiles from z15
+const ZOOM = 15.6;
 const PITCH = 62;
 const SPEED = 70; // camera, m/s along the tour
 const ROT_DEG_S = 4; // orbit fallback
@@ -27,10 +25,10 @@ const RADIUS = 2600; // metres around the centre that get traffic and tour stops
 const LIGHT = '#3fd8ff';
 
 /** road class → [kind (shader colour), half-width in metres] */
-const ROADS = { motorway: [0, 13], trunk: [0, 12], primary: [1, 10], secondary: [2, 8], tertiary: [2, 7], street: [3, 5], street_limited: [3, 4] };
+const ROADS = { motorway: [0, 13], trunk: [0, 12], primary: [1, 10], secondary: [2, 8], tertiary: [2, 7], minor: [3, 5], service: [3, 4] };
 const ROAD_CLASSES = Object.keys(ROADS);
 
-let mapboxgl;
+let maplibregl;
 
 const el = (tag, cls, text) => {
   const e = document.createElement(tag);
@@ -39,37 +37,30 @@ const el = (tag, cls, text) => {
   return e;
 };
 
-const heightOf = ['to-number', ['get', 'height'], 0];
+const heightOf = ['to-number', ['get', 'render_height'], 0];
+const solid = ['!=', ['get', 'hide_3d'], true];
 const style = () => ({
   version: 8,
-  projection: { name: 'mercator' },
-  sources: { streets: { type: 'vector', url: 'mapbox://mapbox.mapbox-streets-v8' } },
-  lights: [
-    { id: 'amb', type: 'ambient', properties: { color: '#d6ecff', intensity: 0.6 } },
-    { id: 'key', type: 'directional', properties: { color: '#bfe9ff', intensity: 0.5, direction: [210, 40], 'cast-shadows': false } },
-  ],
-  fog: { range: [1.5, 9], color: '#04102a', 'high-color': '#0c2d66', 'horizon-blend': 0.12, 'space-color': '#01030a', 'star-intensity': 0.35 },
+  sources: { streets: { type: 'vector', url: 'https://tiles.openfreemap.org/planet', attribution: '<a href="https://openfreemap.org">OpenFreeMap</a> © <a href="https://www.openmaptiles.org/">OpenMapTiles</a> © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' } },
+  light: { anchor: 'viewport', color: '#d6ecff', intensity: 0.35, position: [1.15, 210, 40] },
+  sky: { 'sky-color': '#01030a', 'horizon-color': '#0c2d66', 'fog-color': '#04102a', 'fog-ground-blend': 0.7, 'horizon-fog-blend': 0.3, 'sky-horizon-blend': 0.5, 'atmosphere-blend': 0 },
   layers: [
     { id: 'bg', type: 'background', paint: { 'background-color': '#020814' } },
     { id: 'water', type: 'fill', source: 'streets', 'source-layer': 'water', paint: { 'fill-color': '#06205e', 'fill-opacity': 0.9 } },
     { id: 'water-edge', type: 'line', source: 'streets', 'source-layer': 'water', paint: { 'line-color': '#3fb4ff', 'line-width': 2, 'line-blur': 2, 'line-opacity': 0.6 } },
-    { id: 'park', type: 'fill', source: 'streets', 'source-layer': 'landuse', filter: ['match', ['get', 'class'], ['park', 'grass', 'pitch'], true, false], paint: { 'fill-color': '#0b3d2c', 'fill-opacity': 0.55 } },
-    { id: 'road-glow', type: 'line', source: 'streets', 'source-layer': 'road', filter: ['match', ['get', 'class'], ROAD_CLASSES, true, false], paint: { 'line-color': '#1d5fd6', 'line-width': ['interpolate', ['exponential', 2], ['zoom'], 14, 3, 18, 28], 'line-blur': 6, 'line-opacity': 0.35 } },
-    { id: 'road', type: 'line', source: 'streets', 'source-layer': 'road', filter: ['match', ['get', 'class'], ROAD_CLASSES, true, false], paint: { 'line-color': '#5c8fd6', 'line-width': 0.6, 'line-opacity': 0.5 } },
+    { id: 'park', type: 'fill', source: 'streets', 'source-layer': 'park', paint: { 'fill-color': '#0b3d2c', 'fill-opacity': 0.55 } },
+    { id: 'road-glow', type: 'line', source: 'streets', 'source-layer': 'transportation', filter: ['match', ['get', 'class'], ROAD_CLASSES, true, false], paint: { 'line-color': '#1d5fd6', 'line-width': ['interpolate', ['exponential', 2], ['zoom'], 14, 3, 18, 28], 'line-blur': 6, 'line-opacity': 0.35 } },
+    { id: 'road', type: 'line', source: 'streets', 'source-layer': 'transportation', filter: ['match', ['get', 'class'], ROAD_CLASSES, true, false], paint: { 'line-color': '#5c8fd6', 'line-width': 0.6, 'line-opacity': 0.5 } },
     { id: 'footprint', type: 'line', source: 'streets', 'source-layer': 'building', paint: { 'line-color': '#3fd8ff', 'line-width': 0.8, 'line-opacity': 0.35 } },
     {
-      id: 'bld', type: 'fill-extrusion', source: 'streets', 'source-layer': 'building', filter: ['==', ['get', 'extrude'], 'true'],
+      id: 'bld', type: 'fill-extrusion', source: 'streets', 'source-layer': 'building', filter: solid,
       paint: {
-        // holographic glass: blue → cyan → ice by height; shops violet, industry amber
-        'fill-extrusion-color': ['match', ['get', 'type'],
-          ['retail', 'commercial', 'shop', 'supermarket'], '#b26bff',
-          ['industrial', 'warehouse', 'garage', 'garages'], '#ffaa4a',
-          ['interpolate', ['linear'], heightOf, 0, '#2f7fe0', 25, '#4eb4ff', 70, '#7fdcff', 150, '#bff2ff', 300, '#f0fdff']],
+        // holographic glass: blue → cyan → ice by height
+        'fill-extrusion-color': ['interpolate', ['linear'], heightOf, 0, '#2f7fe0', 25, '#4eb4ff', 70, '#7fdcff', 150, '#bff2ff', 300, '#f0fdff'],
         'fill-extrusion-height': heightOf,
-        'fill-extrusion-base': ['to-number', ['get', 'min_height'], 0],
+        'fill-extrusion-base': ['to-number', ['get', 'render_min_height'], 0],
         'fill-extrusion-opacity': 0.68,
         'fill-extrusion-vertical-gradient': true,
-        'fill-extrusion-emissive-strength': 0.85,
       },
     },
     {
@@ -78,13 +69,8 @@ const style = () => ({
       paint: {
         'fill-extrusion-color': '#c8ff4a',
         'fill-extrusion-height': heightOf,
-        'fill-extrusion-base': ['to-number', ['get', 'min_height'], 0],
+        'fill-extrusion-base': ['to-number', ['get', 'render_min_height'], 0],
         'fill-extrusion-opacity': 0.9,
-        'fill-extrusion-emissive-strength': 0.9,
-        'fill-extrusion-flood-light-color': '#c8ff4a',
-        'fill-extrusion-flood-light-intensity': 0.8,
-        'fill-extrusion-flood-light-ground-radius': 40,
-        'fill-extrusion-flood-light-wall-radius': 30,
       },
     },
   ],
@@ -115,7 +101,7 @@ void main() {
   gl_FragColor = vec4(col(kind) * a, a);
 }`;
 
-/** Mapbox custom layer: the traffic ribbons (rebuilt from road features by the editor). */
+/** MapLibre custom layer: the traffic ribbons (rebuilt from road features by the editor). */
 class TrafficLayer {
   constructor() {
     this.id = 'traffic';
@@ -154,8 +140,9 @@ class TrafficLayer {
     this.count = verts.length / STRIDE;
   }
 
-  render(gl, matrix) {
+  render(gl, args) {
     if (!this.count) return;
+    const matrix = args.defaultProjectionData.mainMatrix; // float64, mercator 0..1
     // vertices are metres from the city centre (float32 mercator would jitter at street zoom):
     // compose matrix · translate(origin) · scale(unit) here, in float64
     const [ox, oy] = this.origin;
@@ -194,7 +181,7 @@ export default class CityEditor extends BaseEditor {
   static label = 'Holo City';
   static icon = 'layers';
   static group = 'Scope';
-  static needs = ['mapbox'];
+  static needs = ['maplibre'];
 
   async mount(ctx, state) {
     await Promise.all([
@@ -203,7 +190,7 @@ export default class CityEditor extends BaseEditor {
       loadCss(new URL('../globe/globe.css', import.meta.url)),
       loadCss(new URL('../terrain/terrain.css', import.meta.url)),
     ]);
-    mapboxgl = ctx.libs.mapbox;
+    maplibregl = ctx.libs.maplibre;
     this.reduce = ctx.store?.get?.('ui.reducedMotion') || matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.state = { tour: state.tour ?? !this.reduce, traffic: state.traffic !== false };
     const stored = ctx.store?.get(KEY);
@@ -220,10 +207,6 @@ export default class CityEditor extends BaseEditor {
     root.appendChild(this.host);
     ctx.el.appendChild(root);
 
-    if (!TOKEN) {
-      this.host.replaceChildren(emptyState({ icon: 'key', title: 'Mapbox access token needed', text: 'Mapbox GL JS v3 only renders with a Mapbox access token. Add VITE_MAPBOX_TOKEN=pk.… to .env.local (or to the Pages build environment) and restart the dev server.' }));
-      return;
-    }
     this.mapEl = el('div', 'ms-tr-map');
     this.host.appendChild(this.mapEl);
     this.buildOverlay();
@@ -242,10 +225,9 @@ export default class CityEditor extends BaseEditor {
 
   createMap() {
     if (this.map) return;
-    mapboxgl.accessToken = TOKEN;
     const c = CITIES[this.cityIdx];
-    const map = (this.map = new mapboxgl.Map({ container: this.mapEl, style: style(), center: [c.lng, c.lat], zoom: ZOOM, pitch: PITCH, bearing: -30, maxPitch: 80, antialias: true }));
-    map.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), 'bottom-right');
+    const map = (this.map = new maplibregl.Map({ container: this.mapEl, style: style(), center: [c.lng, c.lat], zoom: ZOOM, pitch: PITCH, bearing: -30, maxPitch: 80, antialias: true }));
+    map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
     this.traffic = new TrafficLayer();
     this.resetData();
     map.on('style.load', () => {
@@ -253,11 +235,7 @@ export default class CityEditor extends BaseEditor {
       map.setLayoutProperty('traffic', 'visibility', this.state.traffic ? 'visible' : 'none');
     });
     map.on('load', () => this.renderLoading(null));
-    map.on('error', (e) => {
-      const err = e.error;
-      if (err?.status === 401 || /access token/i.test(String(err?.message))) this.showMsg(`Mapbox rejected the access token: ${err.message}`);
-      else console.warn('[city]', err?.message ?? err);
-    });
+    map.on('error', (e) => console.warn('[city]', e.error?.message ?? e.error));
     this.renderLoading('Raising the city');
     this.renderDetail();
   }
@@ -307,7 +285,7 @@ export default class CityEditor extends BaseEditor {
 
   /** Metres (east, south) from the city centre, for a [lng, lat]. */
   toLocal(lngLat) {
-    const p = mapboxgl.MercatorCoordinate.fromLngLat(lngLat);
+    const p = maplibregl.MercatorCoordinate.fromLngLat(lngLat);
     return [(p.x - this.origin.x) / this.unit, (p.y - this.origin.y) / this.unit];
   }
 
@@ -318,13 +296,13 @@ export default class CityEditor extends BaseEditor {
   buildData() {
     const map = this.map;
     const c = CITIES[this.cityIdx];
-    this.origin = mapboxgl.MercatorCoordinate.fromLngLat([c.lng, c.lat]);
+    this.origin = maplibregl.MercatorCoordinate.fromLngLat([c.lng, c.lat]);
     this.unit = this.origin.meterInMercatorCoordinateUnits();
     const near = ([x, y]) => x * x + y * y < RADIUS * RADIUS;
 
     const roads = [];
     let segs = 0;
-    for (const f of map.querySourceFeatures('streets', { sourceLayer: 'road', filter: ['match', ['get', 'class'], ROAD_CLASSES, true, false] })) {
+    for (const f of map.querySourceFeatures('streets', { sourceLayer: 'transportation', filter: ['match', ['get', 'class'], ROAD_CLASSES, true, false] })) {
       const g = f.geometry;
       const lines = g.type === 'LineString' ? [g.coordinates] : g.type === 'MultiLineString' ? g.coordinates : [];
       const [kind, hw] = ROADS[f.properties.class];
@@ -346,9 +324,9 @@ export default class CityEditor extends BaseEditor {
     let count = 0;
     let tallest = 0;
     const bs = [];
-    for (const f of map.querySourceFeatures('streets', { sourceLayer: 'building', filter: ['==', ['get', 'extrude'], 'true'] })) {
+    for (const f of map.querySourceFeatures('streets', { sourceLayer: 'building', filter: solid })) {
       count++;
-      const h = Number(f.properties.height) || 0;
+      const h = Number(f.properties.render_height) || 0;
       if (h > tallest) tallest = h;
       if (h < 30 || f.geometry.type !== 'Polygon') continue;
       const ring = f.geometry.coordinates[0];
@@ -377,7 +355,7 @@ export default class CityEditor extends BaseEditor {
     const now = performance.now();
     const dt = Math.min(info.dt / 1000, 0.1);
     const moving = !info.reducedMotion;
-    const easing = map.isEasing();
+    const easing = map.isMoving();
     if (moving) this.traffic.time += dt;
 
     // read tiles: often at first, then every few seconds as the tour reveals more of the city
@@ -406,7 +384,7 @@ export default class CityEditor extends BaseEditor {
       return;
     }
     const q = loopAt(this.stops, this.tourT);
-    const ll = new mapboxgl.MercatorCoordinate(this.origin.x + q.x * this.unit, this.origin.y + q.y * this.unit).toLngLat();
+    const ll = new maplibregl.MercatorCoordinate(this.origin.x + q.x * this.unit, this.origin.y + q.y * this.unit).toLngLat();
     const want = (Math.atan2(q.dx, -q.dy) * 180) / Math.PI; // y points south: bearing from north, clockwise
     if (this.resume) {
       // back from a user drag or a city change: glide onto the loop instead of jumping
@@ -429,8 +407,7 @@ export default class CityEditor extends BaseEditor {
 
   /** @param {boolean} visible */
   onVisibility(visible) {
-    if (!TOKEN) return;
-    // mapbox owns a WebGL context outside the GL pool: give it back while hidden
+    // maplibre owns a WebGL context outside the GL pool: give it back while hidden
     if (!visible) this.dropMap();
     else this.createMap();
   }
@@ -500,24 +477,15 @@ export default class CityEditor extends BaseEditor {
     panel.append(listHead, list);
     right.append(panel);
 
-    this.msg = el('div', 'ms-sc-msg');
-    this.msg.hidden = true;
     this.loading = el('div', 'ms-sc-loading');
     this.loading.setAttribute('role', 'status');
-    this.host.append(left, right, this.loading, this.msg);
+    this.host.append(left, right, this.loading);
   }
 
   /** @param {string|null} text */
   renderLoading(text) {
     this.loading.hidden = !text;
     if (text) this.loading.innerHTML = `<span>${text}…</span>`;
-  }
-
-  /** @param {string} text */
-  showMsg(text) {
-    this.msg.textContent = text;
-    this.msg.hidden = false;
-    this.msg.setAttribute('role', 'status');
   }
 
   updateTelemetry() {
