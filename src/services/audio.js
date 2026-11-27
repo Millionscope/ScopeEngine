@@ -3,9 +3,9 @@
  *  - TRACKS are the files in public/audio (see CREDITS.txt); a long track is split into <4 MB chunks
  *    that play in order and loop. SCOPES maps every immersive editor to a track; scopes without their
  *    own download reuse the closest one, so two scopes can share a track (it just keeps playing).
- *  - INTRO (welcome music and welcome speech together, from public/speech) plays once, only when the
- *    page loads on the Home tab; it ends with its longest layer, and leaving Home cuts it short for good.
- *    Then HOME follows.
+ *  - INTRO (welcome music and welcome speech together, from public/speech) plays first on every page
+ *    load, whatever the tab; it ends with its longest layer and only mute cuts it short (for good).
+ *    Then the layout's track (HOME, a scope's, or the user's choice) follows.
  *  - HOME plays on first load and on the Home tab (whose left area cycles scopes on its own): a
  *    playlist that starts with Science and Technology, then every other song, then around again. Once the user changes tab or scope, the active area's scope picks the track,
  *    else the current one keeps playing while its scope is visible, else the first visible scope,
@@ -100,8 +100,8 @@ export class AudioDirector {
     this.follow = false;
     /** track the user picked from the status bar; null = Auto */
     this.choice = /** @type {string|null} */ (null);
-    /** the welcome plays only on a first load that lands on Home */
-    this.introDone = ws.activeId !== HOME_WORKSPACE;
+    /** the welcome plays first on every page load, before anything else */
+    this.introDone = false;
     this.missing = new Set();
     this._token = 0;
     this._quietAt = 0; // performance.now() when the last fade-out ends
@@ -163,9 +163,9 @@ export class AudioDirector {
     const at = active?.isVisible() ? active.leaf.editorType : null;
     let scope = null;
     let want = HOME;
-    if (types.includes('game')) want = null;
+    if (!this.introDone) want = INTRO;
+    else if (types.includes('game')) want = null;
     else if (this.choice) want = this.choice;
-    else if (!this.introDone && this.ws.activeId === HOME_WORKSPACE) want = INTRO;
     else if (this.follow && this.ws.activeId !== HOME_WORKSPACE) {
       if (at && SCOPES[at]) scope = at;
       else if (this.wantScope && types.includes(this.wantScope)) scope = this.wantScope;
