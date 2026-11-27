@@ -2,12 +2,13 @@
  * Candlestick: a live, randomly generated OHLC market on the hologram stage.
  *  - Highcharts Stock draws the candles; the forming candle ticks every TICK_MS and a new one opens
  *    every CANDLE_MS (each is one simulated minute), the oldest scrolls off past MAX candles;
- *  - glow: an SVG bloom filter (blur + merge, GPU-composited) on the series group, its radius
- *    breathing with time like the WebGL scopes' bloom; dark navy stage from scope.css in both themes.
+ *  - prism shader: an SVG filter graph on the series group (RGB dispersion + spectrum-shifting
+ *    halo, see shared/prism-filter.js) over glass-gradient bodies; dark navy stage from scope.css in both themes.
  * @module editors/candlestick
  */
 import { BaseEditor } from '../base-editor.js';
 import { loadCss } from '../../core/lazy.js';
+import { addPrism } from '../shared/prism-filter.js';
 
 const TICK_MS = 40;
 const CANDLE_MS = 600;
@@ -16,7 +17,8 @@ const MINUTE = 60_000;
 const UP = '#3fffb0';
 const DOWN = '#ff4f8b';
 const CYAN = '#3fd8ff';
-let uid = 0;
+/** Horizontal glass gradient for a candle body. */
+const glass = (edge, base, deep) => ({ linearGradient: { x1: 0, y1: 0, x2: 1, y2: 0 }, stops: [[0, edge], [0.3, base], [1, deep]] });
 
 const el = (tag, cls, text) => {
   const e = document.createElement(tag);
@@ -74,13 +76,13 @@ export default class CandlestickEditor extends BaseEditor {
       tooltip: { backgroundColor: 'rgba(4,16,30,.85)', borderColor: CYAN, style: { color: '#d8f3ff' }, split: false, valueDecimals: 2 },
       xAxis: { ...axis, overscroll: 6 * MINUTE, crosshair: { color: 'rgba(63,216,255,.35)' } },
       yAxis: { ...axis, opposite: true, crosshair: { color: 'rgba(63,216,255,.35)', label: { enabled: true, backgroundColor: CYAN, style: { color: '#02060d' } } } },
-      plotOptions: { candlestick: { color: DOWN, lineColor: DOWN, upColor: UP, upLineColor: UP, pointPadding: 0.18 } },
+      plotOptions: { candlestick: { color: glass('#ffd0e0', DOWN, '#8a1840'), lineColor: DOWN, upColor: glass('#d6fff0', UP, '#0d7a55'), upLineColor: UP, pointPadding: 0.18 } },
       series: [{
         type: 'candlestick', name: 'SCOPE', data,
       }],
     });
     this.series = this.chart.series[0];
-    this.addGlow();
+    this.prism = addPrism(this.chart);
     this.buildOverlay();
 
     this.tickT = 0;
@@ -88,32 +90,6 @@ export default class CandlestickEditor extends BaseEditor {
     this.time = 0;
     this.disposables.add(ctx.scheduler.animate(this, (info) => this.tick(info)));
     this.listen(this.host, 'keydown', (e) => this.onKey(/** @type {KeyboardEvent} */ (e)));
-  }
-
-  /** SVG bloom: a wide halo and a tight core blur merged under the sharp candles (keeps up/down colours). */
-  addGlow() {
-    const NS = 'http://www.w3.org/2000/svg';
-    const id = `ms-cs-glow-${++uid}`;
-    const filter = document.createElementNS(NS, 'filter');
-    filter.setAttribute('id', id);
-    for (const [k, v] of Object.entries({ x: '-20%', y: '-20%', width: '140%', height: '140%' })) filter.setAttribute(k, v);
-    const blur = (sd, result) => {
-      const b = document.createElementNS(NS, 'feGaussianBlur');
-      b.setAttribute('in', 'SourceGraphic');
-      b.setAttribute('stdDeviation', sd);
-      b.setAttribute('result', result);
-      return b;
-    };
-    this.blur = blur('7', 'wide');
-    const merge = document.createElementNS(NS, 'feMerge');
-    for (const src of ['wide', 'wide', 'core', 'core', 'SourceGraphic']) {
-      const n = document.createElementNS(NS, 'feMergeNode');
-      n.setAttribute('in', src);
-      merge.append(n);
-    }
-    filter.append(this.blur, blur('2', 'core'), merge);
-    this.chart.renderer.defs.element.append(filter);
-    this.chart.seriesGroup.attr({ filter: `url(#${id})` });
   }
 
   buildOverlay() {
@@ -153,8 +129,7 @@ export default class CandlestickEditor extends BaseEditor {
   tick(info) {
     const dt = Math.min(info.dt, 100);
     this.time += dt;
-    // breathing bloom, like the scopes' pulsing glow
-    this.blur.setAttribute('stdDeviation', (7 + Math.sin(this.time / 600) * (info.reducedMotion ? 0.5 : 2.5)).toFixed(2));
+    this.prism(this.time, info.reducedMotion);
     if (!this.running) return;
     const k = info.reducedMotion ? 0.5 : 1;
     this.tickT += dt * k;

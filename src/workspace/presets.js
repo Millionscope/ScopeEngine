@@ -22,7 +22,7 @@ export const PRESETS = [
     description: 'Human Atlas on the left; Earth Globe above Atom and Solar System on the right.',
     build: () => new AreaTree(
       S('row', 0.45,
-        A('scope', { cycle: ['scope', 'building', 'city', 'terrain', 'globe', 'solar', 'atom', 'protein'] }),
+        A('scope', { cycle: ['scope', 'building', 'city', 'terrain', 'globe', 'solar', 'atom', 'choropleth', 'sp500', 'protein'] }),
         S('col', 0.55,
           A('globe'),
           S('row', 0.5, A('atom'), A('solar')))),

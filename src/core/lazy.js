@@ -74,6 +74,8 @@ export const LIBS = {
   },
   // Candlestick editor: Highcharts Stock (a superset of Highcharts with the OHLC series)
   highcharts: { load: () => import('highcharts/highstock'), version: 'highcharts@13.1.1', init: (m) => m.default },
+  // S&P500 editor: Highstock plus the treemap module (UMD; registers on the instance Highstock put on window._Highcharts, so it loads after)
+  highchartsTreemap: { load: () => import('highcharts/highstock').then((m) => import('highcharts/modules/treemap').then(() => m)), version: 'highcharts@13.1.1', init: (m) => m.default },
 };
 
 /** @type {Map<string, Promise<any>>} */
