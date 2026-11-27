@@ -4,3 +4,4 @@ human-atlas/
 node_modules/
 dist/
 Atlas26/
+*.local

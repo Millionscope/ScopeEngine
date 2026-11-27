@@ -23,7 +23,7 @@ npm run preview   # serve dist/
   `src/core/lazy.js` when an editor needs them; Vite splits each into its own chunk.
 - **Static files**: everything in `public/` is served from the site root (`/fonts`, `/favicon`,
   `/models`, `/sitemap.xml`, `/robots.txt`).
-- **Scope**: the anatomy viewer (Scope tab) streams the BodyParts3D atlas from `public/models`
+- **Human Atlas**: the anatomy viewer (Human Atlas tab) streams the BodyParts3D atlas from `public/models`
   (about 33 MB gzipped, loaded once per page). BodyParts3D © The Database Center for Life Science,
   CC BY 4.0.
 

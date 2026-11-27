@@ -1,6 +1,6 @@
 import { suite, assert } from './harness.js';
 import { geoContains, geoDistance } from 'd3';
-import { CITIES, COUNTRIES_URL, fmtLatLng } from '../src/editors/globe/cities.js';
+import { CITIES, COUNTRIES_URL, fmtLatLng } from '../src/editors/shared/cities.js';
 
 const test = suite('globe');
 const KM = 6371;

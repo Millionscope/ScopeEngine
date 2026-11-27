@@ -45,6 +45,12 @@ export const LIBS = {
   // three-globe (Globe.GL's layer engine). 2.40.0 is the last release without a `three/webgpu` import,
   // which three 0.160 lacks; globe.gl itself needs three >= 0.179.
   threeglobe: { load: () => import('three-globe'), version: 'three-globe@2.40.0', init: (m) => m.default },
+  // Terrain editor; v3 renders only with a Mapbox access token (VITE_MAPBOX_TOKEN)
+  mapbox: {
+    load: () => Promise.all([import('mapbox-gl'), import('mapbox-gl/dist/mapbox-gl.css')]).then(([m]) => m),
+    version: 'mapbox-gl@3.35.2',
+    init: (m) => m.default,
+  },
   mermaid: { load: () => import('mermaid'), version: 'mermaid@10.9.1', init: (m) => m.default },
   katex: {
     load: () => Promise.all([import('katex'), import('katex/dist/katex.min.css')]).then(([m]) => m),

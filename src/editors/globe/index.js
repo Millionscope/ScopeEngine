@@ -5,7 +5,7 @@
  *  - every border is one merged LineSegments (one draw call); three-globe only extrudes the active
  *    country (polygon layer), marks the cities (points) and pulses the active one (rings);
  *  - tour (loop): fly to the next city → zoom in, raise and light its country → hold → zoom out.
- *    Dragging pauses it; it resumes after a few idle seconds. Picking a city flies there.
+ *    Dragging pauses it; it resumes after a few idle seconds. Picking a city flies there and opens its Terrain.
  * @module editors/globe
  */
 import { BaseEditor } from '../base-editor.js';
@@ -13,7 +13,7 @@ import { emptyState } from '../shared/empty-state.js';
 import { acquire, release, touch, isLost, glAvailable } from '../shared/gl-pool.js';
 import { surfaceOptions, ReadbackPresenter } from '../shared/gl-present.js';
 import { loadCss } from '../../core/lazy.js';
-import { CITIES, COUNTRIES_URL, fmtLatLng } from './cities.js';
+import { CITIES, COUNTRIES_URL, fmtLatLng } from '../shared/cities.js';
 
 /** three.js and add-ons, set from ctx.libs on mount. */
 let THREE;
@@ -234,6 +234,13 @@ export default class GlobeEditor extends BaseEditor {
     i = ((i % n) + n) % n;
     this.tourT = i * CYCLE + FLY - 0.6;
     this.startTour();
+  }
+
+  /** A clicked city (label or list): fly there and open its holographic terrain beside the globe. */
+  pick(i) {
+    this.goTo(i);
+    this.ctx?.store.set('terrain.city', i);
+    this.ctx?.commands.executeWith('area.openTerrain', { areaId: this.ctx.areaId });
   }
 
   startTour() {
@@ -460,7 +467,7 @@ export default class GlobeEditor extends BaseEditor {
       b.type = 'button';
       b.style.setProperty('--c', LIGHT);
       b.append(el('b', '', c.name), el('small', '', fmtLatLng(c.lat, c.lng)));
-      b.addEventListener('click', () => this.goTo(i));
+      b.addEventListener('click', () => this.pick(i));
       this.labelLayer.appendChild(b);
       return b;
     });
@@ -532,7 +539,7 @@ export default class GlobeEditor extends BaseEditor {
       btn.title = `Fly to ${c.name}, ${c.country}`;
       btn.style.setProperty('--c', LIGHT);
       btn.append(el('i'), el('span', '', c.name), el('small', '', c.a3));
-      btn.addEventListener('click', () => this.goTo(i));
+      btn.addEventListener('click', () => this.pick(i));
       list.appendChild(btn);
       return btn;
     });

@@ -95,7 +95,7 @@ export const PRESETS = [
   },
   {
     key: 'scope',
-    name: 'Scope',
+    name: 'Human Atlas',
     icon: 'pulse',
     description: 'Anatomy hologram (body and brain) with annotations; Chat beside it.',
     build: () => new AreaTree(S('row', 0.76, A('scope'), A('chat'))),

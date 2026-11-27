@@ -1,7 +1,7 @@
 /**
  * Tour stops: city centre (WGS84, decimal degrees) and the Natural Earth ADM0_A3 code of its country.
  * ADM0_A3, not ISO_A3: Natural Earth has France's ISO codes as -99.
- * @module editors/globe/cities
+ * @module editors/shared/cities
  */
 export const CITIES = [
   { name: 'London', country: 'United Kingdom', a3: 'GBR', lat: 51.5074, lng: -0.1278 },

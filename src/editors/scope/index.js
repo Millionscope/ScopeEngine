@@ -1,5 +1,5 @@
 /**
- * Scope: a sci-fi anatomy viewport over the BodyParts3D atlas (public/models).
+ * Human Atlas: a sci-fi anatomy viewport over the BodyParts3D atlas (public/models).
  *  - Body and Brain views; the model auto-rotates (off with reduced motion) and the camera flies
  *    between views;
  *  - hologram shading: one fresnel ShaderMaterial per system (solid organs, glass lungs, an
@@ -49,6 +49,12 @@ const KIND = {
   shell: { fill: 0.05, rim: 1.6, base: 0.02, order: 2 },
 };
 const VIEWS = [['body', 'Body'], ['brain', 'Brain']];
+/**
+ * Guided tour: body overview, each body callout, each brain callout, the whole brain, repeat.
+ * Times in seconds (idle in ms); zoom = camera distance in fitted sizes of the part (body) or of
+ * the whole brain (brain: inner regions would put the camera inside the brain).
+ */
+const TOUR = { idle: 3000, intro: 2.5, step: 4.2, scanStart: 0.6, scan: 2.2, zoom: { body: 4.2, brain: 1.5 }, brainColor: '#ffc845' };
 
 const VERT = /* glsl */`
 attribute float partIndex;
@@ -57,22 +63,22 @@ uniform float uW;
 varying vec3 vN;
 varying vec3 vV;
 varying float vY;
-varying vec2 vS;
+varying vec3 vS;
 void main() {
   vec4 mv = modelViewMatrix * vec4(position, 1.0);
   vN = normalize(normalMatrix * normal);
   vV = -mv.xyz;
   vY = position.y;
-  vS = texture2D(uState, vec2((partIndex + 0.5) / uW, 0.5)).rg;
+  vS = texture2D(uState, vec2((partIndex + 0.5) / uW, 0.5)).rgb;
   gl_Position = projectionMatrix * mv;
 }`;
 const FRAG = /* glsl */`
-uniform vec3 uColor;
-uniform float uOpacity, uFill, uRim, uBase, uTime, uScan;
+uniform vec3 uColor, uTourColor, uTourY;
+uniform float uOpacity, uFill, uRim, uBase, uTime, uScan, uTourOn;
 varying vec3 vN;
 varying vec3 vV;
 varying float vY;
-varying vec2 vS;
+varying vec3 vS;
 void main() {
   vec3 n = normalize(vN);
   if (!gl_FrontFacing) n = -n;
@@ -84,8 +90,18 @@ void main() {
   float pulse = 0.5 + 0.5 * sin(uTime * 5.0);
   col = mix(col, vec3(0.45, 0.9, 1.0) * (0.55 + 1.1 * rim), vS.r * (0.35 + 0.25 * pulse));
   col += uColor * vS.g * 0.5;
-  float a = clamp(uOpacity * (uBase + rim) + band * 0.25 + vS.r * 0.6 + vS.g * 0.3, 0.0, 1.0);
-  gl_FragColor = vec4(col, a);
+  float a = uOpacity * (uBase + rim) + band * 0.25 + vS.r * 0.6 + vS.g * 0.3;
+  // guided tour (B = toured part): the rest dims; the toured part fills with uTourColor as a scan
+  // line sweeps its height bottom to top (uTourY = min y, max y, sweep 0..1)
+  float tour = vS.b * uTourOn;
+  float d = uTourY.z - (vY - uTourY.x) / max(uTourY.y - uTourY.x, 1e-4);
+  float filled = step(0.0, d) * tour;
+  float line = smoothstep(0.07, 0.0, abs(d)) * tour;
+  col *= 1.0 - 0.8 * uTourOn * (1.0 - vS.b);
+  col = mix(col, uTourColor * (0.45 + 0.6 * lit + 1.3 * rim) * (0.9 + 0.1 * pulse), filled * 0.85);
+  col += uTourColor * line * 2.5;
+  a = a * (1.0 - 0.5 * uTourOn * (1.0 - vS.b)) + filled * 0.5 + line * 0.7;
+  gl_FragColor = vec4(col, clamp(a, 0.0, 1.0));
 }`;
 
 const svg = (tag) => document.createElementNS('http://www.w3.org/2000/svg', tag);
@@ -115,7 +131,7 @@ const WAVE_N = 60;
 
 export default class ScopeEditor extends BaseEditor {
   static id = 'scope';
-  static label = 'Scope';
+  static label = 'Human Atlas';
   static icon = 'pulse';
   static group = 'Scope';
   static needs = ['three', 'threefx'];
@@ -130,8 +146,10 @@ export default class ScopeEditor extends BaseEditor {
       rotate: state.rotate ?? !reduce,
       labels: state.labels !== false,
       glow: state.glow !== false,
+      tour: state.tour ?? !reduce,
       hidden: new Set(Array.isArray(state.hidden) ? state.hidden : []),
     };
+    this.idleSince = -Infinity; // last user interaction (ms); the tour starts TOUR.idle after it
 
     const root = el('div', 'ms-ed ms-scope');
     this.root = root;
@@ -161,6 +179,7 @@ export default class ScopeEditor extends BaseEditor {
     this.listen(this.host, 'pointerdown', (e) => {
       const pe = /** @type {PointerEvent} */ (e);
       this._down = { x: pe.clientX, y: pe.clientY };
+      this.interact();
     });
     this.listen(this.host, 'pointerup', (e) => {
       const pe = /** @type {PointerEvent} */ (e);
@@ -187,6 +206,8 @@ export default class ScopeEditor extends BaseEditor {
     this.stateData = new Uint8Array(this.stateW * 4);
     this.stateTex = new THREE.DataTexture(this.stateData, this.stateW, 1);
     this.stateTex.needsUpdate = true;
+    // guided tour uniforms, shared by every material (B channel of uState marks the toured part)
+    this.tourU = { uTourOn: { value: 0 }, uTourY: { value: new THREE.Vector3(0, 1, 0) }, uTourColor: { value: new THREE.Color() } };
     /** @type {Map<string, THREE.ShaderMaterial>} */
     this.materials = new Map(SYSTEMS.map((s) => [s.id, new THREE.ShaderMaterial({
       vertexShader: VERT,
@@ -195,7 +216,7 @@ export default class ScopeEditor extends BaseEditor {
       transparent: true,
       uniforms: {
         uColor: { value: new THREE.Color(s.color) }, uOpacity: { value: 1 }, uFill: { value: 1 }, uRim: { value: 1 }, uBase: { value: 1 },
-        uScan: { value: 1 }, uTime: this.uTime, uState: { value: this.stateTex }, uW: { value: this.stateW },
+        uScan: { value: 1 }, uTime: this.uTime, uState: { value: this.stateTex }, uW: { value: this.stateW }, ...this.tourU,
       },
     })]));
     this.body = new THREE.Group();
@@ -303,7 +324,7 @@ export default class ScopeEditor extends BaseEditor {
       u.uBase.value = k.base;
       u.uScan.value = st.kind === 'solid' ? 0.6 : 1;
       m.blending = st.kind === 'shell' ? THREE.AdditiveBlending : THREE.NormalBlending;
-      m.depthWrite = st.kind === 'solid';
+      m.depthWrite = st.kind === 'solid' && !this.tour; // touring: see the toured part through the dimmed rest
     }
     for (const mesh of this.meshes) {
       const st = style[mesh.userData.system];
@@ -320,14 +341,8 @@ export default class ScopeEditor extends BaseEditor {
     const brain = this.state.view === 'brain';
     const box = brain ? (conceptInfo('brain')?.box ?? new THREE.Box3(new THREE.Vector3(-0.07, 1.54, -0.11), new THREE.Vector3(0.07, 1.71, 0.07)))
       : new THREE.Box3(new THREE.Vector3(-0.34, 0, -0.15), new THREE.Vector3(0.34, 1.75, 0.15));
-    const center = box.getCenter(new THREE.Vector3());
-    const size = box.getSize(new THREE.Vector3());
-    const fov = THREE.MathUtils.degToRad(this.camera.fov);
-    const aspect = this.camera.aspect || 1;
-    const fit = Math.max(size.y, size.x / aspect) / (2 * Math.tan(fov / 2));
-    const dist = fit * (brain ? 2.1 : 1.15);
     const dir = brain ? new THREE.Vector3(0.55, 0.3, 1).normalize() : new THREE.Vector3(0, 0.12, 1).normalize();
-    const to = { target: center, pos: center.clone().addScaledVector(dir, dist) };
+    const to = this.framing(box, brain ? 2.1 : 1.15, dir);
     // the platform sits under the body, or becomes a halo below the brain
     this.platform.position.set(0, brain ? box.min.y - 0.02 : 0.002, 0);
     this.platform.scale.setScalar(brain ? 0.22 : 1);
@@ -348,6 +363,15 @@ export default class ScopeEditor extends BaseEditor {
       this.controls.maxDistance = brain ? 1.5 : 6;
     }
     this.invalidate();
+  }
+
+  /** Camera aimed at the center of `box`, `k` fitted sizes of `sizeBox` away along `dir`. */
+  framing(box, k, dir, sizeBox = box) {
+    const center = box.getCenter(new THREE.Vector3());
+    const size = sizeBox.getSize(new THREE.Vector3());
+    const fov = THREE.MathUtils.degToRad(this.camera.fov);
+    const fit = Math.max(size.y, size.x / (this.camera.aspect || 1)) / (2 * Math.tan(fov / 2));
+    return { target: center, pos: center.clone().addScaledVector(dir, fit * k) };
   }
 
   frameAll() { this.frameView(true); }
@@ -375,6 +399,7 @@ export default class ScopeEditor extends BaseEditor {
       this.controls.autoRotate = this.state.rotate && !info.reducedMotion && !this._dragging && !this.fly;
       this.controls.autoRotateSpeed = this.state.view === 'brain' ? 1.6 : 1.0;
     }
+    this.tickTour(dt, info.reducedMotion);
     if (this.fly && this.controls) {
       const f = this.fly;
       f.t = Math.min(1, f.t + dt / 0.9);
@@ -389,6 +414,81 @@ export default class ScopeEditor extends BaseEditor {
     }
     this.controls?.update();
     this.invalidate();
+  }
+
+  // ------------------------------------------------------------------ guided tour
+
+  /** Any user input stops the tour; it restarts TOUR.idle ms after the last one. */
+  interact() {
+    this.idleSince = performance.now();
+    this.stopTour();
+  }
+
+  stopTour() {
+    if (!this.tour) return;
+    this.tour = null;
+    for (let i = 2; i < this.stateData.length; i += 4) this.stateData[i] = 0;
+    this.stateTex.needsUpdate = true;
+    this.annoLayer.classList.remove('is-touring');
+    this.applyStyles();
+    if (this.selected?.tour) this.choose(null);
+  }
+
+  /** @param {number} dt seconds @param {boolean} reducedMotion */
+  tickTour(dt, reducedMotion) {
+    const u = this.tourU;
+    const step = this.tour?.steps[this.tour.i];
+    u.uTourOn.value += ((step?.info ? 1 : 0) - u.uTourOn.value) * Math.min(1, dt * 4);
+    if (!this.state.tour || reducedMotion || !this.controls || !this.annos || !atlasState().done) return this.stopTour();
+    if (!this.tour) {
+      if (!this._dragging && performance.now() - this.idleSince >= TOUR.idle) this.startTour();
+      return;
+    }
+    const t = this.tour;
+    t.time += dt;
+    u.uTourY.value.z = Math.min(1.1, ((t.time - TOUR.scanStart) / TOUR.scan) * 1.2 - 0.1);
+    if (t.time >= step.dur) this.enterStep((t.i + 1) % t.steps.length);
+  }
+
+  startTour() {
+    const step = (view, anno) => ({ view, anno, info: anno?.info, dur: anno ? TOUR.step : TOUR.intro });
+    const brain = this.annos.find((a) => a.concept === 'brain');
+    const steps = [
+      step('body', null),
+      ...this.annos.filter((a) => a.mode === 'body').map((a) => step('body', a)),
+      ...this.annos.filter((a) => a.mode === 'brain').map((a) => step('brain', a)),
+      { ...step('brain', brain), whole: true },
+    ];
+    this.tour = { steps, i: 0, time: 0 };
+    this.annoLayer.classList.add('is-touring');
+    this.applyStyles();
+    // resume in the view the user left: the body loop, or the brain part of it
+    this.enterStep(this.state.view === 'brain' ? steps.findIndex((s) => s.view === 'brain') : 0);
+  }
+
+  /** @param {number} i */
+  enterStep(i) {
+    const t = this.tour;
+    const s = t.steps[i];
+    t.i = i;
+    t.time = 0;
+    if (s.view !== this.state.view) this.setView(s.view);
+    for (let j = 2; j < this.stateData.length; j += 4) this.stateData[j] = 0;
+    if (s.info) {
+      this.markParts(s.info.parts, 2);
+      this.tourU.uTourY.value.set(s.info.box.min.y, s.info.box.max.y, -0.1);
+      this.tourU.uTourColor.value.set(s.view === 'brain' ? TOUR.brainColor : SYSTEM_BY_ID.get(s.anno.system)?.color ?? '#3fd8ff');
+    }
+    this.stateTex.needsUpdate = true;
+    if (!s.info || s.whole) this.frameView(true);
+    else {
+      // zoom in on the part from the current viewing angle, so auto-rotation carries on smoothly
+      const dir = this.camera.position.clone().sub(this.controls.target).normalize();
+      this.fly = { t: 0, fromT: this.controls.target.clone(), fromP: this.camera.position.clone(), to: this.framing(s.info.box, TOUR.zoom[s.view], dir, s.view === 'brain' ? conceptInfo('brain')?.box : undefined) };
+    }
+    this.selected = s.anno ? { anno: s.anno, tour: true } : null;
+    this.annos.forEach((a) => a.el.classList.toggle('is-selected', a === s.anno));
+    this.renderDetail();
   }
 
   render() {
@@ -452,8 +552,8 @@ export default class ScopeEditor extends BaseEditor {
     this.controls.target.copy(this.target);
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.08;
-    this.controls.addEventListener('start', this._onStart = () => { this._dragging = true; this.fly = null; });
-    this.controls.addEventListener('end', this._onEnd = () => { this._dragging = false; });
+    this.controls.addEventListener('start', this._onStart = () => { this._dragging = true; this.fly = null; this.interact(); });
+    this.controls.addEventListener('end', this._onEnd = () => { this._dragging = false; this.interact(); });
     if (!this._framed) this.frameView(false); // first renderer: fit to the real aspect; later ones keep the camera
     this._framed = true;
     this.msg.hidden = true;
@@ -520,6 +620,7 @@ export default class ScopeEditor extends BaseEditor {
 
   resize() {
     if (this.renderer) this.sizeRenderer();
+    this._free = null;
     this.layoutAnnotations();
     this.invalidate();
   }
@@ -577,12 +678,14 @@ export default class ScopeEditor extends BaseEditor {
     else if (k === 'escape') this.choose(null);
     else if (k === 'home') this.frameView(true);
     else return;
+    if (k !== 'r') this.interact();
     e.preventDefault();
   }
 
   toggle(key) {
     this.state[key] = !this.state[key];
     if (key === 'labels') this.annoLayer.hidden = !this.state.labels;
+    if (key === 'tour') { this.stopTour(); this.idleSince = -Infinity; }
     this.ctx?.refreshHeader();
     this.save();
     this.invalidate();
@@ -773,6 +876,17 @@ export default class ScopeEditor extends BaseEditor {
     }
   }
 
+  /** Screen x range not covered by the HUD columns; cached until the next resize. @param {number} w */
+  freeX(w) {
+    if (!this._free) {
+      const l = this.left.offsetWidth;
+      const r = this.right.offsetWidth;
+      // a left column stretched across a narrow area is not a side column: ignore it
+      this._free = [l && l < w / 2 ? this.left.offsetLeft + l + 8 : 8, r ? this.right.offsetLeft - 8 : w - 8];
+    }
+    return this._free;
+  }
+
   /** Project anchors, place callouts in two columns beside the model and draw leader lines. */
   updateAnnotations() {
     if (!this.annos || !this.state.labels) return;
@@ -789,12 +903,21 @@ export default class ScopeEditor extends BaseEditor {
     const c0 = this._v.copy(tgt).project(cam);
     const cx = (c0.x * 0.5 + 0.5) * w;
     const c1 = this._v.copy(tgt).add(right).project(cam);
-    const span = Math.max(40, Math.abs((c1.x * 0.5 + 0.5) * w - cx));
+    // zoomed in, the model is wider than the view: keep the columns near the middle
+    const span = Math.min(w * 0.22, Math.max(40, Math.abs((c1.x * 0.5 + 0.5) * w - cx)));
+    const [freeL, freeR] = this.freeX(w);
     const tgtDepth = this._v.copy(tgt).applyMatrix4(cam.matrixWorldInverse).z;
     const sides = { L: [], R: [] };
     for (const a of this.annos) {
       if (a.mode !== view) continue;
       const p = this._v.copy(a.info.center).project(cam);
+      // anchor out of view (or behind the camera): its callout would point nowhere
+      const off = p.z > 1 || Math.abs(p.x) > 1 || Math.abs(p.y) > 1;
+      if (a.el.hidden !== off) {
+        a.el.hidden = off;
+        a.line.style.display = a.dot.style.display = off ? 'none' : '';
+      }
+      if (off) continue;
       a.x = (p.x * 0.5 + 0.5) * w;
       a.y = (-p.y * 0.5 + 0.5) * h;
       const depth = this._v.copy(a.info.center).applyMatrix4(cam.matrixWorldInverse).z;
@@ -813,8 +936,11 @@ export default class ScopeEditor extends BaseEditor {
       // pushed past the bottom: shift the column back up
       const over = y - (h - 24);
       if (over > 0) list.forEach((a) => { a.ly -= over; });
-      const colX = side === 'L' ? cx - span - 36 : cx + span + 36;
+      const col = side === 'L' ? cx - span - 36 : cx + span + 36;
       for (const a of list) {
+        // keep the whole callout between the HUD panels
+        a.wid ||= a.el.offsetWidth;
+        const colX = side === 'L' ? Math.max(col, freeL + a.wid) : Math.min(col, freeR - a.wid);
         const ly = Math.max(14, a.ly);
         const tx = side === 'L' ? `calc(${colX}px - 100%)` : `${colX}px`;
         a.el.style.transform = `translate(${tx}, calc(${ly}px - 50%))`;
@@ -823,6 +949,7 @@ export default class ScopeEditor extends BaseEditor {
         a.line.setAttribute('points', `${a.x},${a.y} ${elbow},${ly} ${colX},${ly}`);
         a.line.classList.toggle('is-behind', a.behind);
         a.line.classList.toggle('is-active', a === this.selected?.anno || a === this.hoverAnno);
+        a.dot.classList.toggle('is-active', a === this.selected?.anno);
         a.dot.setAttribute('cx', String(a.x));
         a.dot.setAttribute('cy', String(a.y));
       }
@@ -840,7 +967,7 @@ export default class ScopeEditor extends BaseEditor {
       const b = el('button', '', label);
       b.type = 'button';
       b.setAttribute('aria-pressed', String(this.state?.view === v));
-      b.addEventListener('click', () => this.setView(v));
+      b.addEventListener('click', () => { this.interact(); this.setView(v); });
       seg.appendChild(b);
     }
     wrap.appendChild(seg);
@@ -859,14 +986,14 @@ export default class ScopeEditor extends BaseEditor {
     frame.setAttribute('aria-label', 'Reset camera (Home)');
     frame.dataset.tooltip = 'Reset camera (Home)';
     frame.innerHTML = '<span class="codicon codicon-screen-full"></span>';
-    frame.addEventListener('click', () => this.frameView(true));
-    wrap.append(tog('rotate', 'sync', 'Auto rotate (R)'), tog('labels', 'tag', 'Annotations'), tog('glow', 'sparkle', 'Glow'), frame);
+    frame.addEventListener('click', () => { this.interact(); this.frameView(true); });
+    wrap.append(tog('tour', 'play-circle', 'Guided tour'), tog('rotate', 'sync', 'Auto rotate (R)'), tog('labels', 'tag', 'Annotations'), tog('glow', 'sparkle', 'Glow'), frame);
     return [wrap];
   }
 
   getState() {
-    const { view, rotate, labels, glow, hidden } = this.state;
-    return { view, rotate, labels, glow, hidden: [...hidden] };
+    const { view, rotate, labels, glow, tour, hidden } = this.state;
+    return { view, rotate, labels, glow, tour, hidden: [...hidden] };
   }
 
   dispose() {
