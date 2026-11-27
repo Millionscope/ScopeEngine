@@ -10,3 +10,6 @@ Atlas26/
 
 # source WAVs for public/audio (958 MB)
 raw_audio/
+
+# intro video output (scripts/make-intro.mjs)
+video/
